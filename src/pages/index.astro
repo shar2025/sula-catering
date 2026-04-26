@@ -3,19 +3,21 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout
 	title="Sula Catering Vancouver | Award-Winning Indian Catering for Weddings, Corporate & Private Events"
-	description="Vancouver's most trusted Indian catering company since 2010. Award-winning wedding catering, corporate lunches, and private party catering across the Lower Mainland. Halal, vegetarian, vegan menus."
+	description="Vancouver's most trusted Indian catering company since 2010. Award-winning wedding catering, corporate lunches, and private party catering across the Lower Mainland."
 	canonical="/"
 >
 
+	<!-- HERO -->
 	<section class="hero" style="background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.7) 50%, rgba(20,8,16,0.9) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/vancouver-catering-sula-indian-restaurant.webp');">
 		<div class="hero-content">
 			<p class="gold-label">Award-Winning Since 2010</p>
 			<h1>The Art of <em>Indian Catering</em><br/>in Vancouver</h1>
 			<p class="hero-tagline">From intimate gatherings to grand weddings — flawlessly executed, exquisitely presented, and rooted in 15 years of craft.</p>
-			<a href="/contact" class="btn btn-gold">Begin Your Event</a>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Begin Your Event</a>
 		</div>
 	</section>
 
+	<!-- INTRO -->
 	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
@@ -29,55 +31,59 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- FULL-WIDTH BANNER -->
 	<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp" alt="Indian food catering Vancouver Burnaby Richmond" class="full-width-image" loading="lazy" />
 
+	<!-- SERVICES MENU-CARD STYLE (drinks-page inspired) -->
 	<section class="section section-cream">
-		<div class="container">
+		<div class="container-narrow">
 			<div class="text-center reveal">
-				<p class="gold-label">What We Offer</p>
-				<h2 style="font-size:48px;font-weight:400">Catering for Every <em style="color:var(--gold)">Occasion</em></h2>
+				<p class="eyebrow">Our Catering Services · Since 2010</p>
+				<h2 class="mag-title">Catering for Every <em>Occasion</em></h2>
 				<div class="gold-divider-ornament">
 					<span></span><div class="diamond"></div><span></span>
 				</div>
+				<p style="max-width:680px;margin:0 auto;font-size:16px;color:rgba(26,26,26,0.75)">Four distinct catering experiences — each crafted with the same fifteen-year obsession with flavour, presentation, and timing.</p>
 			</div>
-			<div class="services-grid">
-				<a href="/weddings" class="service-card reveal">
-					<div class="service-icon">
-						<svg viewBox="0 0 48 48" fill="none" stroke-width="1.2"><path d="M24 8 C24 8 14 16 14 26 C14 32 18 38 24 40 C30 38 34 32 34 26 C34 16 24 8 24 8 Z"/><circle cx="24" cy="26" r="4"/></svg>
+			<div class="menu-grid">
+				<a href="/weddings" class="menu-card reveal" style="text-decoration:none;color:inherit">
+					<div class="menu-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg" alt="Indian wedding catering Vancouver" loading="lazy" />
 					</div>
-					<h3>Weddings</h3>
-					<p>Elegant menus for sangeet, ceremony, and reception. Custom-built with your chef.</p>
-					<span class="arrow">Discover →</span>
+					<span class="eyebrow">Most Loved</span>
+					<h3>Wedding <em>Catering</em></h3>
+					<p>Sangeet, ceremony, reception. Custom menus crafted with your chef. Halal, vegetarian, vegan, Jain.</p>
 				</a>
-				<a href="/corporate" class="service-card reveal delay-100">
-					<div class="service-icon">
-						<svg viewBox="0 0 48 48" fill="none" stroke-width="1.2"><rect x="10" y="14" width="28" height="24"/><path d="M18 14 V8 H30 V14"/><line x1="10" y1="22" x2="38" y2="22"/></svg>
+				<a href="/corporate" class="menu-card reveal delay-100" style="text-decoration:none;color:inherit">
+					<div class="menu-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-burnaby-richmond-for-corporate-offices-private-parties-and-weddings.webp" alt="Corporate Indian catering Vancouver" loading="lazy" />
 					</div>
-					<h3>Corporate</h3>
-					<p>Boardroom lunches and conferences delivered with zero-delay precision.</p>
-					<span class="arrow">Discover →</span>
+					<span class="eyebrow">Trusted by Vancouver's Best</span>
+					<h3>Corporate <em>Catering</em></h3>
+					<p>Boardroom lunches and conferences. Hot delivery, professional plating, zero-delay execution.</p>
 				</a>
-				<a href="/private-parties" class="service-card reveal delay-200">
-					<div class="service-icon">
-						<svg viewBox="0 0 48 48" fill="none" stroke-width="1.2"><path d="M14 24 L24 14 L34 24 L24 34 Z"/><circle cx="24" cy="24" r="4"/></svg>
+				<a href="/private-parties" class="menu-card reveal delay-200" style="text-decoration:none;color:inherit">
+					<div class="menu-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-for-private-parties-birthdays-celebrations.webp" alt="Private party Indian catering Vancouver" loading="lazy" />
 					</div>
-					<h3>Private Parties</h3>
-					<p>Birthdays, anniversaries, milestones — feasts that bring people together.</p>
-					<span class="arrow">Discover →</span>
+					<span class="eyebrow">Birthdays & Milestones</span>
+					<h3>Private <em>Parties</em></h3>
+					<p>Birthdays, anniversaries, housewarmings, holiday gatherings. Vibrant feasts, effortlessly delivered.</p>
 				</a>
-				<a href="/cafe-catering" class="service-card reveal delay-300">
-					<div class="service-icon">
-						<svg viewBox="0 0 48 48" fill="none" stroke-width="1.2"><path d="M14 18 H32 V30 C32 34 28 36 23 36 C18 36 14 34 14 30 Z"/><path d="M32 22 H36 C38 22 38 28 36 28 H32"/><line x1="20" y1="10" x2="20" y2="14"/><line x1="26" y1="10" x2="26" y2="14"/></svg>
+				<a href="/cafe-catering" class="menu-card reveal delay-300" style="text-decoration:none;color:inherit">
+					<div class="menu-card-img">
+						<img src="https://sulacafe.com/wp-content/uploads/2026/02/sula-cafe-near-me-vancouver.webp" alt="Sula Cafe chai catering Vancouver" loading="lazy" />
 					</div>
-					<h3>Café & Chai</h3>
-					<p>Live chai stations, specialty coffee, and freshly baked goods.</p>
-					<span class="arrow">Discover →</span>
+					<span class="eyebrow">From Sula Café</span>
+					<h3>Café & <em>Chai</em></h3>
+					<p>Live chai stations, specialty coffee bars, freshly baked goods. The perfect addition to any event.</p>
 				</a>
 			</div>
 		</div>
 	</section>
 
-	<section class="section section-dark">
+	<!-- THE EXPERIENCE - alt-row with stats (PLUM section for variety) -->
+	<section class="section section-plum">
 		<div class="container">
 			<div class="experience">
 				<div class="experience-img reveal-left">
@@ -107,6 +113,7 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- IMAGE BANNER WITH PARALLAX -->
 	<div class="image-banner" style="background-image: url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-food-catering-near-me-vancouver-bc.webp');">
 		<div class="image-banner-content reveal">
 			<h2>Authentic Flavours, <em>Effortless Service</em></h2>
@@ -114,11 +121,25 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</div>
 
+	<!-- PHILOSOPHY - centered pull quote (cream, decorative) -->
+	<section class="section section-cream">
+		<div class="container-narrow">
+			<div class="reveal text-center">
+				<p class="eyebrow">Our Philosophy</p>
+				<div class="pull-quote">
+					<p class="pull-quote-text">A great meal is not just <em>tasted</em> — it is <em>remembered</em>. Every guest who walks away from a Sula table carries something with them: a flavour, a moment, a feeling of being truly cared for.</p>
+					<p class="pull-quote-attribution">— The Sula Kitchen</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- GALLERY -->
 	<section class="section section-cream">
 		<div class="container">
 			<div class="text-center reveal">
-				<p class="gold-label">Recent Events</p>
-				<h2 style="font-size:48px;font-weight:400">Moments <em style="color:var(--gold)">Worth Celebrating</em></h2>
+				<p class="eyebrow">Recent Events</p>
+				<h2 class="mag-title">Moments <em>Worth Celebrating</em></h2>
 				<div class="gold-divider-ornament">
 					<span></span><div class="diamond"></div><span></span>
 				</div>
@@ -130,11 +151,12 @@ import Layout from '../layouts/Layout.astro';
 				<div class="gallery-item reveal-scale delay-300"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-catering-near-me-vancouver-birthdays-parties.webp" alt="Indian catering for birthdays Vancouver" loading="lazy" /></div>
 			</div>
 			<div class="text-center reveal" style="margin-top:60px">
-				<a href="/gallery" class="btn btn-plum">View Full Gallery</a>
+				<a href="/gallery" class="btn btn-outline-dark">View Full Gallery</a>
 			</div>
 		</div>
 	</section>
 
+	<!-- TESTIMONIAL (dark blue) -->
 	<section class="section section-dark">
 		<div class="container">
 			<div class="testimonial-block reveal">
@@ -145,15 +167,16 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- SERVICE AREAS -->
 	<section class="section section-cream">
-		<div class="container">
+		<div class="container-narrow">
 			<div class="text-center reveal">
-				<p class="gold-label">Service Areas</p>
-				<h2 style="font-size:42px;font-weight:400">Catering Across the <em style="color:var(--gold)">Lower Mainland</em></h2>
+				<p class="eyebrow">Where We Cater</p>
+				<h2 class="mag-title">Across the <em>Lower Mainland</em></h2>
 				<div class="gold-divider-ornament">
 					<span></span><div class="diamond"></div><span></span>
 				</div>
-				<p style="font-size:18px;max-width:760px;margin:0 auto 40px;color:rgba(50,34,28,0.8)">Vancouver · North Vancouver · Burnaby · Richmond · Surrey · West Vancouver — reliable, beautifully executed Indian catering for events of any size, from intimate gatherings to weddings of 500+ guests.</p>
+				<p style="font-size:18px;max-width:760px;margin:0 auto 40px;color:rgba(26,26,26,0.75)">Vancouver · North Vancouver · Burnaby · Richmond · Surrey · West Vancouver — reliable, beautifully executed Indian catering for events of any size.</p>
 			</div>
 			<div class="gallery-grid-3">
 				<div class="gallery-item reveal-scale"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/weddin-catering-burnaby-vancouver.webp" alt="Wedding catering Burnaby Vancouver" loading="lazy" /></div>
@@ -163,12 +186,13 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- CTA -->
 	<section class="cta-section">
 		<div class="reveal">
 			<p class="gold-label" style="color:var(--gold-light)">Begin the Conversation</p>
 			<h2>Let's Plan Something <em>Extraordinary</em></h2>
 			<p>Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
-			<a href="/contact" class="btn btn-gold">Request a Quote</a>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
 		</div>
 	</section>
 

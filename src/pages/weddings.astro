@@ -18,17 +18,30 @@ import Layout from '../layouts/Layout.astro';
 			"serviceType": "Wedding Catering",
 			"description": "Custom Indian wedding catering in Vancouver — sangeet, mehndi, ceremony, and reception menus with halal, vegetarian, vegan, and Jain options."
 		})} />
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			"mainEntity": [
+				{"@type":"Question","name":"Do you offer halal meat for Indian wedding catering?","acceptedAnswer":{"@type":"Answer","text":"Yes — all chicken and lamb dishes are prepared using halal-certified meats sourced from trusted local BC suppliers."}},
+				{"@type":"Question","name":"Can you cater pure-vegetarian or Jain weddings?","acceptedAnswer":{"@type":"Answer","text":"Absolutely. We offer dedicated vegetarian, vegan, and Jain menus prepared in separate kitchen areas to honour traditional dietary requirements."}},
+				{"@type":"Question","name":"What is your minimum guest count for weddings?","acceptedAnswer":{"@type":"Answer","text":"We cater weddings from 50 to 500+ guests. Smaller intimate events are also welcome — please reach out to discuss."}},
+				{"@type":"Question","name":"Do you provide servers and setup for weddings?","acceptedAnswer":{"@type":"Answer","text":"Yes — full-service catering includes setup, professional servers, buffet management, and complete cleanup."}},
+				{"@type":"Question","name":"How far in advance should we book wedding catering?","acceptedAnswer":{"@type":"Answer","text":"For peak season weddings (May–October), we recommend booking 6–9 months in advance. Off-season bookings are more flexible."}}
+			]
+		})} />
 	</Fragment>
 
+	<!-- HERO -->
 	<section class="hero" style="background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.7) 50%, rgba(20,8,16,0.9) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg');">
 		<div class="hero-content">
 			<p class="gold-label">Wedding Catering</p>
 			<h1>Indian Wedding Catering<br/>in <em>Vancouver</em></h1>
 			<p class="hero-tagline">From sangeet to reception — flawless execution, exquisite presentation, and the warmth of true Indian hospitality.</p>
-			<a href="/contact" class="btn btn-gold">Request a Wedding Quote</a>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Wedding Quote</a>
 		</div>
 	</section>
 
+	<!-- INTRO -->
 	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
@@ -42,10 +55,20 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- FULL-WIDTH WEDDING IMAGE -->
 	<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/weddinf-catering-vancouver-bc.webp" alt="Indian wedding catering Vancouver BC" class="full-width-image" loading="lazy" />
 
-	<section class="section section-dark">
+	<!-- THE THREE EVENTS - alt-rows in a PLUM section -->
+	<section class="section section-plum">
 		<div class="container">
+			<div class="text-center reveal" style="margin-bottom:80px">
+				<p class="eyebrow">Three Events. One Family.</p>
+				<h2 class="mag-title">From Sangeet to <em>Reception</em></h2>
+				<div class="gold-divider-ornament">
+					<span></span><div class="diamond"></div><span></span>
+				</div>
+			</div>
+
 			<div class="alt-row">
 				<div class="alt-row-img reveal-left">
 					<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/weddin-catering-burnaby-vancouver.webp" alt="Sangeet catering Vancouver" loading="lazy" />
@@ -54,7 +77,7 @@ import Layout from '../layouts/Layout.astro';
 					<p class="gold-label">Sangeet & Mehndi</p>
 					<h2>Live Stations, <em>Lively Nights</em></h2>
 					<p>Pani puri at the chaat counter. Dosas crisping at the tava station. Chai pouring from copper urns. Our live cooking stations turn pre-wedding events into immersive experiences your guests will remember long after the henna fades.</p>
-					<p>Pair with our chai bar from Sula Café for a complete sensory experience.</p>
+					<p>Pair with our chai bar from <a href="/cafe-catering" style="color:var(--gold-light);border-bottom:1px solid var(--gold)">Sula Café</a> for a complete sensory experience.</p>
 				</div>
 			</div>
 
@@ -82,43 +105,58 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
-	<div class="image-banner" style="background-image: url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg');">
+	<!-- IMAGE BANNER -->
+	<div class="image-banner image-banner-plum" style="background-image: url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg');">
 		<div class="image-banner-content reveal">
 			<h2>Every Detail, <em>Considered</em></h2>
 			<p>From dietary needs to dietary dreams — we say yes.</p>
 		</div>
 	</div>
 
+	<!-- WHAT'S INCLUDED - numbered list (cream) -->
 	<section class="section section-cream">
-		<div class="container">
+		<div class="container-narrow">
 			<div class="text-center reveal">
-				<p class="gold-label">Full-Service Wedding Catering</p>
-				<h2 style="font-size:42px;font-weight:400">What's <em style="color:var(--gold)">Included</em></h2>
+				<p class="eyebrow">Full-Service Wedding Catering</p>
+				<h2 class="mag-title">What's <em>Included</em></h2>
 				<div class="gold-divider-ornament">
 					<span></span><div class="diamond"></div><span></span>
 				</div>
 			</div>
-			<div class="services-grid">
-				<div class="service-card reveal">
-					<h3>Custom Menus</h3>
-					<p>Build your menu with our chef. Vegan, Jain, gluten-friendly, regional preferences welcome.</p>
+			<div class="numbered-list">
+				<div class="numbered-item reveal">
+					<div class="numbered-num">01</div>
+					<div class="numbered-content">
+						<h3><em>Custom</em> Menus</h3>
+						<p>Build your menu with our chef. Vegan, Jain, gluten-friendly, regional preferences welcome. Tastings available before final approval.</p>
+					</div>
 				</div>
-				<div class="service-card reveal delay-100">
-					<h3>Dedicated Coordinator</h3>
-					<p>One point of contact from your first email to the final cleanup. We handle the timeline.</p>
+				<div class="numbered-item reveal">
+					<div class="numbered-num">02</div>
+					<div class="numbered-content">
+						<h3>Dedicated <em>Coordinator</em></h3>
+						<p>One point of contact from your first email to the final cleanup. We handle the timeline so you can focus on the moments that matter.</p>
+					</div>
 				</div>
-				<div class="service-card reveal delay-200">
-					<h3>Live Cooking Stations</h3>
-					<p>Chaat counters, dosa stations, tandoori grills. Live cooking turns dinner into theatre.</p>
+				<div class="numbered-item reveal">
+					<div class="numbered-num">03</div>
+					<div class="numbered-content">
+						<h3>Live <em>Cooking Stations</em></h3>
+						<p>Chaat counters, dosa stations, tandoori grills. Live cooking turns dinner into theatre — and brings guests together.</p>
+					</div>
 				</div>
-				<div class="service-card reveal delay-300">
-					<h3>Setup & Cleanup</h3>
-					<p>Buffets, plated service, professional servers. We arrive early and leave the venue spotless.</p>
+				<div class="numbered-item reveal">
+					<div class="numbered-num">04</div>
+					<div class="numbered-content">
+						<h3>Setup <em>& Cleanup</em></h3>
+						<p>Buffets, plated service, professional servers. We arrive early, set up beautifully, and leave the venue spotless.</p>
+					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
+	<!-- TESTIMONIAL (dark blue) -->
 	<section class="section section-dark">
 		<div class="container">
 			<div class="testimonial-block reveal">
@@ -129,11 +167,12 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
+	<!-- FAQ -->
 	<section class="section section-cream">
 		<div class="container">
 			<div class="text-center reveal">
-				<p class="gold-label">Common Questions</p>
-				<h2 style="font-size:42px;font-weight:400">Wedding Catering <em style="color:var(--gold)">FAQs</em></h2>
+				<p class="eyebrow">Common Questions</p>
+				<h2 class="mag-title">Wedding Catering <em>FAQs</em></h2>
 				<div class="gold-divider-ornament">
 					<span></span><div class="diamond"></div><span></span>
 				</div>
@@ -141,19 +180,20 @@ import Layout from '../layouts/Layout.astro';
 			<div class="faq-list">
 				<div class="faq-item reveal"><h3>Do you offer halal meat?</h3><p>Yes — all chicken and lamb dishes are prepared using halal-certified meats sourced from trusted local BC suppliers.</p></div>
 				<div class="faq-item reveal"><h3>Can you cater pure-vegetarian or Jain weddings?</h3><p>Absolutely. We offer dedicated vegetarian, vegan, and Jain menus prepared in separate kitchen areas to honour traditional dietary requirements.</p></div>
-				<div class="faq-item reveal"><h3>What is your minimum guest count?</h3><p>We cater weddings from 50 to 500+ guests. Smaller intimate events are also welcome — please reach out to discuss.</p></div>
+				<div class="faq-item reveal"><h3>What's your minimum guest count?</h3><p>We cater weddings from 50 to 500+ guests. Smaller intimate events also welcome.</p></div>
 				<div class="faq-item reveal"><h3>Do you provide servers and setup?</h3><p>Yes — full-service catering includes setup, professional servers, buffet management, and complete cleanup.</p></div>
-				<div class="faq-item reveal"><h3>How far in advance should we book?</h3><p>For peak season weddings (May–October), we recommend booking 6–9 months in advance. Off-season bookings are more flexible.</p></div>
+				<div class="faq-item reveal"><h3>How far in advance should we book?</h3><p>For peak season weddings (May–October), we recommend booking 6–9 months in advance. Off-season bookings are flexible.</p></div>
 			</div>
 		</div>
 	</section>
 
-	<section class="cta-section">
+	<!-- CTA -->
+	<section class="cta-section cta-plum">
 		<div class="reveal">
 			<p class="gold-label" style="color:var(--gold-light)">Begin the Conversation</p>
 			<h2>Let's Plan Your <em>Wedding</em></h2>
 			<p>Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
-			<a href="/contact" class="btn btn-gold">Request a Wedding Quote</a>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Wedding Quote</a>
 		</div>
 	</section>
 
