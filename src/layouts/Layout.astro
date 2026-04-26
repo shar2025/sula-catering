@@ -227,7 +227,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.service-card:hover .arrow{letter-spacing:4px}
 
 			/* MENU-STYLE CARDS */
-			.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:48px;margin-top:64px;text-align:center}
+			.menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-top:64px;text-align:center}
 			.menu-card{padding:24px}
 			.menu-card-img{width:200px;height:200px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:1px solid rgba(184,149,106,0.3);transition:all 0.5s ease;position:relative}
 			.menu-card-img::after{content:'';position:absolute;inset:-8px;border:1px solid var(--gold);border-radius:50%;opacity:0;transition:all 0.4s ease}
@@ -412,6 +412,10 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.footer-bottom p{color:rgba(245,237,224,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:300}
 
 			/* RESPONSIVE */
+			
+			@media (max-width:1100px){
+				.menu-grid{grid-template-columns:repeat(2,1fr);gap:48px}
+			}
 			@media (max-width:900px){
 				.logo-img{height:40px}
 				.hero h1{font-size:44px}
@@ -425,6 +429,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 				.section{padding:80px 24px}
 				.section-tight{padding:60px 24px}
 				.cta-section{padding:80px 24px}
+				.menu-grid{grid-template-columns:1fr;gap:48px}
 				.main-nav{gap:14px;justify-content:center;width:100%}
 				.main-nav a{font-size:10px;letter-spacing:1.5px}
 				.testimonial-quote{font-size:22px}
