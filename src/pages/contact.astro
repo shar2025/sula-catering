@@ -2,8 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout
-	title="Get a Catering Quote | Sula Catering Vancouver"
-	description="Request an Indian catering quote for your wedding, corporate event, or private party in Vancouver. We respond within 24 hours."
+	title="Contact Sula Catering Vancouver | Request a Quote for Indian Catering"
+	description="Contact Sula Catering for Indian wedding, corporate, and private party catering across Vancouver. Call 604-215-1130 or request a custom quote online."
 	canonical="/contact"
 >
 
@@ -12,89 +12,113 @@ import Layout from '../layouts/Layout.astro';
 			"@context": "https://schema.org",
 			"@type": "ContactPage",
 			"name": "Contact Sula Catering Vancouver",
-			"url": "https://sulacatering.com/contact",
-			"description": "Request a catering quote from Sula Catering Vancouver. Phone, email, and online form."
+			"description": "Contact information and quote request for Sula Catering Vancouver.",
+			"mainEntity": {"@id": "https://sulacatering.com/#organization"}
 		})} />
 	</Fragment>
 
-	<section class="hero" style="min-height: 60vh; background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.7) 50%, rgba(20,8,16,0.9) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-catering-vancouver.webp');">
+	<!-- HERO -->
+	<section class="hero" style="min-height:60vh;background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.6) 50%, rgba(20,8,16,0.85) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp');">
 		<div class="hero-content">
-			<p class="gold-label">Get in Touch</p>
-			<h1>Request a <em>Catering Quote</em></h1>
-			<p class="hero-tagline">Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
+			<p class="gold-label">Begin the Conversation</p>
+			<h1>Let's Plan<br/><em>Your Event</em></h1>
+			<p class="hero-tagline">Tell us about your celebration. We'll respond within 24 hours with a custom menu and quote.</p>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
 		</div>
 	</section>
 
+	<!-- INTRO -->
 	<section class="section section-cream">
 		<div class="container">
-			<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; margin: 0 auto;" class="contact-grid">
-
-				<div class="reveal-left">
-					<p class="gold-label">Contact Sula Catering</p>
-					<h2 style="font-size:36px;font-weight:400;margin-bottom:24px">Let's Plan Your <em style="color:var(--gold)">Event</em></h2>
-					<div class="gold-divider-ornament" style="justify-content:flex-start;margin-left:0">
-						<span></span><div class="diamond"></div><span></span>
-					</div>
-
-					<p style="font-size:16px;margin-bottom:40px;line-height:1.9">Whether it's a wedding for 500, an office lunch for 20, or a chai bar for a private party — we'll build a menu that fits your event perfectly.</p>
-
-					<div style="margin-bottom:32px">
-						<h3 style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:3px;margin-bottom:8px;font-family:'Montserrat',sans-serif;font-weight:500">Phone</h3>
-						<p style="font-size:18px;font-family:'Cormorant Garamond',serif;color:var(--plum)">604-215-1130</p>
-					</div>
-
-					<div style="margin-bottom:32px">
-						<h3 style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:3px;margin-bottom:8px;font-family:'Montserrat',sans-serif;font-weight:500">Email</h3>
-						<p style="font-size:18px;font-family:'Cormorant Garamond',serif;color:var(--plum)">catering@sulaindianrestaurant.com</p>
-					</div>
-
-					<div style="margin-bottom:32px">
-						<h3 style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:3px;margin-bottom:8px;font-family:'Montserrat',sans-serif;font-weight:500">Service Areas</h3>
-						<p style="font-size:15px">Vancouver · Burnaby · Richmond<br/>Surrey · North Vancouver · West Vancouver</p>
-					</div>
-
-					<div>
-						<h3 style="font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:3px;margin-bottom:16px;font-family:'Montserrat',sans-serif;font-weight:500">Visit Sula</h3>
-						<p style="font-size:14px;line-height:2"><strong style="color:var(--plum)">Sula Commercial Drive</strong><br/>1128 Commercial Drive, Vancouver</p>
-						<p style="font-size:14px;line-height:2;margin-top:12px"><strong style="color:var(--plum)">Sula Davie Street</strong><br/>1708 Davie Street, Vancouver</p>
-						<p style="font-size:14px;line-height:2;margin-top:12px"><strong style="color:var(--plum)">Sula Main Street</strong><br/>4172 Main Street, Vancouver</p>
-						<p style="font-size:14px;line-height:2;margin-top:12px"><strong style="color:var(--plum)">Sula Café</strong><br/>260 East 5th Ave, Vancouver</p>
-					</div>
+			<div class="intro-block reveal">
+				<p class="gold-label">Three Ways to Reach Us</p>
+				<h2>Always <em>Listening</em></h2>
+				<div class="gold-divider-ornament">
+					<span></span><div class="diamond"></div><span></span>
 				</div>
-
-				<div class="reveal-right">
-					<div style="background: linear-gradient(180deg, #fff 0%, var(--cream) 100%); padding: 48px; border-top: 2px solid var(--gold); box-shadow: 0 20px 50px rgba(38,14,38,0.08);">
-						<h2 style="font-size:28px;font-weight:500;margin-bottom:8px">Quote Request Form</h2>
-						<p style="font-size:14px;color:rgba(50,34,28,0.7);margin-bottom:32px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px">Fill in the form below — we'll be in touch within 24 hours.</p>
-
-						<!--
-							REPLACE THE IFRAME BELOW WITH YOUR GRAVITY FORM EMBED.
-							Get the embed URL from your WordPress admin → your form → embed shortcode.
-						-->
-						<iframe
-							src="https://sulaindianrestaurant.com/request-a-quote/?embed=1"
-							width="100%"
-							height="650"
-							frameborder="0"
-							style="border: none;"
-							title="Catering Quote Request Form">
-						</iframe>
-
-						<p style="font-size:13px;color:rgba(50,34,28,0.6);margin-top:20px;text-align:center">Form not loading? Email us directly at <a href="mailto:catering@sulaindianrestaurant.com">catering@sulaindianrestaurant.com</a></p>
-					</div>
+				<p>Whether it's a quick question, a last-minute booking, or a fully custom wedding menu — we're here. Most quote requests are answered within 24 hours.</p>
+			</div>
+			<div class="contact-cards">
+				<div class="contact-card reveal">
+					<div class="icon">✆</div>
+					<h3>Call Us</h3>
+					<p>Speak directly with our catering coordinator for any question, big or small.</p>
+					<a href="tel:6042151130">604-215-1130</a>
 				</div>
-
+				<div class="contact-card reveal delay-100">
+					<div class="icon">✉</div>
+					<h3>Email Us</h3>
+					<p>Send your event details, menu preferences, and timeline — we'll get back to you fast.</p>
+					<a href="mailto:catering@sulaindianrestaurant.com">catering@sulaindianrestaurant.com</a>
+				</div>
+				<div class="contact-card reveal delay-200">
+					<div class="icon">◆</div>
+					<h3>Quote Request</h3>
+					<p>Use our online form to share your event details and receive a custom quote within 24 hours.</p>
+					<a href="https://sulaindianrestaurant.com/request-a-quote/">Request a Quote →</a>
+				</div>
 			</div>
 		</div>
 	</section>
 
-	<style>
-		@media (max-width: 900px) {
-			.contact-grid {
-				grid-template-columns: 1fr !important;
-				gap: 60px !important;
-			}
-		}
-	</style>
+	<!-- LOCATIONS - PLUM section with location cards -->
+	<section class="section section-plum">
+		<div class="container">
+			<div class="text-center reveal">
+				<p class="eyebrow">Visit Sula</p>
+				<h2 class="mag-title">Our <em>Locations</em></h2>
+				<div class="gold-divider-ornament">
+					<span></span><div class="diamond"></div><span></span>
+				</div>
+				<p style="max-width:680px;margin:0 auto;font-size:16px;color:rgba(245,237,224,0.85)">Four locations across Vancouver. Visit us in-restaurant or come say hello at the Café.</p>
+			</div>
+			<div class="locations-grid">
+				<div class="location-card reveal">
+					<h3>Commercial Drive</h3>
+					<p class="addr">1128 Commercial Drive<br/>Vancouver, BC</p>
+					<p class="phone">604-215-1130</p>
+				</div>
+				<div class="location-card reveal delay-100">
+					<h3>Davie Street</h3>
+					<p class="addr">1708 Davie Street<br/>Vancouver, BC</p>
+					<p class="phone">604-428-4400</p>
+				</div>
+				<div class="location-card reveal delay-200">
+					<h3>Main Street</h3>
+					<p class="addr">4172 Main Street<br/>Vancouver, BC</p>
+					<p class="phone">604-874-5375</p>
+				</div>
+				<div class="location-card reveal delay-300">
+					<h3>Sula Café</h3>
+					<p class="addr">260 East 5th Ave<br/>Vancouver, BC</p>
+					<p class="phone">778-386-1130</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- SERVICE AREAS -->
+	<section class="section section-cream">
+		<div class="container-narrow">
+			<div class="text-center reveal">
+				<p class="eyebrow">Where We Cater</p>
+				<h2 class="mag-title">Across the <em>Lower Mainland</em></h2>
+				<div class="gold-divider-ornament">
+					<span></span><div class="diamond"></div><span></span>
+				</div>
+				<p style="font-size:18px;max-width:760px;margin:0 auto;color:rgba(26,26,26,0.75)">Vancouver · North Vancouver · West Vancouver · Burnaby · Richmond · Surrey — reliable, beautifully executed Indian catering for events of any size.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA -->
+	<section class="cta-section">
+		<div class="reveal">
+			<p class="gold-label" style="color:var(--gold-light)">Ready When You Are</p>
+			<h2>Let's Create<br/><em>Something Memorable</em></h2>
+			<p>Tell us about your event. We'll respond within 24 hours.</p>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
+		</div>
+	</section>
 
 </Layout>
