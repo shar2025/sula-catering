@@ -12,14 +12,12 @@ import Layout from '../layouts/Layout.astro';
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org","@type": "ImageGallery",
 			"name": "Sula Catering Vancouver Gallery",
-			"description": "Photo gallery of Sula Catering's wedding catering, corporate catering, private party, and café catering events across Vancouver, BC.",
 			"author": {"@id": "https://sulacatering.com/#organization"}
 		})} />
 	</Fragment>
 
-	<section class="hero" style="min-height:70vh;background-image: linear-gradient(135deg, rgba(5,11,21,0.7) 0%, rgba(20,36,66,0.5) 50%, rgba(37,4,45,0.7) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/weddinf-catering-vancouver-bc.webp');">
+	<section class="hero" style="min-height:60vh;background-image: linear-gradient(135deg, rgba(5,11,21,0.7) 0%, rgba(20,36,66,0.5) 50%, rgba(37,4,45,0.7) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/weddinf-catering-vancouver-bc.webp');">
 		<div class="hero-content">
-			<p class="gold-label">The Gallery</p>
 			<h1>Moments,<br/><em>Captured</em></h1>
 			<p class="hero-tagline">A visual journey through fifteen years of weddings, celebrations, and quiet moments worth remembering.</p>
 		</div>
@@ -31,7 +29,7 @@ import Layout from '../layouts/Layout.astro';
 				<p class="eyebrow">Section One</p>
 				<h2 class="mag-title">Weddings &amp; <em>Receptions</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(26,26,26,0.75)">From sangeet to reception — South Asian weddings of every scale and tradition. Explore our <a href="/weddings" class="inline-link">wedding catering services</a>.</p>
+				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(26,26,26,0.75)">From sangeet to reception. Explore our <a href="/weddings" class="body-link">wedding catering services</a>.</p>
 			</div>
 			<div class="gallery-grid-2">
 				<div class="gallery-item reveal-scale"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg" alt="Indian wedding catering Vancouver" loading="lazy" /></div>
@@ -48,7 +46,7 @@ import Layout from '../layouts/Layout.astro';
 				<p class="eyebrow">Section Two</p>
 				<h2 class="mag-title">Corporate &amp; <em>Office</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(245,237,224,0.85)">Boardroom lunches, conferences, holiday parties, and client entertaining. See our <a href="/corporate" class="inline-link">corporate catering services</a>.</p>
+				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(245,237,224,0.85)">Boardroom lunches and conferences. See our <a href="/corporate" class="body-link">corporate catering services</a>.</p>
 			</div>
 			<div class="gallery-grid-3">
 				<div class="gallery-item reveal-scale"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/office-catering-vancouver-bc.webp" alt="Office catering Vancouver BC" loading="lazy" /></div>
@@ -64,7 +62,7 @@ import Layout from '../layouts/Layout.astro';
 				<p class="eyebrow">Section Three</p>
 				<h2 class="mag-title">Private &amp; <em>Personal</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(26,26,26,0.75)">Birthdays, anniversaries, housewarmings, Diwali catering — explore <a href="/private-parties" class="inline-link">private party catering</a>.</p>
+				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(26,26,26,0.75)">Birthdays, anniversaries, Diwali — explore <a href="/private-parties" class="body-link">private party catering</a>.</p>
 			</div>
 			<div class="gallery-grid-3">
 				<div class="gallery-item reveal-scale"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-catering-near-me-vancouver-birthdays-parties.webp" alt="Birthday party catering Vancouver" loading="lazy" /></div>
@@ -80,7 +78,7 @@ import Layout from '../layouts/Layout.astro';
 				<p class="eyebrow">Section Four</p>
 				<h2 class="mag-title">Food &amp; <em>Drink</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(245,237,224,0.85)">Close-ups of butter chicken, biryani, masala chai, and the dishes that make every event unforgettable. See our <a href="/cafe-catering" class="inline-link">café catering menu</a>.</p>
+				<p style="max-width:680px;margin:0 auto 16px;font-size:16px;color:rgba(245,237,224,0.85)">Close-ups of butter chicken, biryani, masala chai. See our <a href="/cafe-catering" class="body-link">café catering menu</a>.</p>
 			</div>
 			<div class="gallery-grid">
 				<div class="gallery-item reveal-scale"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/best-chicken-tikka-masala-vancouver.webp" alt="Best chicken tikka masala Vancouver" loading="lazy" /></div>
@@ -97,7 +95,6 @@ import Layout from '../layouts/Layout.astro';
 
 	<section class="cta-section cta-plum">
 		<div class="reveal">
-			<p class="gold-label" style="color:var(--gold-light)">Inspired?</p>
 			<h2>Let's Add Your Event to <em>the Gallery</em></h2>
 			<p>Tell us about your celebration — we'll bring the same care to your event.</p>
 			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>

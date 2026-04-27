@@ -2,86 +2,76 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 <Layout
-	title="Sula Catering Journal | Wedding & Corporate Catering Insights Vancouver"
-	description="Insights from Sula Catering — Indian wedding planning guides, corporate catering tips, halal catering essentials, and stories from Vancouver's most celebrated events."
+	title="Catering Journal Vancouver | Indian Catering Insights & Guides | Sula"
+	description="Insights, guides, and stories from Sula's fifteen years catering Vancouver. Wedding planning, halal catering, corporate lunch ideas, and chai vs coffee."
 	canonical="/blog"
-	ogImage="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg"
 >
 
 	<Fragment slot="schema">
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org","@type": "Blog",
 			"name": "Sula Catering Journal",
-			"description": "Insights and stories from Sula Catering Vancouver — wedding catering guides, corporate catering tips, and Indian cuisine inspiration.",
-			"url": "https://sulacatering.com/blog",
-			"publisher": {"@id": "https://sulacatering.com/#organization"}
+			"author": {"@id": "https://sulacatering.com/#organization"}
 		})} />
 	</Fragment>
 
-	<section class="hero" style="min-height:60vh;background-image: linear-gradient(135deg, rgba(5,11,21,0.85) 0%, rgba(20,36,66,0.5) 50%, rgba(37,4,45,0.85) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg');">
+	<section class="hero" style="min-height:55vh;background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.7) 50%, rgba(20,8,16,0.9) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/Indian-food-catering-vancouver-bc-canada.webp');">
 		<div class="hero-content">
-			<p class="gold-label">The Sula Journal · Insights & Stories</p>
-			<h1>Stories, Tips &<br/><em>Catering Wisdom</em></h1>
-			<p class="hero-tagline">From wedding planning guides to halal catering essentials — insights from fifteen years of Vancouver's most celebrated events.</p>
+			<h1>The <em>Journal</em></h1>
+			<p class="hero-tagline">Stories, guides, and insights from fifteen years catering Vancouver's finest events.</p>
 		</div>
 	</section>
 
-	<section class="section-tight section-cream">
+	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
-				<p class="gold-label">Featured Reads</p>
-				<h2>Latest from the <em>Journal</em></h2>
+				<h2>Catering Wisdom, <em>Written Down</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p>Our service pages: <a href="/weddings" class="inline-link">wedding catering Vancouver</a>, <a href="/corporate" class="inline-link">corporate catering</a>, <a href="/private-parties" class="inline-link">private parties</a>, and <a href="/cafe-catering" class="inline-link">café catering</a>.</p>
+				<p>Practical guidance and stories from our kitchen — wedding planning, halal certification, corporate lunch ideas, and the small details that make events memorable. Whether you're booking <a href="/weddings" class="body-link">wedding catering</a>, organising <a href="/corporate" class="body-link">corporate lunches</a>, planning a <a href="/private-parties" class="body-link">private party</a>, or curious about <a href="/cafe-catering" class="body-link">café catering</a> — start here.</p>
 			</div>
-		</div>
-	</section>
-
-	<section class="section-tight section-cream" style="padding-top:0">
-		<div class="container">
 			<div class="blog-grid">
 				<a href="/blog/indian-wedding-catering-vancouver-guide" class="blog-card reveal">
 					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg" alt="Indian wedding catering Vancouver guide" loading="lazy" /></div>
 					<div class="blog-card-content">
-						<p class="blog-card-meta">Wedding Catering · 8 Min Read</p>
-						<h3>Indian Wedding Catering Vancouver: <em>The Complete Planning Guide</em></h3>
-						<p>Sangeet menus, halal certification, dietary planning, timeline tips, budget guidance — everything we wish every couple knew.</p>
+						<p class="blog-card-meta">Wedding Planning · 8 min</p>
+						<h3>Indian Wedding Catering: <em>Vancouver's Complete Guide</em></h3>
+						<p>Sangeet menus, halal certification, dietary planning, timeline coordination — everything we wish every couple knew before booking.</p>
 						<span class="read-more">Read the Guide →</span>
 					</div>
 				</a>
 				<a href="/blog/office-catering-vancouver-large-groups" class="blog-card reveal delay-100">
 					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/office-catering-vancouver-bc.webp" alt="Office catering Vancouver large groups" loading="lazy" /></div>
 					<div class="blog-card-content">
-						<p class="blog-card-meta">Corporate Catering · 6 Min Read</p>
-						<h3>Office Catering Vancouver: <em>How to Feed 50+ at Work</em></h3>
-						<p>Practical guidance on planning a large office lunch — guest count, dietary needs, delivery timing, menu choices that always work.</p>
+						<p class="blog-card-meta">Corporate Catering · 6 min</p>
+						<h3>Office Catering Vancouver: <em>Feeding 50+ at Work</em></h3>
+						<p>Practical guidance on planning a large office lunch — guest count, dietary needs, delivery logistics, menu strategy.</p>
 						<span class="read-more">Read More →</span>
 					</div>
 				</a>
 				<a href="/blog/halal-indian-catering-vancouver" class="blog-card reveal delay-200">
 					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp" alt="Halal Indian catering Vancouver" loading="lazy" /></div>
 					<div class="blog-card-content">
-						<p class="blog-card-meta">Catering Essentials · 5 Min Read</p>
-						<h3>Halal Indian Catering: <em>What to Know for Your Event</em></h3>
-						<p>What halal certification means, how to ask the right questions, and why it matters at multi-cultural weddings and corporate events.</p>
+						<p class="blog-card-meta">Catering Essentials · 5 min</p>
+						<h3>Halal Indian <em>Catering Vancouver</em></h3>
+						<p>What halal certification means, how to ask the right questions, and why it matters for multi-cultural events.</p>
 						<span class="read-more">Read More →</span>
 					</div>
 				</a>
 				<a href="/blog/best-indian-dishes-corporate-lunches" class="blog-card reveal delay-300">
-					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-food-dishes-vancouver.webp" alt="Best Indian dishes corporate lunches Vancouver" loading="lazy" /></div>
+					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/best-chicken-tikka-masala-vancouver.webp" alt="Best Indian dishes corporate lunches" loading="lazy" /></div>
 					<div class="blog-card-content">
-						<p class="blog-card-meta">Menu Inspiration · 4 Min Read</p>
+						<p class="blog-card-meta">Menu Planning · 4 min</p>
 						<h3>Best Indian Dishes for <em>Corporate Lunches</em></h3>
-						<p>Butter chicken, paneer butter masala, dal makhani — the crowd-pleasers that always work for office catering.</p>
+						<p>The crowd-pleasers that always work — butter chicken, paneer butter masala, dal makhani, biryani.</p>
 						<span class="read-more">Read More →</span>
 					</div>
 				</a>
-				<a href="/blog/chai-coffee-catering-weddings" class="blog-card reveal delay-400">
+				<a href="/blog/chai-coffee-catering-weddings" class="blog-card reveal">
 					<div class="blog-card-img"><img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/masala-chai-sula-indian-restaurant.webp" alt="Chai coffee catering weddings Vancouver" loading="lazy" /></div>
 					<div class="blog-card-content">
-						<p class="blog-card-meta">Beverage Catering · 5 Min Read</p>
+						<p class="blog-card-meta">Beverage Catering · 5 min</p>
 						<h3>Chai vs Coffee: <em>Why Both Belong at Your Wedding</em></h3>
-						<p>The case for a live masala chai bar and a barista coffee station — and how Sula Café brings both to weddings.</p>
+						<p>Building the perfect beverage program for your wedding — from masala chai bars to specialty espresso stations.</p>
 						<span class="read-more">Read More →</span>
 					</div>
 				</a>
@@ -89,11 +79,10 @@ import Layout from '../../layouts/Layout.astro';
 		</div>
 	</section>
 
-	<section class="cta-section cta-plum">
+	<section class="cta-section">
 		<div class="reveal">
-			<p class="gold-label" style="color:var(--gold-light)">Ready to Plan?</p>
-			<h2>Let's Make Your Event <em>Unforgettable</em></h2>
-			<p>Tell us about your celebration — we'll send a custom menu and quote within 24 hours.</p>
+			<h2>Ready to Plan Your <em>Event?</em></h2>
+			<p>Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
 			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
 		</div>
 	</section>

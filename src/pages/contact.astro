@@ -2,8 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout
-	title="Contact Sula Catering Vancouver | Request a Custom Catering Quote"
-	description="Contact Sula Catering for Indian wedding, corporate, and private party catering across Vancouver. Call 604-215-1130 or request a custom quote online."
+	title="Contact Sula Catering Vancouver | Request a Quote"
+	description="Contact Sula Catering Vancouver for wedding, corporate, and private party catering. Email, phone, or request a quote online. Response within 24 hours."
 	canonical="/contact"
 >
 
@@ -11,125 +11,84 @@ import Layout from '../layouts/Layout.astro';
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org","@type": "ContactPage",
 			"name": "Contact Sula Catering Vancouver",
-			"description": "Contact information and quote request for Sula Catering Vancouver.",
-			"mainEntity": {"@id": "https://sulacatering.com/#organization"}
+			"author": {"@id": "https://sulacatering.com/#organization"}
 		})} />
 	</Fragment>
 
-	<section class="hero" style="min-height:60vh;background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.6) 50%, rgba(20,8,16,0.85) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp');">
+	<section class="hero" style="min-height:55vh;background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.7) 50%, rgba(20,8,16,0.9) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp');">
 		<div class="hero-content">
-			<p class="gold-label">Get in Touch</p>
-			<h1>Let's Plan<br/><em>Your Event</em></h1>
-			<p class="hero-tagline">Tell us about your celebration. We'll respond within 24 hours with a custom menu and quote.</p>
-			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
+			<h1>Let's Plan<br/><em>Together</em></h1>
+			<p class="hero-tagline">Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
 		</div>
 	</section>
 
 	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
-				<p class="gold-label">Three Ways to Reach Us</p>
-				<h2>Always <em>Listening</em></h2>
+				<h2>Reach <em>Out</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p>Whether it's a quick question, a last-minute booking, or a fully custom <a href="/weddings" class="inline-link">wedding catering menu</a> — we're here. Most quote requests are answered within 24 hours. Browse our <a href="/corporate" class="inline-link">corporate catering</a> or <a href="/private-parties" class="inline-link">private party services</a> to start.</p>
+				<p>Whether you're booking <a href="/weddings" class="body-link">wedding catering</a>, planning <a href="/corporate" class="body-link">corporate catering</a>, organising a <a href="/private-parties" class="body-link">private party</a>, or adding <a href="/cafe-catering" class="body-link">café catering</a> to an event — we'd love to hear from you. Most quotes go out within hours.</p>
 			</div>
 			<div class="contact-cards">
 				<div class="contact-card reveal">
-					<div class="icon">✆</div>
-					<h3>Call Us</h3>
-					<p>Speak directly with our catering coordinator for any question, big or small.</p>
-					<a href="tel:6042151130">604-215-1130</a>
-				</div>
-				<div class="contact-card reveal delay-100">
 					<div class="icon">✉</div>
-					<h3>Email Us</h3>
-					<p>Send your event details, menu preferences, and timeline — we'll get back to you fast.</p>
+					<h3>Email</h3>
+					<p>For detailed quotes, menus, and availability.</p>
 					<a href="mailto:catering@sulaindianrestaurant.com">catering@sulaindianrestaurant.com</a>
 				</div>
+				<div class="contact-card reveal delay-100">
+					<div class="icon">☏</div>
+					<h3>Phone</h3>
+					<p>Call our catering team directly — fastest for urgent timelines.</p>
+					<a href="tel:6042151130">604-215-1130</a>
+				</div>
 				<div class="contact-card reveal delay-200">
-					<div class="icon">◆</div>
-					<h3>Quote Request</h3>
-					<p>Use our online form to share your event details and receive a custom quote within 24 hours.</p>
+					<div class="icon">✦</div>
+					<h3>Quote Form</h3>
+					<p>Send all your event details in one place — easiest for full quotes.</p>
 					<a href="https://sulaindianrestaurant.com/request-a-quote/">Request a Quote →</a>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section section-plum">
+	<section class="section section-dark">
 		<div class="container">
 			<div class="text-center reveal">
 				<p class="eyebrow">Visit Sula</p>
 				<h2 class="mag-title">Our <em>Locations</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p style="max-width:680px;margin:0 auto;font-size:16px;color:rgba(245,237,224,0.85)">Four locations across Vancouver — Commercial Drive, Davie Street, Main Street, and Sula Café in East Van.</p>
+				<p style="max-width:680px;margin:0 auto;font-size:16px">Four Vancouver locations — three full-service restaurants and our café in East Van.</p>
 			</div>
 			<div class="locations-grid">
 				<div class="location-card reveal">
 					<h3>Commercial Drive</h3>
 					<p class="addr">1128 Commercial Drive<br/>Vancouver, BC</p>
-					<p class="phone">604-215-1130</p>
+					<a href="tel:6042151130" class="phone">604-215-1130</a>
 				</div>
 				<div class="location-card reveal delay-100">
 					<h3>Davie Street</h3>
 					<p class="addr">1708 Davie Street<br/>Vancouver, BC</p>
-					<p class="phone">604-428-4400</p>
+					<a href="tel:6044284400" class="phone">604-428-4400</a>
 				</div>
 				<div class="location-card reveal delay-200">
 					<h3>Main Street</h3>
 					<p class="addr">4172 Main Street<br/>Vancouver, BC</p>
-					<p class="phone">604-874-5375</p>
+					<a href="tel:6048745375" class="phone">604-874-5375</a>
 				</div>
 				<div class="location-card reveal delay-300">
 					<h3>Sula Café</h3>
 					<p class="addr">260 East 5th Ave<br/>Vancouver, BC</p>
-					<p class="phone">778-386-1130</p>
+					<a href="tel:7783861130" class="phone">778-386-1130</a>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section section-cream">
-		<div class="container">
-			<div class="text-center reveal">
-				<p class="eyebrow">Browse Our Services</p>
-				<h2 class="mag-title">Explore <em>Sula Catering</em></h2>
-				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-			</div>
-			<div class="related-links">
-				<a href="/weddings" class="related-link reveal">
-					<p class="meta">Service · Wedding Catering</p>
-					<h4>Wedding <em>Catering</em></h4>
-					<p>Sangeet, ceremony, reception. Custom menus crafted with our chef.</p>
-					<span class="arrow">Explore Weddings →</span>
-				</a>
-				<a href="/corporate" class="related-link reveal delay-100">
-					<p class="meta">Service · Corporate Catering</p>
-					<h4>Corporate <em>Catering</em></h4>
-					<p>Office lunches, conferences, holiday parties. On-time, every time.</p>
-					<span class="arrow">Explore Corporate →</span>
-				</a>
-				<a href="/private-parties" class="related-link reveal delay-200">
-					<p class="meta">Service · Private Parties</p>
-					<h4>Private <em>Parties</em></h4>
-					<p>Birthdays, anniversaries, housewarmings, Diwali celebrations.</p>
-					<span class="arrow">Explore Private →</span>
-				</a>
-				<a href="/cafe-catering" class="related-link reveal delay-300">
-					<p class="meta">Service · Café Catering</p>
-					<h4>Café &amp; <em>Chai</em></h4>
-					<p>Live masala chai bars, specialty coffee, fresh-baked Indian pastries.</p>
-					<span class="arrow">Explore Café →</span>
-				</a>
-			</div>
-		</div>
-	</section>
-
-	<section class="cta-section">
+	<section class="cta-section cta-plum">
 		<div class="reveal">
-			<p class="gold-label" style="color:var(--gold-light)">Ready When You Are</p>
-			<h2>Let's Create<br/><em>Something Memorable</em></h2>
-			<p>Tell us about your event. We'll respond within 24 hours.</p>
+			<h2>Ready to <em>Begin?</em></h2>
+			<p>The most detailed quote requests get the most detailed responses. Tell us everything.</p>
 			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
 		</div>
 	</section>
