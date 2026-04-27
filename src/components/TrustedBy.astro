@@ -1,12 +1,9 @@
 ---
-// Trusted By marquee section
-// Drop into any page above the CTA section
 const clients = [
 	"Amazon", "Microsoft", "UBC", "SFU", "Lululemon", "Arc'teryx",
 	"Lush Cosmetics", "Sony Pictures", "Disney Animation", "Electronic Arts",
 	"PwC", "McKinsey & Co.", "City of Vancouver", "WorkSafeBC", "BC Cancer", "CBC"
 ];
-// Duplicate the array so the marquee loops seamlessly
 const loop = [...clients, ...clients];
 ---
 
@@ -33,7 +30,7 @@ const loop = [...clients, ...clients];
 <style>
 	.trusted-by {
 		background: linear-gradient(180deg, var(--cream-soft) 0%, var(--cream) 100%);
-		padding: 80px 0 80px;
+		padding: 90px 0 90px;
 		position: relative;
 		border-top: 1px solid rgba(184, 149, 106, 0.2);
 		border-bottom: 1px solid rgba(184, 149, 106, 0.2);
@@ -42,7 +39,7 @@ const loop = [...clients, ...clients];
 	.trusted-inner {
 		max-width: 1280px;
 		margin: 0 auto;
-		padding: 0 32px 48px;
+		padding: 0 32px 56px;
 	}
 	.trusted-header {
 		text-align: center;
@@ -50,28 +47,27 @@ const loop = [...clients, ...clients];
 		margin: 0 auto;
 	}
 	.trusted-title {
-		font-family: 'Cormorant Garamond', serif;
+		font-family: 'Libre Baskerville', Georgia, serif;
 		font-size: 44px;
-		font-weight: 400;
+		font-weight: 700;
 		color: var(--midnight);
 		line-height: 1.2;
 		margin-bottom: 8px;
-		letter-spacing: 0.5px;
 	}
 	.trusted-title em {
 		color: var(--gold);
 		font-style: italic;
-		font-weight: 500;
+		font-weight: 400;
 	}
 	.trusted-sub {
+		font-family: 'Montserrat', sans-serif;
 		font-size: 15px;
-		color: rgba(26, 26, 26, 0.7);
+		color: rgba(26, 26, 26, 0.8);
 		line-height: 1.7;
-		margin-top: 16px;
-		font-weight: 300;
+		margin-top: 20px;
+		font-weight: 400;
 	}
 
-	/* MARQUEE - infinite scroll left to right */
 	.marquee {
 		width: 100%;
 		overflow: hidden;
@@ -90,11 +86,11 @@ const loop = [...clients, ...clients];
 		animation-play-state: paused;
 	}
 	.marquee-item {
-		font-family: 'Cormorant Garamond', serif;
+		font-family: 'Libre Baskerville', Georgia, serif;
 		font-size: 28px;
-		font-weight: 500;
-		color: rgba(26, 26, 26, 0.45);
-		letter-spacing: 1px;
+		font-weight: 700;
+		color: rgba(26, 26, 26, 0.55);
+		letter-spacing: 0.5px;
 		white-space: nowrap;
 		transition: color 0.4s ease, transform 0.4s ease;
 		font-style: italic;
@@ -111,8 +107,8 @@ const loop = [...clients, ...clients];
 	}
 
 	@media (max-width: 900px) {
-		.trusted-by { padding: 60px 0; }
-		.trusted-title { font-size: 30px; }
+		.trusted-by { padding: 70px 0; }
+		.trusted-title { font-size: 32px; }
 		.trusted-sub { font-size: 14px; }
 		.marquee-track {
 			gap: 40px;
@@ -125,7 +121,6 @@ const loop = [...clients, ...clients];
 		.marquee-item { font-size: 19px; }
 	}
 
-	/* Respect reduced-motion preference */
 	@media (prefers-reduced-motion: reduce) {
 		.marquee-track {
 			animation: none;
