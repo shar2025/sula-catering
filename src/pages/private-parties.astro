@@ -3,24 +3,22 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout
 	title="Private Party Catering Vancouver | Birthday, Anniversary, Housewarming | Sula"
-	description="Indian catering for birthdays, anniversaries, housewarmings, and private parties in Vancouver. Live cooking stations, custom menus, and full-service catering since 2010."
+	description="Indian catering for birthdays, anniversaries, housewarmings, and private parties in Vancouver. Live cooking stations, custom menus, full-service catering since 2010."
 	canonical="/private-parties"
 	ogImage="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-for-private-parties-birthdays-celebrations.webp"
 >
 
 	<Fragment slot="schema">
 		<script type="application/ld+json" set:html={JSON.stringify({
-			"@context": "https://schema.org",
-			"@type": "Service",
+			"@context": "https://schema.org","@type": "Service",
 			"name": "Private Party Catering Vancouver",
 			"provider": {"@id": "https://sulacatering.com/#organization"},
 			"areaServed": ["Vancouver", "Burnaby", "Richmond", "Surrey", "North Vancouver"],
 			"serviceType": "Private Party Catering",
-			"description": "Indian catering for birthdays, anniversaries, housewarmings, and private celebrations in Vancouver — live cooking stations, custom menus, halal and vegetarian options."
+			"description": "Indian catering for birthdays, anniversaries, housewarmings, and private celebrations in Vancouver."
 		})} />
 	</Fragment>
 
-	<!-- HERO -->
 	<section class="hero" style="background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.6) 50%, rgba(20,8,16,0.85) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-for-private-parties-birthdays-celebrations.webp');">
 		<div class="hero-content">
 			<p class="gold-label">Private Party Catering</p>
@@ -30,72 +28,72 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
-	<!-- INTRO -->
 	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
 				<p class="gold-label">For Every Milestone</p>
 				<h2>Catering for Life's <em>Best Moments</em></h2>
-				<div class="gold-divider-ornament">
-					<span></span><div class="diamond"></div><span></span>
-				</div>
-				<p>The big birthday. The first house. The fiftieth anniversary. Diwali with the whole family. We've been catering these moments across Vancouver homes and venues for fifteen years — bringing the warmth of authentic Indian hospitality to celebrations of every shape and size.</p>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+				<p>The big birthday. The first house. The fiftieth anniversary. Diwali with the whole family. We've been catering these moments across Vancouver for fifteen years. Browse our <a href="/gallery" style="color:var(--gold);border-bottom:1px solid var(--gold)">private party gallery</a> or add a <a href="/cafe-catering" style="color:var(--gold);border-bottom:1px solid var(--gold)">live chai bar</a> for a special touch.</p>
 			</div>
 		</div>
 	</section>
 
-	<!-- FULL-WIDTH IMAGE -->
 	<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-catering-near-me-vancouver-birthdays-parties.webp" alt="Indian catering Vancouver birthdays parties" class="full-width-image" loading="lazy" />
 
-	<!-- THE OCCASIONS - menu-card style (centered, no awkward alt-rows) -->
+	<!-- 2x2 SERVICE CARDS -->
 	<section class="section section-cream">
-		<div class="container-narrow">
+		<div class="container">
 			<div class="text-center reveal">
 				<p class="eyebrow">Every Occasion</p>
 				<h2 class="mag-title">For Every <em>Celebration</em></h2>
-				<div class="gold-divider-ornament">
-					<span></span><div class="diamond"></div><span></span>
-				</div>
-				<p style="max-width:680px;margin:0 auto;font-size:16px;color:rgba(26,26,26,0.75)">No matter the milestone, we've catered it before — and we'll make yours unforgettable.</p>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
 			</div>
-			<div class="menu-grid">
-				<div class="menu-card reveal">
-					<div class="menu-card-img">
+			<div class="service-grid-v2">
+				<div class="service-card-v2 reveal">
+					<div class="service-card-img">
 						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-catering-near-me-vancouver-birthdays-parties.webp" alt="Birthday party catering Vancouver" loading="lazy" />
+						<div class="service-card-overlay">
+							<span class="service-eyebrow">Milestone Birthdays</span>
+							<h3>Birthdays</h3>
+							<p>From sweet sixteens to seventieth surprises — vibrant menus that capture the spirit of the celebration.</p>
+						</div>
 					</div>
-					<span class="eyebrow">Milestone Birthdays</span>
-					<h3>Birthdays</h3>
-					<p>From sweet sixteens to seventieth surprises — vibrant menus that capture the spirit of the celebration.</p>
 				</div>
-				<div class="menu-card reveal delay-100">
-					<div class="menu-card-img">
+				<div class="service-card-v2 reveal delay-100">
+					<div class="service-card-img">
 						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-food-catering-near-me-vancouver-bc.webp" alt="Anniversary dinner catering Vancouver" loading="lazy" />
+						<div class="service-card-overlay">
+							<span class="service-eyebrow">Marking Decades</span>
+							<h3>Anniversaries</h3>
+							<p>Plated dinners or buffet feasts — luxury menus designed to honour the moments that built a life together.</p>
+						</div>
 					</div>
-					<span class="eyebrow">Marking Decades</span>
-					<h3>Anniversaries</h3>
-					<p>Plated dinners or buffet feasts — luxury menus designed to honour the moments that built a life together.</p>
 				</div>
-				<div class="menu-card reveal delay-200">
-					<div class="menu-card-img">
+				<div class="service-card-v2 reveal delay-200">
+					<div class="service-card-img">
 						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/Indian-food-catering-vancouver-bc-canada.webp" alt="Housewarming catering Vancouver" loading="lazy" />
+						<div class="service-card-overlay">
+							<span class="service-eyebrow">New Beginnings</span>
+							<h3>Housewarmings</h3>
+							<p>Welcome friends and family with abundant Indian feasts — perfect for filling a new home with warmth.</p>
+						</div>
 					</div>
-					<span class="eyebrow">New Beginnings</span>
-					<h3>Housewarmings</h3>
-					<p>Welcome friends and family with abundant Indian feasts — perfect for filling a new home with warmth.</p>
 				</div>
-				<div class="menu-card reveal delay-300">
-					<div class="menu-card-img">
+				<div class="service-card-v2 reveal delay-300">
+					<div class="service-card-img">
 						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-burnaby-richmond-for-corporate-offices-private-parties-and-weddings.webp" alt="Holiday gathering catering Vancouver" loading="lazy" />
+						<div class="service-card-overlay">
+							<span class="service-eyebrow">Diwali, Eid & More</span>
+							<h3>Holidays</h3>
+							<p>Diwali, Eid, Christmas, Holi — full festive menus that bring family traditions to your table.</p>
+						</div>
 					</div>
-					<span class="eyebrow">Diwali, Eid & More</span>
-					<h3>Holidays</h3>
-					<p>Diwali, Eid, Christmas, Holi — full festive menus that bring family traditions to your dining table.</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- IMAGE BANNER PLUM -->
 	<div class="image-banner image-banner-plum" style="background-image: url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-food-catering-near-me-vancouver-bc.webp');">
 		<div class="image-banner-content reveal">
 			<h2>Live Stations.<br/><em>Lively Nights.</em></h2>
@@ -103,67 +101,38 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</div>
 
-	<!-- THE EXPERIENCE - alt-row in PLUM (substantial content, image+text works) -->
 	<section class="section section-plum">
 		<div class="container">
 			<div class="experience">
 				<div class="experience-img reveal-left">
-					<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-for-private-parties-birthdays-celebrations.webp" alt="Private party catering Vancouver experience" loading="lazy" />
+					<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/indian-catering-vancouver-for-private-parties-birthdays-celebrations.webp" alt="Private party catering Vancouver" loading="lazy" />
 				</div>
 				<div class="experience-content reveal-right">
 					<p class="gold-label">A Different Kind of Dinner</p>
 					<h2>Where Hospitality<br/>Meets <em>Heritage</em></h2>
 					<p>A great party isn't just about the food — it's about the warmth around the table. We bring fifteen years of catering Vancouver's finest celebrations and pour it into every event we touch.</p>
-					<p>From a quiet anniversary dinner for twelve to a multi-generational housewarming for two hundred, we scale up or down without compromising on the things that matter: flavour, presentation, and the feeling that everything is taken care of.</p>
+					<p>From a quiet anniversary dinner for twelve to a multi-generational housewarming for two hundred, we scale up or down without compromising on the things that matter.</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- HOW WE WORK - numbered list (cream) -->
 	<section class="section section-cream">
 		<div class="container-narrow">
 			<div class="text-center reveal">
 				<p class="eyebrow">From Idea to Celebration</p>
 				<h2 class="mag-title">How It <em>Works</em></h2>
-				<div class="gold-divider-ornament">
-					<span></span><div class="diamond"></div><span></span>
-				</div>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
 			</div>
 			<div class="numbered-list">
-				<div class="numbered-item reveal">
-					<div class="numbered-num">01</div>
-					<div class="numbered-content">
-						<h3>Tell Us <em>Your Story</em></h3>
-						<p>What's the occasion? Who's coming? What feeling do you want guests to walk away with? We start with the moment.</p>
-					</div>
-				</div>
-				<div class="numbered-item reveal">
-					<div class="numbered-num">02</div>
-					<div class="numbered-content">
-						<h3>Build Your <em>Menu</em></h3>
-						<p>Our chefs craft a custom menu that fits your guest count, dietary needs, and budget. Tastings available for events of 100+ guests.</p>
-					</div>
-				</div>
-				<div class="numbered-item reveal">
-					<div class="numbered-num">03</div>
-					<div class="numbered-content">
-						<h3>We Handle <em>the Details</em></h3>
-						<p>Setup, service, cleanup. Servers, equipment, presentation. You greet your guests — we take care of everything else.</p>
-					</div>
-				</div>
-				<div class="numbered-item reveal">
-					<div class="numbered-num">04</div>
-					<div class="numbered-content">
-						<h3>You <em>Celebrate</em></h3>
-						<p>The party flows. The food flows. The guests linger because they don't want to leave.</p>
-					</div>
-				</div>
+				<div class="numbered-item reveal"><div class="numbered-num">01</div><div class="numbered-content"><h3>Tell Us <em>Your Story</em></h3><p>What's the occasion? Who's coming? What feeling do you want guests to walk away with?</p></div></div>
+				<div class="numbered-item reveal"><div class="numbered-num">02</div><div class="numbered-content"><h3>Build Your <em>Menu</em></h3><p>Our chefs craft a custom menu that fits your guest count, dietary needs, and budget.</p></div></div>
+				<div class="numbered-item reveal"><div class="numbered-num">03</div><div class="numbered-content"><h3>We Handle <em>the Details</em></h3><p>Setup, service, cleanup. You greet your guests — we take care of everything else.</p></div></div>
+				<div class="numbered-item reveal"><div class="numbered-num">04</div><div class="numbered-content"><h3>You <em>Celebrate</em></h3><p>The party flows. The food flows. The guests linger because they don't want to leave.</p></div></div>
 			</div>
 		</div>
 	</section>
 
-	<!-- TESTIMONIAL (dark) -->
 	<section class="section section-dark">
 		<div class="container">
 			<div class="testimonial-block reveal">
@@ -174,7 +143,37 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 	</section>
 
-	<!-- CTA PLUM -->
+	<!-- RELATED -->
+	<section class="section section-cream">
+		<div class="container">
+			<div class="text-center reveal">
+				<p class="eyebrow">More Catering Options</p>
+				<h2 class="mag-title">Continue <em>Exploring</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+			</div>
+			<div class="related-links">
+				<a href="/cafe-catering" class="related-link reveal">
+					<p class="meta">Service · Café Catering</p>
+					<h4>Add a <em>Chai or Coffee Bar</em></h4>
+					<p>Bring Sula Café to your party — live chai stations, specialty coffee, fresh-baked goods.</p>
+					<span class="arrow">Explore Café →</span>
+				</a>
+				<a href="/weddings" class="related-link reveal delay-100">
+					<p class="meta">Service · Wedding Catering</p>
+					<h4>Wedding <em>Catering</em></h4>
+					<p>Sangeet, ceremony, reception. Custom menus, live stations, full-service execution.</p>
+					<span class="arrow">Explore Weddings →</span>
+				</a>
+				<a href="/gallery" class="related-link reveal delay-200">
+					<p class="meta">Gallery</p>
+					<h4>Private Party <em>Gallery</em></h4>
+					<p>Real Vancouver celebrations we've catered — birthdays, anniversaries, housewarmings.</p>
+					<span class="arrow">View Gallery →</span>
+				</a>
+			</div>
+		</div>
+	</section>
+
 	<section class="cta-section cta-plum">
 		<div class="reveal">
 			<p class="gold-label" style="color:var(--gold-light)">Ready When You Are</p>

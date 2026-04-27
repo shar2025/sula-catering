@@ -1,7 +1,7 @@
 ---
 const {
-	title = "Sula Catering Vancouver | Award-Winning Indian Catering for Weddings, Corporate & Private Events",
-	description = "Vancouver's most trusted Indian catering company since 2010. Award-winning wedding, corporate, and private party catering across the Lower Mainland.",
+	title = "Sula Catering Vancouver | Award-Winning Indian Catering for Weddings, Corporate & Events",
+	description = "Vancouver's most trusted Indian catering since 2010. Award-winning wedding, corporate, and private party catering. Halal, vegetarian, vegan options. Get a custom quote.",
 	canonical = "/",
 	ogImage = "https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/vancouver-catering-sula-indian-restaurant.webp"
 } = Astro.props;
@@ -118,7 +118,6 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			img{max-width:100%;height:auto;display:block}
 			a{color:var(--gold);text-decoration:none}
 			h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;font-weight:400;color:var(--midnight);letter-spacing:0.5px}
-
 			@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
 			@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 			.reveal{opacity:0;transform:translateY(40px);transition:opacity 1s ease,transform 1s ease}
@@ -129,20 +128,18 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.reveal-right.visible{opacity:1;transform:translateX(0)}
 			.reveal-scale{opacity:0;transform:scale(0.95);transition:opacity 1s ease,transform 1s ease}
 			.reveal-scale.visible{opacity:1;transform:scale(1)}
-			.delay-100{transition-delay:0.1s}.delay-200{transition-delay:0.2s}.delay-300{transition-delay:0.3s}.delay-400{transition-delay:0.4s}.delay-500{transition-delay:0.5s}
+			.delay-100{transition-delay:0.1s}.delay-200{transition-delay:0.2s}.delay-300{transition-delay:0.3s}.delay-400{transition-delay:0.4s}
 
-			/* MAGAZINE LABELS */
+			/* LABELS */
 			.gold-label{display:inline-block;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:24px}
 			.gold-label::before,.gold-label::after{content:'';display:inline-block;width:32px;height:1px;background:var(--gold);vertical-align:middle;margin:0 16px;opacity:0.6}
 			.eyebrow{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--gold);letter-spacing:0.5px;margin-bottom:8px;font-weight:400}
-			.script-em{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-weight:500}
 
 			/* DIVIDERS */
 			.gold-divider-ornament{display:flex;align-items:center;justify-content:center;margin:32px 0;gap:16px}
 			.gold-divider-ornament span{height:1px;width:60px;background:linear-gradient(90deg,transparent,var(--gold))}
 			.gold-divider-ornament span:last-child{background:linear-gradient(90deg,var(--gold),transparent)}
 			.gold-divider-ornament .diamond{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0;background:linear-gradient(135deg,var(--gold-shimmer),var(--gold))}
-			.gold-line{width:60px;height:1px;background:var(--gold);margin:24px auto;border:none}
 
 			/* HEADER */
 			.site-header{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--midnight) 30%,var(--plum-mid) 70%,var(--plum) 100%);color:var(--cream);padding:16px 0;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(184,149,106,0.2);box-shadow:0 4px 30px rgba(0,0,0,0.4);animation:fadeIn 0.8s ease}
@@ -155,7 +152,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.main-nav a::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--gold);transition:all 0.4s ease;transform:translateX(-50%)}
 			.main-nav a:hover{color:var(--gold)}
 			.main-nav a:hover::after{width:100%}
-			.main-nav a.cta{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:var(--midnight);padding:12px 24px;font-weight:600;letter-spacing:2px;transition:all 0.4s ease}
+			.main-nav a.cta{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:var(--midnight);padding:12px 24px;font-weight:600;letter-spacing:2px}
 			.main-nav a.cta::after{display:none}
 			.main-nav a.cta:hover{background:linear-gradient(135deg,var(--gold-light) 0%,var(--gold-shimmer) 100%);transform:translateY(-2px);box-shadow:0 8px 20px rgba(184,149,106,0.4)}
 
@@ -175,8 +172,6 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.btn:hover::before{left:100%}
 			.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-light) 100%);color:var(--midnight);border:1px solid var(--gold)}
 			.btn-gold:hover{background:linear-gradient(135deg,var(--gold-shimmer) 0%,var(--gold-light) 100%);transform:translateY(-3px);box-shadow:0 12px 30px rgba(184,149,106,0.5)}
-			.btn-plum{background:linear-gradient(135deg,var(--plum) 0%,var(--plum-rich) 100%);color:var(--cream);border:1px solid var(--plum)}
-			.btn-plum:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,21,84,0.4)}
 			.btn-outline{background:transparent;color:var(--cream);border:1px solid var(--gold)}
 			.btn-outline:hover{background:var(--gold);color:var(--midnight);transform:translateY(-3px)}
 			.btn-outline-dark{background:transparent;color:var(--midnight);border:1px solid var(--midnight)}
@@ -210,37 +205,25 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.intro-block p{font-size:17px;line-height:1.9;color:var(--dark-text);font-weight:300}
 			.section-dark .intro-block p,.section-plum .intro-block p{color:rgba(245,237,224,0.85)}
 
-			/* MAGAZINE TITLE PATTERN */
+			/* MAGAZINE TITLE */
 			.mag-title{font-size:56px;font-weight:400;line-height:1.1;letter-spacing:0.5px;text-align:center}
 			.mag-title em{color:var(--gold);font-style:italic;font-weight:500}
 			.section-dark .mag-title em,.section-plum .mag-title em{color:var(--gold-light)}
 
-			/* SERVICE CARDS */
-			.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;margin-top:80px}
-			.service-card{background:linear-gradient(180deg,#fff 0%,var(--cream) 100%);padding:48px 32px;text-align:center;position:relative;border:1px solid rgba(184,149,106,0.2);transition:all 0.5s cubic-bezier(0.4,0,0.2,1);color:inherit;display:block;overflow:hidden}
-			.service-card::before{content:'';position:absolute;top:0;left:50%;width:0;height:2px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%);transition:all 0.5s ease;transform:translateX(-50%)}
-			.service-card:hover{transform:translateY(-12px);box-shadow:0 25px 60px rgba(10,22,40,0.18);border-color:var(--gold)}
-			.service-card:hover::before{width:100%}
-			.service-card h3{font-size:26px;margin-bottom:12px;font-weight:500}
-			.service-card p{font-size:14px;color:rgba(26,26,26,0.7);margin-bottom:20px;line-height:1.7}
-			.service-card .arrow{color:var(--gold);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;letter-spacing:2px;text-transform:uppercase;font-weight:500;transition:letter-spacing 0.3s}
-			.service-card:hover .arrow{letter-spacing:4px}
-
-			/* MENU-STYLE CARDS */
-			.menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;margin-top:64px;text-align:center;align-items:start;justify-items:center}
-			.menu-card{padding:24px}
-			.menu-card-img{width:200px;height:200px;border-radius:50%;overflow:hidden;margin:0 auto 24px;border:1px solid rgba(184,149,106,0.3);transition:all 0.5s ease;position:relative}
-			.menu-card-img::after{content:'';position:absolute;inset:-8px;border:1px solid var(--gold);border-radius:50%;opacity:0;transition:all 0.4s ease}
-			.menu-card:hover .menu-card-img::after{opacity:1;inset:-12px}
-			.menu-card-img img{width:100%;height:100%;object-fit:cover}
-			.menu-card:hover .menu-card-img{transform:scale(1.04)}
-			.menu-card .eyebrow{margin-bottom:8px}
-			.menu-card h3{font-size:24px;font-weight:500;margin-bottom:14px;text-align:center}
-			.menu-card h3 em{color:var(--gold);font-style:italic}
-			.section-dark .menu-card h3,.section-plum .menu-card h3{color:var(--gold-light)}
-			.section-dark .menu-card h3 em,.section-plum .menu-card h3 em{color:var(--gold)}
-			.menu-card p{font-size:14px;color:rgba(26,26,26,0.75);line-height:1.7;text-align:center}
-			.section-dark .menu-card p,.section-plum .menu-card p{color:rgba(245,237,224,0.8)}
+			/* NEW SERVICE CARDS V2 - 2x2 grid with overlay */
+			.service-grid-v2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:80px}
+			.service-card-v2{position:relative;display:block;overflow:hidden;color:inherit;text-decoration:none;aspect-ratio:4/3;transition:transform 0.5s ease}
+			.service-card-v2:hover{transform:translateY(-6px)}
+			.service-card-img{position:relative;width:100%;height:100%;overflow:hidden}
+			.service-card-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.8s ease}
+			.service-card-v2:hover .service-card-img img{transform:scale(1.08)}
+			.service-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,22,40,0.1) 0%,rgba(10,22,40,0.5) 50%,rgba(20,8,16,0.92) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:48px 40px;color:var(--cream)}
+			.service-eyebrow{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:var(--gold-light);letter-spacing:1px;margin-bottom:8px;font-weight:400;display:block}
+			.service-card-v2 h3{font-size:36px;color:var(--cream);margin-bottom:12px;font-weight:400;line-height:1.1}
+			.service-card-v2 h3 em{color:var(--gold-light);font-style:italic;font-weight:500}
+			.service-card-v2 p{font-size:15px;color:rgba(245,237,224,0.85);line-height:1.6;margin-bottom:16px;max-width:420px}
+			.service-arrow{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);font-weight:500;transition:letter-spacing 0.3s,padding-left 0.3s}
+			.service-card-v2:hover .service-arrow{letter-spacing:4px;padding-left:6px}
 
 			/* EXPERIENCE / ALT-ROW */
 			.experience{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
@@ -269,7 +252,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.alt-row-img img{width:100%;height:100%;object-fit:cover;transition:transform 1s ease}
 			.alt-row-img:hover img{transform:scale(1.05)}
 			.alt-row-content{text-align:left}
-			.alt-row-content h2{font-size:42px;font-weight:400;line-height:1.2;margin-bottom:20px;text-align:left;word-break:keep-all;hyphens:none}
+			.alt-row-content h2{font-size:42px;font-weight:400;line-height:1.2;margin-bottom:20px;text-align:left}
 			.alt-row-content h2 em{color:var(--gold);font-style:italic}
 			.section-dark .alt-row-content h2,.section-plum .alt-row-content h2{color:var(--gold-light)}
 			.section-dark .alt-row-content h2 em,.section-plum .alt-row-content h2 em{color:var(--gold)}
@@ -340,14 +323,18 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.cta-section p{font-size:18px;color:rgba(245,237,224,0.8);max-width:600px;margin:0 auto 40px;font-family:'Cormorant Garamond',serif;font-style:italic}
 			.cta-plum{background:linear-gradient(135deg,var(--plum) 0%,var(--plum-rich) 50%,var(--plum-mid) 100%)}
 
-			/* FEATURED LIST */
-			.featured-list{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:0 80px}
-			.featured-item{padding:24px 0;border-bottom:1px dotted rgba(184,149,106,0.3);text-align:left}
-			.featured-item h3{font-size:22px;margin-bottom:6px;font-weight:500;color:var(--midnight)}
-			.section-dark .featured-item h3,.section-plum .featured-item h3{color:var(--gold-light)}
-			.featured-item h3 em{color:var(--gold);font-style:italic}
-			.featured-item p{font-size:13px;letter-spacing:1px;color:rgba(26,26,26,0.7);text-transform:uppercase;font-weight:500}
-			.section-dark .featured-item p,.section-plum .featured-item p{color:rgba(245,237,224,0.7)}
+			/* RELATED LINKS - For internal linking */
+			.related-links{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:60px}
+			.related-link{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);padding:32px 28px;border:1px solid rgba(184,149,106,0.2);transition:all 0.4s ease;text-align:left;display:block;color:inherit}
+			.section-cream .related-link{background:white;border-color:rgba(184,149,106,0.15)}
+			.related-link:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 30px rgba(10,22,40,0.1)}
+			.related-link .meta{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:500}
+			.related-link h4{font-size:20px;margin-bottom:8px;font-weight:500;color:var(--midnight);font-family:'Cormorant Garamond',serif}
+			.section-dark .related-link h4,.section-plum .related-link h4{color:var(--gold-light)}
+			.related-link h4 em{color:var(--gold);font-style:italic}
+			.related-link p{font-size:14px;line-height:1.7;color:rgba(26,26,26,0.7)}
+			.section-dark .related-link p,.section-plum .related-link p{color:rgba(245,237,224,0.7)}
+			.related-link .arrow{display:inline-block;margin-top:12px;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:13px;letter-spacing:1px;font-weight:500}
 
 			/* BLOG CARDS */
 			.blog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:40px;margin-top:80px}
@@ -363,7 +350,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.blog-card p{font-size:15px;color:rgba(26,26,26,0.7);line-height:1.8;margin-bottom:16px}
 			.blog-card .read-more{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--gold);font-size:15px;letter-spacing:1px;font-weight:500}
 
-			/* BLOG POST CONTENT */
+			/* BLOG POST */
 			.blog-post{max-width:780px;margin:0 auto;padding:0 32px}
 			.blog-post p{font-size:17px;line-height:1.9;margin-bottom:24px;color:var(--dark-text)}
 			.blog-post h2{font-size:36px;margin:48px 0 20px;color:var(--midnight);font-weight:400}
@@ -376,7 +363,6 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.blog-post a:hover{opacity:0.7}
 			.blog-post-meta{text-align:center;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid rgba(184,149,106,0.3)}
 			.blog-post-meta .meta-info{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:500}
-			.blog-post-hero{width:100%;height:60vh;min-height:400px;object-fit:cover;margin-bottom:60px}
 
 			/* CONTACT CARDS */
 			.contact-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;margin-top:60px}
@@ -387,7 +373,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.contact-card p{font-size:15px;color:rgba(26,26,26,0.75);margin-bottom:16px;line-height:1.7}
 			.contact-card a{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--gold);font-weight:500;border-bottom:1px solid var(--gold);padding-bottom:2px}
 
-			/* LOCATIONS GRID */
+			/* LOCATIONS */
 			.locations-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px;margin-top:60px}
 			.location-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);padding:36px 28px;text-align:center;border:1px solid rgba(184,149,106,0.2);transition:all 0.4s ease}
 			.location-card:hover{border-color:var(--gold);transform:translateY(-6px);background:rgba(255,255,255,0.08)}
@@ -412,10 +398,6 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.footer-bottom p{color:rgba(245,237,224,0.4);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:300}
 
 			/* RESPONSIVE */
-			
-			@media (max-width:1100px){
-				.menu-grid{grid-template-columns:repeat(2,1fr);gap:48px}
-			}
 			@media (max-width:900px){
 				.logo-img{height:40px}
 				.hero h1{font-size:44px}
@@ -429,7 +411,9 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 				.section{padding:80px 24px}
 				.section-tight{padding:60px 24px}
 				.cta-section{padding:80px 24px}
-				.menu-grid{grid-template-columns:1fr;gap:48px}
+				.service-grid-v2{grid-template-columns:1fr;gap:24px}
+				.service-card-overlay{padding:32px 24px}
+				.service-card-v2 h3{font-size:28px}
 				.main-nav{gap:14px;justify-content:center;width:100%}
 				.main-nav a{font-size:10px;letter-spacing:1.5px}
 				.testimonial-quote{font-size:22px}
@@ -440,13 +424,11 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 				.alt-row-content h2{font-size:30px;line-height:1.25;hyphens:none;word-break:normal;overflow-wrap:break-word}
 				.image-banner{height:50vh;min-height:350px;background-attachment:scroll}
 				.full-width-image{height:50vh;min-height:350px}
-				.featured-list{grid-template-columns:1fr;gap:0}
 				.numbered-item{grid-template-columns:1fr;gap:8px;text-align:center}
 				.numbered-num{text-align:center}
 				.numbered-content h3,.numbered-content p{text-align:center}
 				.pull-quote-text{font-size:24px}
 				.blog-post h2{font-size:28px}
-				.blog-post-hero{height:40vh;min-height:280px}
 			}
 		</style>
 		<script>
