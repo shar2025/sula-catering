@@ -1,0 +1,137 @@
+---
+// Trusted By marquee section
+// Drop into any page above the CTA section
+const clients = [
+	"Amazon", "Microsoft", "UBC", "SFU", "Lululemon", "Arc'teryx",
+	"Lush Cosmetics", "Sony Pictures", "Disney Animation", "Electronic Arts",
+	"PwC", "McKinsey & Co.", "City of Vancouver", "WorkSafeBC", "BC Cancer", "CBC"
+];
+// Duplicate the array so the marquee loops seamlessly
+const loop = [...clients, ...clients];
+---
+
+<section class="trusted-by">
+	<div class="trusted-inner">
+		<div class="trusted-header reveal">
+			<p class="eyebrow">Trusted By Vancouver's Best</p>
+			<h2 class="trusted-title">We've Catered <em>For</em></h2>
+			<div class="gold-divider-ornament">
+				<span></span><div class="diamond"></div><span></span>
+			</div>
+			<p class="trusted-sub">Catering Vancouver's most respected companies, government agencies, and institutions since 2010.</p>
+		</div>
+	</div>
+	<div class="marquee" aria-hidden="true">
+		<div class="marquee-track">
+			{loop.map((name) => (
+				<span class="marquee-item">{name}</span>
+			))}
+		</div>
+	</div>
+</section>
+
+<style>
+	.trusted-by {
+		background: linear-gradient(180deg, var(--cream-soft) 0%, var(--cream) 100%);
+		padding: 80px 0 80px;
+		position: relative;
+		border-top: 1px solid rgba(184, 149, 106, 0.2);
+		border-bottom: 1px solid rgba(184, 149, 106, 0.2);
+		overflow: hidden;
+	}
+	.trusted-inner {
+		max-width: 1280px;
+		margin: 0 auto;
+		padding: 0 32px 48px;
+	}
+	.trusted-header {
+		text-align: center;
+		max-width: 720px;
+		margin: 0 auto;
+	}
+	.trusted-title {
+		font-family: 'Cormorant Garamond', serif;
+		font-size: 44px;
+		font-weight: 400;
+		color: var(--midnight);
+		line-height: 1.2;
+		margin-bottom: 8px;
+		letter-spacing: 0.5px;
+	}
+	.trusted-title em {
+		color: var(--gold);
+		font-style: italic;
+		font-weight: 500;
+	}
+	.trusted-sub {
+		font-size: 15px;
+		color: rgba(26, 26, 26, 0.7);
+		line-height: 1.7;
+		margin-top: 16px;
+		font-weight: 300;
+	}
+
+	/* MARQUEE - infinite scroll left to right */
+	.marquee {
+		width: 100%;
+		overflow: hidden;
+		position: relative;
+		mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+		-webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+	}
+	.marquee-track {
+		display: flex;
+		gap: 64px;
+		width: max-content;
+		animation: marquee-scroll 60s linear infinite;
+		padding: 24px 32px;
+	}
+	.marquee:hover .marquee-track {
+		animation-play-state: paused;
+	}
+	.marquee-item {
+		font-family: 'Cormorant Garamond', serif;
+		font-size: 28px;
+		font-weight: 500;
+		color: rgba(26, 26, 26, 0.45);
+		letter-spacing: 1px;
+		white-space: nowrap;
+		transition: color 0.4s ease, transform 0.4s ease;
+		font-style: italic;
+		flex-shrink: 0;
+	}
+	.marquee-item:hover {
+		color: var(--gold);
+		transform: scale(1.05);
+	}
+
+	@keyframes marquee-scroll {
+		from { transform: translateX(0); }
+		to { transform: translateX(-50%); }
+	}
+
+	@media (max-width: 900px) {
+		.trusted-by { padding: 60px 0; }
+		.trusted-title { font-size: 30px; }
+		.trusted-sub { font-size: 14px; }
+		.marquee-track {
+			gap: 40px;
+			animation-duration: 45s;
+		}
+		.marquee-item { font-size: 22px; }
+	}
+	@media (max-width: 480px) {
+		.trusted-title { font-size: 26px; }
+		.marquee-item { font-size: 19px; }
+	}
+
+	/* Respect reduced-motion preference */
+	@media (prefers-reduced-motion: reduce) {
+		.marquee-track {
+			animation: none;
+			justify-content: center;
+			flex-wrap: wrap;
+			padding: 24px;
+		}
+	}
+</style>
