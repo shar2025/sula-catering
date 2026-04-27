@@ -1,0 +1,123 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout
+	title="Sula Catering Journal | Indian Catering Tips, Wedding Guides & More"
+	description="Insights from Sula Catering — Indian wedding planning guides, corporate catering tips, halal catering essentials, and stories from Vancouver's most celebrated events."
+	canonical="/blog"
+	ogImage="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg"
+>
+
+	<Fragment slot="schema">
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "Blog",
+			"name": "Sula Catering Journal",
+			"description": "Insights and stories from Sula Catering Vancouver — wedding catering guides, corporate catering tips, and Indian cuisine inspiration.",
+			"url": "https://sulacatering.com/blog",
+			"publisher": {"@id": "https://sulacatering.com/#organization"}
+		})} />
+	</Fragment>
+
+	<!-- HERO -->
+	<section class="hero" style="min-height:60vh;background-image: linear-gradient(135deg, rgba(20,8,16,0.85) 0%, rgba(38,14,38,0.6) 50%, rgba(20,8,16,0.85) 100%), url('https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg');">
+		<div class="hero-content">
+			<p class="gold-label">The Sula Journal</p>
+			<h1>Stories, Tips &<br/><em>Catering Wisdom</em></h1>
+			<p class="hero-tagline">From wedding planning guides to halal catering essentials — insights from fifteen years of Vancouver's most celebrated events.</p>
+		</div>
+	</section>
+
+	<!-- INTRO -->
+	<section class="section-tight section-cream">
+		<div class="container">
+			<div class="intro-block reveal">
+				<p class="gold-label">Featured Reads</p>
+				<h2>Latest from the <em>Journal</em></h2>
+				<div class="gold-divider-ornament">
+					<span></span><div class="diamond"></div><span></span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- BLOG GRID -->
+	<section class="section-tight section-cream" style="padding-top:0">
+		<div class="container">
+			<div class="blog-grid">
+
+				<a href="/blog/indian-wedding-catering-vancouver-guide" class="blog-card reveal">
+					<div class="blog-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/01/WEDDING.jpg" alt="Indian wedding catering Vancouver guide" loading="lazy" />
+					</div>
+					<div class="blog-card-content">
+						<p class="blog-card-meta">Wedding Catering · 8 Min Read</p>
+						<h3>Indian Wedding Catering Vancouver: <em>The Complete Planning Guide</em></h3>
+						<p>Everything you need to know — from sangeet menus to reception logistics, halal certification, dietary planning, and timeline tips.</p>
+						<span class="read-more">Read the Guide →</span>
+					</div>
+				</a>
+
+				<a href="/blog/office-catering-vancouver-large-groups" class="blog-card reveal delay-100">
+					<div class="blog-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/office-catering-vancouver-bc.webp" alt="Office catering Vancouver large groups" loading="lazy" />
+					</div>
+					<div class="blog-card-content">
+						<p class="blog-card-meta">Corporate Catering · 6 Min Read</p>
+						<h3>Office Catering Vancouver: <em>How to Feed 50+ at Work</em></h3>
+						<p>Practical guidance on planning a large office lunch — guest count, dietary needs, delivery timing, and menu choices that always work.</p>
+						<span class="read-more">Read More →</span>
+					</div>
+				</a>
+
+				<a href="/blog/halal-indian-catering-vancouver" class="blog-card reveal delay-200">
+					<div class="blog-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/04/Indian-food-catering-vancouver-burnaby-richmond.webp" alt="Halal Indian catering Vancouver" loading="lazy" />
+					</div>
+					<div class="blog-card-content">
+						<p class="blog-card-meta">Catering Essentials · 5 Min Read</p>
+						<h3>Halal Indian Catering: <em>What to Know for Your Event</em></h3>
+						<p>What halal certification means, how to ask the right questions, and why it matters at multi-cultural weddings and corporate events.</p>
+						<span class="read-more">Read More →</span>
+					</div>
+				</a>
+
+				<a href="/blog/best-indian-dishes-corporate-lunches" class="blog-card reveal delay-300">
+					<div class="blog-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/indian-food-dishes-vancouver.webp" alt="Best Indian dishes corporate lunches Vancouver" loading="lazy" />
+					</div>
+					<div class="blog-card-content">
+						<p class="blog-card-meta">Menu Inspiration · 4 Min Read</p>
+						<h3>Best Indian Dishes for <em>Corporate Lunches</em></h3>
+						<p>The crowd-pleasers that always work — dishes that travel well, hold heat, satisfy mixed dietary needs, and don't slow down the afternoon.</p>
+						<span class="read-more">Read More →</span>
+					</div>
+				</a>
+
+				<a href="/blog/chai-coffee-catering-weddings" class="blog-card reveal delay-400">
+					<div class="blog-card-img">
+						<img src="https://backend.sulaindianrestaurant.com/wp-content/uploads/2026/03/masala-chai-sula-indian-restaurant.webp" alt="Chai coffee catering weddings Vancouver" loading="lazy" />
+					</div>
+					<div class="blog-card-content">
+						<p class="blog-card-meta">Beverage Catering · 5 Min Read</p>
+						<h3>Chai vs Coffee: <em>Why Both Belong at Your Wedding</em></h3>
+						<p>The case for a live chai bar and a barista coffee station — and how Sula Café brings both to weddings, sangeets, and morning ceremonies.</p>
+						<span class="read-more">Read More →</span>
+					</div>
+				</a>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA PLUM -->
+	<section class="cta-section cta-plum">
+		<div class="reveal">
+			<p class="gold-label" style="color:var(--gold-light)">Ready to Plan?</p>
+			<h2>Let's Make Your Event <em>Unforgettable</em></h2>
+			<p>Tell us about your celebration — we'll send a custom menu and quote within 24 hours.</p>
+			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
+		</div>
+	</section>
+
+</Layout>
