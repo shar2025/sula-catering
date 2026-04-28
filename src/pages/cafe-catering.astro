@@ -3,128 +3,161 @@ import Layout from '../layouts/Layout.astro';
 import TrustedBy from '../components/TrustedBy.astro';
 ---
 <Layout
-	title="Sula Café Catering Vancouver | Chai, Coffee & Indian Bakery for Events"
-	description="Live masala chai stations, specialty coffee, fresh-baked Indian pastries, and Mumbai street food catering from Sula Café. Perfect for weddings, offices, and private events."
+	title="Café & Chai Catering Vancouver | Sula Café Mobile Service"
+	description="Bring Sula Café to your event. Live masala chai bars, specialty Indian coffee, fresh-baked croissants, cruffins, and pastries. Wedding, corporate, and private party café catering across Vancouver."
 	canonical="/cafe-catering"
 	ogImage="https://sulacafe.com/uploads/2025/10/Masala-chai.webp"
 >
 
 	<Fragment slot="schema">
 		<script type="application/ld+json" set:html={JSON.stringify({
-			"@context": "https://schema.org","@type": "Service",
-			"name": "Sula Café Catering Vancouver",
+			"@context": "https://schema.org",
+			"@type": "Service",
+			"name": "Café & Chai Catering Vancouver",
 			"provider": {"@id": "https://sulacatering.com/#organization"},
-			"areaServed": ["Vancouver", "Burnaby", "Richmond", "Surrey", "North Vancouver"],
+			"areaServed": ["Vancouver","Burnaby","Richmond","Surrey","North Vancouver","West Vancouver"],
 			"serviceType": "Café Catering"
 		})} />
 	</Fragment>
 
 	<section class="hero" style="background-image: linear-gradient(135deg, rgba(20,8,16,0.7) 0%, rgba(184,149,106,0.25) 50%, rgba(37,4,45,0.75) 100%), url('https://sulacafe.com/uploads/2025/10/Masala-chai.webp');">
 		<div class="hero-content">
-			<h1>Chai, Coffee &<br/><em>Café Catering</em></h1>
-			<p class="hero-tagline">Live masala chai stations, specialty coffee bars, fresh-baked Indian pastries, and Mumbai street food, directly from our café in East Van.</p>
-			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request Café Catering</a>
+			<h1>Café & Chai <em>Catering</em></h1>
+			<p class="hero-tagline">Bring Sula Café to your wedding, corporate event, or private party. Live masala chai bars, specialty coffee, and fresh-baked pastries served on site.</p>
+			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Quote</a>
 		</div>
 	</section>
 
 	<TrustedBy />
 
-
 	<section class="section section-cream">
 		<div class="container">
 			<div class="intro-block reveal">
-				<h2>The Café <em>Experience</em>, On Location</h2>
+				<span class="eyebrow">Sula Café Mobile</span>
+				<h2>Slow rituals, <em>brought to you.</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<p><a href="https://sulacafe.com" target="_blank" rel="noopener" class="body-link">Sula Café</a> is more than chai and pastries, it's a love letter to morning rituals and slow conversations. We bring all of it to your event. Pair our café service with our <a href="/weddings" class="body-link">wedding catering</a> for a full sangeet-to-reception experience, or add a chai bar to your <a href="/corporate" class="body-link">corporate catering</a> for an all-day conference. Read why <a href="/blog/chai-coffee-catering-weddings" class="body-link">both chai and coffee belong at every wedding</a>.</p>
+				<p><a href="https://sulacafe.com" target="_blank" rel="noopener" class="body-link">Sula Café</a> is more than chai and pastries. It's a love letter to morning rituals and slow conversations. We bring all of it to your event. Pair our café service with our <a href="/weddings" class="body-link">wedding catering</a> for a full sangeet-to-reception experience, or add a chai bar to your <a href="/corporate" class="body-link">corporate catering</a> for an all-day conference. Read why <a href="/blog/chai-coffee-catering-weddings" class="body-link">both chai and coffee belong at every wedding</a>.</p>
 			</div>
 		</div>
 	</section>
 
-	<img src="https://sulacafe.com/uploads/2025/10/Masala-chai.webp" alt="Sula Cafe masala chai catering Vancouver" class="full-width-image" loading="lazy" />
-
-	<section class="section section-cream">
+	<section class="section section-dark pattern-mandala">
 		<div class="container">
-			<div class="text-center reveal">
-				<p class="eyebrow">Our Café Catering Menu</p>
-				<h2 class="mag-title">Stations &amp; <em>Specialties</em></h2>
+			<div class="intro-block reveal">
+				<span class="eyebrow">What We Bring</span>
+				<h2>Four signature <em>café experiences.</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
 			</div>
-			<div class="service-grid-v2">
-				<div class="service-card-v2 reveal">
-					<div class="service-card-img">
-						<img src="https://sulacafe.com/uploads/2025/10/Masala-chai.webp" alt="Live masala chai station catering Vancouver" loading="lazy" />
-						<div class="service-card-overlay">
-							<span class="service-eyebrow">The Heart of the Event</span>
-							<h3>Live <em>Chai Bar</em></h3>
-							<p>Masala chai brewed fresh on-site in copper urns. Cardamom, ginger, fennel, spiced to your taste.</p>
-						</div>
+
+			<div class="cafe-services-grid">
+				<div class="cafe-service-card reveal">
+					<div class="cafe-service-stripe"></div>
+					<div class="cafe-service-img"><img src="https://sulacafe.com/uploads/2025/10/Masala-chai.webp" alt="Live masala chai bar Vancouver wedding catering" loading="lazy" /></div>
+					<div class="cafe-service-content">
+						<span class="eyebrow">Signature</span>
+						<h3>Live <em>Masala Chai Bar</em></h3>
+						<p>Five chai blends brewed on site: classic masala, lavender, pistachio, spicy ginger, and gulabi rose. A barista pours every cup fresh with the spices simmering in front of your guests.</p>
 					</div>
 				</div>
-				<div class="service-card-v2 reveal delay-100">
-					<div class="service-card-img">
-						<img src="https://sulacafe.com/uploads/2025/12/a4.jpg" alt="Specialty coffee catering Vancouver" loading="lazy" />
-						<div class="service-card-overlay">
-							<span class="service-eyebrow">Specialty Espresso Bar</span>
-							<h3>Coffee <em>Service</em></h3>
-							<p>Espresso, cortados, lattes, drip, full barista service. Single-origin beans, plant-based milks.</p>
-						</div>
+
+				<div class="cafe-service-card reveal delay-100">
+					<div class="cafe-service-stripe"></div>
+					<div class="cafe-service-img"><img src="https://sulacafe.com/uploads/2025/12/cappuccino.jpg" alt="Specialty Indian coffee catering Vancouver" loading="lazy" /></div>
+					<div class="cafe-service-content">
+						<span class="eyebrow">Coffee</span>
+						<h3>Specialty <em>Alai Coffee</em></h3>
+						<p>Espresso, cappuccino, jaggery velvet latte, masala monsoon misto, coastal coconut cappuccino, and South Indian filter coffee. Single-origin beans from Chikmagalur and Odisha.</p>
 					</div>
 				</div>
-				<div class="service-card-v2 reveal delay-200">
-					<div class="service-card-img">
-						<img src="https://sulacafe.com/uploads/2025/10/butter-croissiant-sula-cafe-vancouver.webp" alt="Indian bakery catering Vancouver" loading="lazy" />
-						<div class="service-card-overlay">
-							<span class="service-eyebrow">Fresh-Baked Daily</span>
-							<h3>Bakery <em>& Pastries</em></h3>
-							<p>Croissants, masala biscuits, koliyada, Indian sweets, seasonal cakes, baked the morning of your event.</p>
-						</div>
+
+				<div class="cafe-service-card reveal delay-200">
+					<div class="cafe-service-stripe"></div>
+					<div class="cafe-service-img"><img src="https://sulacafe.com/uploads/2025/10/butter-croissiant-sula-cafe-vancouver.webp" alt="Fresh croissants and cruffins catering Vancouver" loading="lazy" /></div>
+					<div class="cafe-service-content">
+						<span class="eyebrow">Bakery</span>
+						<h3>Fresh-Baked <em>Pastries</em></h3>
+						<p>All-butter croissants, chocolate croissants, lime coconut cruffins, tiramisu cruffins, pistachio loaf, paan macaroons, and morning glory muffins. Baked daily, delivered warm.</p>
 					</div>
 				</div>
-				<div class="service-card-v2 reveal delay-300">
-					<div class="service-card-img">
-						<img src="https://sulacafe.com/uploads/2025/10/butter-croissiant-sula-cafe-vancouver.webp" alt="Mumbai street food catering Vancouver" loading="lazy" />
-						<div class="service-card-overlay">
-							<span class="service-eyebrow">Mumbai's Street Corner</span>
-							<h3>Street <em>Food</em></h3>
-							<p>Pav bhaji, vada pav, Mumbai sandwich, dabeli, kachori, live stations with full Bombay-style energy.</p>
-						</div>
+
+				<div class="cafe-service-card reveal delay-300">
+					<div class="cafe-service-stripe"></div>
+					<div class="cafe-service-img"><img src="https://sulacafe.com/uploads/2025/10/Pesto-chicken-tikka-panini.webp" alt="Panini and savoury cafe catering Vancouver" loading="lazy" /></div>
+					<div class="cafe-service-content">
+						<span class="eyebrow">Savoury</span>
+						<h3>Paninis & <em>Savoury Bites</em></h3>
+						<p>Pesto chicken tikka paninis on masala focaccia, chutney cheese croissants, samosas with chutneys, and warm tomato red pepper soup. Real food for real hunger.</p>
 					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<section class="section section-plum pattern-mandala">
-		<div class="container">
-			<div class="experience">
-				<div class="experience-img reveal-left">
-					<img src="https://sulacafe.com/uploads/2025/10/Masala-chai.webp" alt="Sula Cafe Vancouver chai" loading="lazy" />
-				</div>
-				<div class="experience-content reveal-right">
-					<h2>Where Mornings <em>Begin</em><br/>and Conversations <em>Linger</em></h2>
-					<p>A cup of chai is never just a cup of chai. It's an invitation. It's the pause between rush hours. Sula Café was built around that idea, and we bring the same philosophy to every event we cater.</p>
-					<p>Whether it's a 7AM team kickoff, a wedding morning chai ritual, or a late-night dessert bar at a <a href="/private-parties" class="body-link">private party</a>, we serve the kind of warmth that makes a room feel like home.</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<div class="image-banner" style="background-image: url('https://sulacafe.com/uploads/2025/10/butter-croissiant-sula-cafe-vancouver.webp');">
+	<div class="image-banner image-banner-plum" style="background-image: url('https://sulacafe.com/uploads/2026/02/chai-near-me-vancouver-sula-chai-cafe.webp');">
 		<div class="image-banner-content reveal">
-			<h2>Live Stations.<br/><em>Honest Flavours.</em></h2>
-			<p>Bombay street food, brewed fresh, served with the warmth of home.</p>
+			<h2>Chai is <em>a feeling.</em></h2>
+			<p>Cardamom, ginger, clove, cinnamon, and pepper, simmered slow with milk. The way your grandmother made it.</p>
 		</div>
 	</div>
 
 	<section class="section section-cream">
-		<div class="container-narrow">
-			<div class="text-center reveal">
-				<p class="eyebrow">When to Book Café Catering</p>
-				<h2 class="mag-title">Perfect <em>For</em></h2>
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Chai Bar Menu</span>
+				<h2>Five blends, <em>brewed to order.</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
-				<div class="pull-quote">
-					<p class="pull-quote-text">Office breakfasts. Wedding morning chai rituals. Sangeet pre-dinner stations. Reception coffee &amp; dessert bars. Diwali brunches. Conferences with all-day chai service. Anywhere people gather, and need to feel <em>cared for</em>.</p>
-					<p class="pull-quote-attribution">  The Sula Café Team</p>
+				<p>Every cup is brewed fresh on site. Spices are bloomed in water first, then leaves go in, then milk. No syrup, no shortcuts.</p>
+			</div>
+
+			<div class="chai-menu-grid">
+				<div class="chai-tile reveal">
+					<div class="chai-tile-img"><img src="https://sulacafe.com/uploads/2025/10/Masala-chai.webp" alt="Classic masala chai Sula Café" loading="lazy" /></div>
+					<h3>Classic Masala</h3>
+					<p>The heritage blend. Cardamom, ginger, clove, cinnamon, pepper.</p>
+				</div>
+				<div class="chai-tile reveal delay-100">
+					<div class="chai-tile-img"><img src="https://sulacafe.com/uploads/2025/10/Lavender-chai.webp" alt="Lavender chai Sula Café Vancouver" loading="lazy" /></div>
+					<h3>Lavender</h3>
+					<p>Floral, calming, with a hint of vanilla. Soft and elegant.</p>
+				</div>
+				<div class="chai-tile reveal delay-200">
+					<div class="chai-tile-img"><img src="https://sulacafe.com/uploads/2025/10/Rose-chai.webp" alt="Gulabi rose chai Sula Café" loading="lazy" /></div>
+					<h3>Gulabi Rose</h3>
+					<p>Rose petals and pistachio. Romantic, fragrant, royal.</p>
+				</div>
+				<div class="chai-tile reveal delay-300">
+					<div class="chai-tile-img"><img src="https://sulacafe.com/uploads/2025/10/chai-near-me-2.webp" alt="Spicy ginger chai Vancouver" loading="lazy" /></div>
+					<h3>Spicy Ginger</h3>
+					<p>Strong, warming, no holding back. The wake-up cup.</p>
+				</div>
+				<div class="chai-tile reveal delay-400">
+					<div class="chai-tile-img"><img src="https://sulacafe.com/uploads/2025/12/chai-near-me.webp" alt="Pistachio chai Vancouver" loading="lazy" /></div>
+					<h3>Pistachio</h3>
+					<p>Nutty, creamy, indulgent. Dessert in a cup.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section-plum pattern-damask">
+		<div class="container">
+			<div class="alt-row reveal">
+				<div class="alt-row-img"><img src="https://sulacafe.com/uploads/2025/12/a4.jpg" alt="Specialty coffee catering Vancouver Alai" loading="lazy" /></div>
+				<div class="alt-row-content">
+					<span class="eyebrow">Specialty Coffee</span>
+					<h2>Indian coffee, <em>brewed brilliant.</em></h2>
+					<p>Our partnership with <strong>Alai Coffee</strong>, a South Asian, women-owned micro-roaster in Vancouver, brings shade-grown beans from Chikmagalur and Odisha to your event. Lower acid, smoother body, deeper notes than your average café roast.</p>
+					<p>Build a custom coffee bar with espresso, jaggery latte, masala monsoon misto, coastal coconut cappuccino, malai pista mocha, and traditional South Indian filter coffee.</p>
+				</div>
+			</div>
+
+			<div class="alt-row reverse reveal">
+				<div class="alt-row-img"><img src="https://sulacafe.com/uploads/2025/10/Coconut-lime-cruffin.webp" alt="Lime coconut cruffin pastry catering Vancouver" loading="lazy" /></div>
+				<div class="alt-row-content">
+					<span class="eyebrow">Bakery</span>
+					<h2>Pastries, <em>warm from the oven.</em></h2>
+					<p>Our bakers work overnight so the croissants arrive flaky, the cruffins arrive filled, and the cookies arrive soft. Bakery selection includes butter and chocolate croissants, chutney cheese croissants, pistachio loaf, paan macaroons, tiramisu cruffins, lime coconut cruffins, chocolate chip cookies, and morning glory muffins.</p>
+					<p>For chai pairings and pastry combinations, read our guide on <a href="/blog/chai-coffee-catering-weddings" class="body-link">chai and coffee at weddings</a>.</p>
 				</div>
 			</div>
 		</div>
@@ -132,46 +165,100 @@ import TrustedBy from '../components/TrustedBy.astro';
 
 	<section class="section section-cream">
 		<div class="container">
-			<div class="text-center reveal">
-				<p class="eyebrow">Pair With</p>
-				<h2 class="mag-title">Complete the <em>Experience</em></h2>
+			<div class="intro-block reveal">
+				<span class="eyebrow">Bakery Highlights</span>
+				<h2>The <em>pastry case.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+			</div>
+			<div class="pastry-mosaic">
+				<div class="pastry-tile reveal"><img src="https://sulacafe.com/uploads/2025/10/Chocolate-croissaint-near-vancouver.webp" alt="Chocolate croissant Vancouver" loading="lazy" /><span class="pastry-label">Chocolate Croissant</span></div>
+				<div class="pastry-tile reveal delay-100"><img src="https://sulacafe.com/uploads/2025/10/Chutney-cheese-croissant.webp" alt="Chutney cheese croissant Vancouver" loading="lazy" /><span class="pastry-label">Chutney Cheese</span></div>
+				<div class="pastry-tile reveal delay-200"><img src="https://sulacafe.com/uploads/2025/10/pistachio-loaf.webp" alt="Pistachio loaf Vancouver bakery" loading="lazy" /><span class="pastry-label">Pistachio Loaf</span></div>
+				<div class="pastry-tile reveal delay-300"><img src="https://sulacafe.com/uploads/2025/10/paan-macaroons.webp" alt="Paan macaroons Vancouver Indian bakery" loading="lazy" /><span class="pastry-label">Paan Macaroons</span></div>
+				<div class="pastry-tile reveal"><img src="https://sulacafe.com/uploads/2025/10/tiramisu-cruffin.webp" alt="Tiramisu cruffin Vancouver" loading="lazy" /><span class="pastry-label">Tiramisu Cruffin</span></div>
+				<div class="pastry-tile reveal delay-100"><img src="https://sulacafe.com/uploads/2025/10/morning-glory-muffin-sugar-free.webp" alt="Morning glory muffin Vancouver" loading="lazy" /><span class="pastry-label">Morning Glory Muffin</span></div>
+				<div class="pastry-tile reveal delay-200"><img src="https://sulacafe.com/uploads/2025/10/chocolate-chip-cookie.webp" alt="Chocolate chip cookie Vancouver" loading="lazy" /><span class="pastry-label">Brown Butter Cookie</span></div>
+				<div class="pastry-tile reveal delay-300"><img src="https://sulacafe.com/uploads/2025/10/samosa-near-me.webp" alt="Samosa Vancouver Indian street food" loading="lazy" /><span class="pastry-label">Vegetable Samosa</span></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="cta-section cta-plum">
+		<h2>Add a café bar to <em>your event.</em></h2>
+		<p>Whether it's a wedding sangeet, a corporate retreat, or a brunch celebration, our café team brings the chai, the coffee, the pastries, and the warmth.</p>
+		<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Quote</a>
+			<a href="https://calendly.com/sula-catering/30min" class="btn btn-outline" target="_blank" rel="noopener">Schedule a Call</a>
+		</div>
+	</section>
+
+	<section class="section section-dark pattern-trellis">
+		<div class="container text-center">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Continue Exploring</span>
+				<h2>Other catering <em>services.</em></h2>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
 			</div>
 			<div class="related-links">
-				<a href="/blog/chai-coffee-catering-weddings" class="related-link reveal">
-					<div class="related-link-img"><img src="https://sulacafe.com/uploads/2025/10/Pesto-chicken-tikka-panini.webp" alt="" /></div>
-
-					<p class="meta">Journal · 5 min</p>
-					<h4>Chai vs <em>Coffee</em></h4>
-					<p>Why both belong at your wedding, building the perfect beverage program for guests of all ages.</p>
-					<span class="arrow">Read More →</span>
-				</a>
-				<a href="/weddings" class="related-link reveal delay-100">
-					<div class="related-link-img"><img src="https://sulacafe.com/uploads/2025/10/Pesto-chicken-tikka-panini.webp" alt="" /></div>
-					<p class="meta">Service · Wedding Catering</p>
+				<a href="/weddings" class="related-link reveal">
+					<div class="related-link-img"><img src="/uploads/indian-wedding-catering.webp" alt="" /></div>
+					<p class="meta">Service · Weddings</p>
 					<h4>Wedding <em>Catering</em></h4>
-					<p>Add chai bars and coffee stations to sangeet, ceremony, or reception events.</p>
+					<p>Sangeets, ceremonies, receptions. Full-service Indian wedding catering in Vancouver.</p>
 					<span class="arrow">Explore Weddings →</span>
 				</a>
-				<a href="/corporate" class="related-link reveal delay-200">
-					<div class="related-link-img"><img src="https://sulacafe.com/uploads/2025/10/Rose-chai.webp" alt="" /></div>
-
-					<p class="meta">Service · Corporate Catering</p>
+				<a href="/corporate" class="related-link reveal delay-100">
+					<div class="related-link-img"><img src="/uploads/indian-food-catering-vancouver-corporate.webp" alt="" /></div>
+					<p class="meta">Service · Corporate</p>
 					<h4>Corporate <em>Catering</em></h4>
-					<p>All-day chai service for conferences. Specialty coffee for client meetings.</p>
+					<p>Office lunches, board meetings, conferences. From $21.95 per person.</p>
 					<span class="arrow">Explore Corporate →</span>
+				</a>
+				<a href="/private-parties" class="related-link reveal delay-200">
+					<div class="related-link-img"><img src="/uploads/private-party-vancouver-catering.webp" alt="" /></div>
+					<p class="meta">Service · Private</p>
+					<h4>Private <em>Parties</em></h4>
+					<p>Birthdays, anniversaries, baby showers, intimate celebrations.</p>
+					<span class="arrow">Explore Private →</span>
 				</a>
 			</div>
 		</div>
 	</section>
 
+	<style>
+		.cafe-services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:1100px;margin:60px auto 0;position:relative;z-index:2}
+		.cafe-service-card{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--navy) 50%,var(--plum-mid) 100%);border:1px solid rgba(184,149,106,0.4);position:relative;overflow:hidden;transition:all 0.4s ease}
+		.cafe-service-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-shimmer),var(--gold-deep));z-index:5}
+		.cafe-service-card:hover{border-color:var(--gold);transform:translateY(-6px);box-shadow:0 20px 50px rgba(10,22,40,0.4)}
+		.cafe-service-img{width:100%;height:280px;overflow:hidden}
+		.cafe-service-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease}
+		.cafe-service-card:hover .cafe-service-img img{transform:scale(1.06)}
+		.cafe-service-content{padding:32px 32px 36px}
+		.cafe-service-content .eyebrow{color:var(--gold-light);margin-bottom:10px}
+		.cafe-service-content h3{font-family:'Libre Baskerville',Georgia,serif;font-size:24px;color:var(--cream);font-weight:700;margin-bottom:14px;line-height:1.25}
+		.cafe-service-content h3 em{color:var(--gold-light);font-style:italic;font-weight:400}
+		.cafe-service-content p{font-size:14px;color:rgba(245,237,224,0.88);line-height:1.7;margin:0;font-weight:400}
 
-	<section class="cta-section">
-		<div class="reveal">
-			<h2>Pour the <em>First Cup</em></h2>
-			<p>Tell us your event details. We'll send you a custom café catering quote within 24 hours.</p>
-			<a href="https://sulaindianrestaurant.com/request-a-quote/" class="btn btn-gold">Request a Quote</a>
-		</div>
-	</section>
+		.chai-menu-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;max-width:1200px;margin:60px auto 0}
+		.chai-tile{text-align:center}
+		.chai-tile-img{width:100%;aspect-ratio:2/3;overflow:hidden;margin-bottom:16px;border:1px solid rgba(184,149,106,0.25)}
+		.chai-tile-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease}
+		.chai-tile:hover .chai-tile-img img{transform:scale(1.06)}
+		.chai-tile h3{font-family:'Libre Baskerville',Georgia,serif;font-size:18px;color:var(--midnight);font-weight:700;margin-bottom:6px;line-height:1.25}
+		.chai-tile p{font-size:13px;color:rgba(26,26,26,0.75);line-height:1.6;font-weight:400;margin:0}
+
+		.pastry-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;max-width:1200px;margin:60px auto 0}
+		.pastry-tile{position:relative;aspect-ratio:1;overflow:hidden;background:#f5ede0;border:1px solid rgba(184,149,106,0.2)}
+		.pastry-tile img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease}
+		.pastry-tile:hover img{transform:scale(1.08)}
+		.pastry-label{position:absolute;bottom:0;left:0;right:0;padding:12px 14px;background:linear-gradient(180deg,transparent 0%,rgba(5,11,21,0.85) 100%);color:var(--cream);font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:14px;font-weight:400;text-align:center}
+
+		@media (max-width:900px){
+			.cafe-services-grid{grid-template-columns:1fr;gap:20px}
+			.cafe-service-img{height:240px}
+			.chai-menu-grid{grid-template-columns:repeat(2,1fr);gap:14px}
+			.pastry-mosaic{grid-template-columns:repeat(2,1fr);gap:10px}
+		}
+	</style>
 
 </Layout>

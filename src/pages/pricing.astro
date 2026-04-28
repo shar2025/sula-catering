@@ -1,0 +1,403 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TrustedBy from '../components/TrustedBy.astro';
+---
+<Layout
+	title="Catering Pricing Vancouver | Office, Corporate, Wedding & Private Party Pricing | Sula"
+	description="Transparent catering pricing for offices, corporate functions, weddings, and private parties in Vancouver, Burnaby, Richmond, Surrey. Indian catering from $21.95 per person."
+	canonical="/pricing"
+>
+
+	<Fragment slot="schema">
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "Service",
+			"name": "Catering Pricing - Sula Catering Vancouver",
+			"provider": {"@id": "https://sulacatering.com/#organization"},
+			"areaServed": ["Vancouver","Burnaby","Richmond","Surrey","North Vancouver","West Vancouver"],
+			"serviceType": "Indian Catering",
+			"offers": [
+				{"@type":"Offer","name":"Corporate Catering Option 1","price":"21.95","priceCurrency":"CAD","description":"2 vegetarian curries, 1 non-vegetarian curry with rice, naan, papadum"},
+				{"@type":"Offer","name":"Corporate Catering Option 2","price":"23.95","priceCurrency":"CAD","description":"2 vegetarian curries, 2 non-vegetarian curries"},
+				{"@type":"Offer","name":"Corporate Catering Option 3","price":"25.95","priceCurrency":"CAD","description":"1 vegetarian appetizer, 2 vegetarian curries, 2 non-vegetarian curries"},
+				{"@type":"Offer","name":"Corporate Catering Option 4","price":"26.95","priceCurrency":"CAD","description":"1 non-vegetarian appetizer, 2 vegetarian curries, 2 non-vegetarian curries"},
+				{"@type":"Offer","name":"Veg & Vegan Menu","price":"22.95","priceCurrency":"CAD","description":"2 vegetarian curries, 2 vegan curries"},
+				{"@type":"Offer","name":"Meat Lovers","price":"29.95","priceCurrency":"CAD","description":"Sliced salad, 2 lamb curries, 2 chicken curries"},
+				{"@type":"Offer","name":"Appetizer & Street Food","price":"24.95","priceCurrency":"CAD","description":"2 appetizers, 2 street food items, chutneys"}
+			]
+		})} />
+	</Fragment>
+
+	<section class="hero" style="min-height:55vh;background-image: linear-gradient(135deg, rgba(5,11,21,0.85) 0%, rgba(20,36,66,0.6) 50%, rgba(37,4,45,0.85) 100%), url('/uploads/best-caterer-vancouver.webp');">
+		<div class="hero-content">
+			<h1>Catering <em>Pricing</em></h1>
+			<p class="hero-tagline">Transparent pricing for office, corporate, wedding, and private party catering across Vancouver, Burnaby, Richmond, Surrey, and the North Shore. From $21.95 per person.</p>
+			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Quote</a>
+		</div>
+	</section>
+
+	<TrustedBy />
+
+	<!-- INTRO -->
+	<section class="section section-cream">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">All Pricing</span>
+				<h2>Clear pricing, <em>no surprises.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+				<p>Office and corporate catering is fixed-price, per person. Weddings and large private parties are custom-quoted because the variables (menu, service style, venue, rentals, staffing) vary too much for a flat rate. Either way, we'll give you a clear, itemized number, no hidden fees, no surprise charges.</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- CORPORATE & OFFICE PRICING -->
+	<section class="section section-dark pattern-mandala">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Corporate & Office Catering</span>
+				<h2>Office & corporate <em>menu pricing.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+				<p>Pricing is the same for office lunches, board meetings, team appreciation events, and corporate functions. All options are per person, for groups up to 150 guests. For 150 to 600 guests, pricing scales, contact us for a custom quote. Read the full <a href="/corporate" class="body-link">corporate catering details</a>.</p>
+			</div>
+
+			<div class="pricing-grid">
+
+				<div class="pricing-card reveal">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>21.95<span class="per">per person</span></div>
+					<h3>Option 1</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>2 vegetarian curries of your choice</li>
+						<li>1 non-vegetarian curry of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan, papadum. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mango chutney and hot sauce included.</p>
+				</div>
+
+				<div class="pricing-card reveal delay-100">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>23.95<span class="per">per person</span></div>
+					<h3>Option 2</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>2 vegetarian curries of your choice</li>
+						<li>2 non-vegetarian curries of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan, papadum. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mango chutney and hot sauce included.</p>
+				</div>
+
+				<div class="pricing-card reveal delay-200">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>25.95<span class="per">per person</span></div>
+					<h3>Option 3</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>1 vegetarian appetizer</li>
+						<li>2 vegetarian curries of your choice</li>
+						<li>2 non-vegetarian curries of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mint & cilantro, tamarind & date, mango chutney, hot sauce, papadums.</p>
+				</div>
+
+				<div class="pricing-card reveal delay-300">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>26.95<span class="per">per person</span></div>
+					<h3>Option 4</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>1 non-vegetarian appetizer</li>
+						<li>2 vegetarian curries of your choice</li>
+						<li>2 non-vegetarian curries of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mint & cilantro, tamarind & date, mango chutney, hot sauce, papadums.</p>
+				</div>
+
+				<div class="pricing-card reveal">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>22.95<span class="per">per person</span></div>
+					<h3>Veg & Vegan Menu</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>2 vegetarian curries of your choice</li>
+						<li>2 vegan curries of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan, papadum. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mango chutney and hot sauce included.</p>
+				</div>
+
+				<div class="pricing-card reveal delay-100">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>29.95<span class="per">per person</span></div>
+					<h3>Meat Lovers</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>Sliced salad</li>
+						<li>2 lamb curries of your choice</li>
+						<li>2 chicken curries of your choice</li>
+					</ul>
+					<p class="pricing-served">Served with basmati rice, garlic naan, tandoori naan, papadum. Gluten-free missi roti available on request.</p>
+					<p class="pricing-extras">Mango chutney and hot sauce included.</p>
+				</div>
+
+				<div class="pricing-card reveal delay-200">
+					<div class="pricing-card-stripe"></div>
+					<div class="pricing-card-price"><span class="dollar">$</span>24.95<span class="per">per person</span></div>
+					<h3>Appetizer & Street Food</h3>
+					<p class="pricing-includes">Includes</p>
+					<ul class="pricing-list">
+						<li>2 kinds of appetizers of your choice</li>
+						<li>2 kinds of street food of your choice</li>
+						<li>Chutneys, spicy bhujia and chaat</li>
+					</ul>
+				</div>
+
+			</div>
+
+			<div class="reveal" style="margin-top:60px;text-align:center">
+				<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Corporate Quote</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- ADD-ONS -->
+	<section class="section section-cream">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Build Your Menu</span>
+				<h2>Add-ons <em>per person.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+			</div>
+			<div class="addons-grid">
+				<div class="addon-card reveal"><div class="addon-price">$5</div><p>Vegetarian appetizer</p></div>
+				<div class="addon-card reveal delay-100"><div class="addon-price">$6</div><p>Non-vegetarian appetizer</p></div>
+				<div class="addon-card reveal delay-200"><div class="addon-price">$3-4</div><p>Dessert</p></div>
+				<div class="addon-card reveal delay-300"><div class="addon-price">$6</div><p>Vegetarian curry</p></div>
+				<div class="addon-card reveal"><div class="addon-price">$7</div><p>Non-vegetarian curry</p></div>
+				<div class="addon-card reveal delay-100"><div class="addon-price">$9-11</div><p>Tandoori grilled paneer / veg / meat</p></div>
+			</div>
+		</div>
+	</section>
+
+	<!-- SETUP TYPES -->
+	<section class="section section-plum pattern-damask">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Service Setup</span>
+				<h2>Setup types <em>& pricing.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+				<p>Choose the right setup for your event. From simple aluminum trays to hammered copper buffet stations, we have a setup for every occasion and budget.</p>
+			</div>
+
+			<div class="setup-grid">
+
+				<div class="setup-card reveal">
+					<div class="setup-card-stripe"></div>
+					<h3>Aluminum Trays</h3>
+					<div class="setup-price">Free</div>
+					<p>Standard delivery setup with disposable aluminum serving trays. Perfect for casual office lunches.</p>
+				</div>
+
+				<div class="setup-card reveal delay-100">
+					<div class="setup-card-stripe"></div>
+					<h3>Reusable Plastic Bowls</h3>
+					<div class="setup-price">$60</div>
+					<p>Step up from aluminum with reusable plastic bowls. Cleaner presentation for team lunches.</p>
+				</div>
+
+				<div class="setup-card reveal delay-200">
+					<div class="setup-card-stripe"></div>
+					<h3>Non-Heated Premium Bowl Setup</h3>
+					<div class="setup-price">$120 – $180</div>
+					<p>Premium bowl setup. $120 for 15-30 guests, $180 for 35-60 guests.</p>
+				</div>
+
+				<div class="setup-card reveal delay-300">
+					<div class="setup-card-stripe"></div>
+					<h3>Stainless Steel</h3>
+					<div class="setup-price">$295 – $395</div>
+					<p>Professional stainless steel chafing dishes. $295 for 30-60 guests, $395 for 60-120 guests.</p>
+				</div>
+
+				<div class="setup-card reveal" style="grid-column:span 2">
+					<div class="setup-card-stripe"></div>
+					<h3>Hammered Copper</h3>
+					<div class="setup-price">$695 – $995</div>
+					<p>Our most premium setup. Hammered copper buffet station with double-sided serving for up to 300 guests. Showstopper centerpiece for weddings, galas, and high-profile corporate events.</p>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- WEDDING PRICING -->
+	<section class="section section-dark pattern-lotus">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Wedding Catering</span>
+				<h2>Wedding <em>pricing.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+			</div>
+
+			<div class="wedding-pricing-grid">
+
+				<div class="wedding-info-card reveal">
+					<p class="wedding-card-eyebrow">Why It Varies</p>
+					<h3>Every wedding is <em>different.</em></h3>
+					<p>Wedding pricing depends on a few moving pieces: menu selection, service style, venue, rentals, staffing, and special requests. A 100-guest sangeet at a banquet hall is priced very differently from a 400-guest reception at an outdoor estate. We don't believe in one-size-fits-all wedding pricing because no two weddings are the same.</p>
+					<p>Once we understand your event, we'll give you a clear, itemized quote, no hidden fees, no surprise charges. <a href="/weddings" class="body-link">See our wedding catering details</a>, browse the <a href="/gallery" class="body-link">wedding gallery</a>, or read our <a href="/blog/indian-wedding-catering-vancouver-guide" class="body-link">complete wedding planning guide</a>.</p>
+				</div>
+
+				<div class="wedding-cta-card reveal delay-200">
+					<div class="wedding-cta-stripe"></div>
+					<p class="wedding-cta-eyebrow">Not Sure? Schedule a Call</p>
+					<h3>Talk to our <em>events team.</em></h3>
+					<p>Book a free 30-minute consultation. We'll walk through your vision, guest count, venue, and date, and give you a ballpark range so you can plan with confidence.</p>
+					<div class="wedding-cta-buttons">
+						<a href="https://calendly.com/sula-catering/30min" class="btn btn-gold" target="_blank" rel="noopener">Schedule a Call</a>
+						<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-outline">Request a Quote</a>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="wedding-factors reveal" style="margin-top:60px">
+				<p class="wedding-factors-heading">Wedding pricing typically depends on:</p>
+				<div class="wedding-factors-grid">
+					<div class="factor-item"><span class="factor-num">1</span><div><h4>Menu Selection</h4><p>Number of courses, appetizer styles, dessert station, signature dishes, dietary requirements.</p></div></div>
+					<div class="factor-item"><span class="factor-num">2</span><div><h4>Service Style</h4><p>Buffet, family-style, plated, food stations, or live cooking demos.</p></div></div>
+					<div class="factor-item"><span class="factor-num">3</span><div><h4>Venue & Setup</h4><p>Indoor banquet hall, outdoor estate, multiple service areas, kitchen access on site.</p></div></div>
+					<div class="factor-item"><span class="factor-num">4</span><div><h4>Rentals</h4><p>Plates, glassware, linens, chafing setup tier (stainless to hammered copper).</p></div></div>
+					<div class="factor-item"><span class="factor-num">5</span><div><h4>Staffing</h4><p>Servers, captains, bartenders, chefs on site, length of service.</p></div></div>
+					<div class="factor-item"><span class="factor-num">6</span><div><h4>Add-Ons</h4><p>Live chai bar, pani puri station, tandoori grill, late-night snack service.</p></div></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- PRIVATE PARTIES PRICING -->
+	<section class="section section-cream">
+		<div class="container">
+			<div class="intro-block reveal">
+				<span class="eyebrow">Private Parties</span>
+				<h2>Private party <em>pricing.</em></h2>
+				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
+				<p>For birthdays, anniversaries, baby showers, and celebrations of every kind. Smaller events (10-30 guests) often work with our corporate menu pricing above. Larger or more elaborate parties are custom-quoted, like weddings, the variables matter too much.</p>
+			</div>
+
+			<div class="private-pricing-grid" style="margin-top:60px">
+
+				<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="private-option-card reveal">
+					<div class="private-option-stripe"></div>
+					<p class="private-eyebrow">Smaller Events</p>
+					<h3>10 – 30 <em>guests.</em></h3>
+					<p>Use the corporate menu pricing above. Same options, same quality, same per-person pricing. Ideal for intimate birthdays, baby showers, and home celebrations.</p>
+					<span class="private-arrow">Request a Quote →</span>
+				</a>
+
+				<a href="https://calendly.com/sula-catering/30min" class="private-option-card reveal delay-200" target="_blank" rel="noopener">
+					<div class="private-option-stripe"></div>
+					<p class="private-eyebrow">Larger or Custom Events</p>
+					<h3>30+ <em>guests.</em></h3>
+					<p>Custom-quoted. Includes options like live food stations, premium chafing setups, dedicated servers, and add-on bar service. Schedule a call to walk through your event.</p>
+					<span class="private-arrow">Schedule a Call →</span>
+				</a>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- FINAL CTA -->
+	<section class="cta-section cta-plum">
+		<h2>Ready to <em>plan your event?</em></h2>
+		<p>Tell us about your guest count, venue, and date. We'll send back a clear quote within 24 hours, or hop on a call if you'd rather talk it through.</p>
+		<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Quote</a>
+			<a href="https://calendly.com/sula-catering/30min" class="btn btn-outline" target="_blank" rel="noopener">Schedule a Call</a>
+		</div>
+	</section>
+
+	<style>
+		/* PRICING GRID */
+		.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1200px;margin:60px auto 0;position:relative;z-index:2}
+		.pricing-card{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--navy) 50%,var(--plum-mid) 100%);padding:40px 32px 32px;border:1px solid rgba(184,149,106,0.4);position:relative;overflow:hidden;transition:all 0.4s ease}
+		.pricing-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-shimmer),var(--gold-deep));z-index:5}
+		.pricing-card:hover{border-color:var(--gold);transform:translateY(-6px);box-shadow:0 20px 50px rgba(10,22,40,0.4)}
+		.pricing-card-price{font-family:'Libre Baskerville',Georgia,serif;font-size:48px;font-weight:700;color:var(--gold-light);line-height:1;margin-bottom:16px}
+		.pricing-card-price .dollar{font-size:24px;vertical-align:top;margin-right:2px}
+		.pricing-card-price .per{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;display:block;margin-top:8px}
+		.pricing-card h3{font-family:'Libre Baskerville',Georgia,serif;font-size:24px;color:var(--cream);font-weight:700;margin-bottom:18px;line-height:1.2}
+		.pricing-includes{font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px;font-weight:700}
+		.pricing-list{list-style:none;padding:0;margin:0 0 18px}
+		.pricing-list li{padding:6px 0 6px 18px;position:relative;font-size:14px;line-height:1.6;color:rgba(245,237,224,0.92);font-weight:400}
+		.pricing-list li::before{content:'◆';position:absolute;left:0;color:var(--gold);font-size:8px;top:9px}
+		.pricing-served{font-size:13px;line-height:1.6;color:rgba(245,237,224,0.75);margin-bottom:10px;padding-top:14px;border-top:1px solid rgba(184,149,106,0.25);font-weight:400}
+		.pricing-extras{font-style:italic;font-size:13px;line-height:1.6;color:var(--gold-light);font-family:'Libre Baskerville',Georgia,serif;font-weight:400}
+
+		/* ADDONS */
+		.addons-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1100px;margin:60px auto 0}
+		.addon-card{background:white;padding:32px 24px;text-align:center;border:1px solid rgba(184,149,106,0.25);transition:all 0.4s ease;display:flex;flex-direction:column;align-items:center;gap:12px}
+		.addon-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 30px rgba(10,22,40,0.1)}
+		.addon-price{font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:32px;color:var(--gold);font-weight:700;line-height:1}
+		.addon-card p{font-size:14px;color:var(--midnight);font-weight:500;margin:0;line-height:1.5}
+
+		/* SETUP CARDS */
+		.setup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:1100px;margin:60px auto 0;position:relative;z-index:2}
+		.setup-card{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--navy) 50%,var(--plum-mid) 100%);padding:36px 32px;border:1px solid rgba(184,149,106,0.4);position:relative;overflow:hidden;transition:all 0.4s ease}
+		.setup-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-shimmer),var(--gold-deep));z-index:5}
+		.setup-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 18px 40px rgba(10,22,40,0.4)}
+		.setup-card h3{font-family:'Libre Baskerville',Georgia,serif;font-size:22px;color:var(--cream);font-weight:700;margin-bottom:8px;line-height:1.25}
+		.setup-card .setup-price{font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:24px;color:var(--gold-light);font-weight:700;margin-bottom:14px}
+		.setup-card p{font-size:14px;color:rgba(245,237,224,0.85);line-height:1.7;margin:0;font-weight:400}
+
+		/* WEDDING */
+		.wedding-pricing-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:32px;max-width:1100px;margin:60px auto 0;position:relative;z-index:2}
+		.wedding-info-card{background:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.08) 100%);backdrop-filter:blur(10px);padding:48px 40px;border:1px solid rgba(184,149,106,0.25);text-align:left}
+		.wedding-card-eyebrow{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px;font-weight:700}
+		.wedding-info-card h3{font-family:'Libre Baskerville',Georgia,serif;font-size:32px;color:var(--cream);font-weight:700;margin-bottom:20px;line-height:1.25}
+		.wedding-info-card h3 em{color:var(--gold-light);font-style:italic;font-weight:400}
+		.wedding-info-card p{font-size:15px;line-height:1.85;color:rgba(245,237,224,0.88);margin-bottom:18px;font-weight:400}
+		.wedding-info-card p:last-child{margin-bottom:0}
+
+		.wedding-cta-card{background:linear-gradient(135deg,var(--plum) 0%,var(--plum-rich) 50%,var(--plum-mid) 100%);padding:48px 40px;border:1px solid rgba(184,149,106,0.4);position:relative;overflow:hidden;text-align:center;display:flex;flex-direction:column;justify-content:center}
+		.wedding-cta-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-shimmer),var(--gold-deep));z-index:5}
+		.wedding-cta-eyebrow{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:14px;font-weight:700}
+		.wedding-cta-card h3{font-family:'Libre Baskerville',Georgia,serif;font-size:28px;color:var(--cream);font-weight:700;margin-bottom:16px;line-height:1.25}
+		.wedding-cta-card h3 em{color:var(--gold-light);font-style:italic;font-weight:400}
+		.wedding-cta-card p{font-size:14px;line-height:1.7;color:rgba(245,237,224,0.85);margin-bottom:24px;font-weight:400}
+		.wedding-cta-buttons{display:flex;flex-direction:column;gap:12px;align-items:center}
+
+		.wedding-factors{max-width:1100px;margin:0 auto;position:relative;z-index:2}
+		.wedding-factors-heading{text-align:center;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:32px;font-weight:700}
+		.wedding-factors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+		.factor-item{display:grid;grid-template-columns:48px 1fr;gap:16px;align-items:flex-start;padding:20px;background:rgba(255,255,255,0.04);border-left:2px solid var(--gold-light);text-align:left}
+		.factor-num{font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:32px;color:var(--gold);line-height:1;font-weight:700}
+		.factor-item h4{font-family:'Libre Baskerville',Georgia,serif;font-size:16px;color:var(--cream);font-weight:700;margin-bottom:6px;line-height:1.3;text-align:left}
+		.factor-item p{font-size:13px;line-height:1.65;color:rgba(245,237,224,0.8);margin:0;font-weight:400;text-align:left}
+
+		/* PRIVATE */
+		.private-pricing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:32px;max-width:1100px;margin-left:auto;margin-right:auto}
+		.private-option-card{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--navy) 50%,var(--plum-mid) 100%);padding:48px 40px;border:1px solid rgba(184,149,106,0.4);position:relative;overflow:hidden;display:block;color:inherit;text-decoration:none;transition:all 0.4s ease}
+		.private-option-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold-shimmer),var(--gold-deep));z-index:5}
+		.private-option-card:hover{border-color:var(--gold);transform:translateY(-6px);box-shadow:0 20px 50px rgba(10,22,40,0.4)}
+		.private-eyebrow{font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:16px;font-weight:700}
+		.private-option-card h3{font-family:'Libre Baskerville',Georgia,serif;font-size:30px;color:var(--cream);font-weight:700;margin-bottom:16px;line-height:1.25}
+		.private-option-card h3 em{color:var(--gold-light);font-style:italic;font-weight:400}
+		.private-option-card p{font-size:14px;line-height:1.75;color:rgba(245,237,224,0.85);margin-bottom:18px;font-weight:400}
+		.private-arrow{font-family:'Montserrat',sans-serif;color:var(--gold-light);font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:700;display:inline-block;transition:padding-left 0.3s,letter-spacing 0.3s}
+		.private-option-card:hover .private-arrow{padding-left:6px;letter-spacing:5px}
+
+		@media (max-width:900px){
+			.pricing-grid,.setup-grid,.private-pricing-grid,.wedding-pricing-grid{grid-template-columns:1fr;gap:20px}
+			.setup-grid > .setup-card[style*="grid-column"]{grid-column:auto !important}
+			.wedding-factors-grid{grid-template-columns:1fr}
+			.pricing-card-price{font-size:36px}
+			.pricing-card h3,.private-option-card h3,.wedding-info-card h3{font-size:24px}
+			.wedding-info-card,.wedding-cta-card,.private-option-card{padding:36px 28px}
+		}
+	</style>
+
+</Layout>
