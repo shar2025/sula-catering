@@ -12,10 +12,10 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#050b15" />
-<meta name="msapplication-navbutton-color" content="#050b15" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="#260e26" />
+		<meta name="msapplication-navbutton-color" content="#260e26" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="description" content={description} />
 		<link rel="canonical" href={fullCanonical} />
 		<link rel="icon" type="image/png" href="https://sulaindianrestaurant.com/images/logos/logo-icon.png" />
@@ -76,7 +76,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 					<a href="/cafe-catering">Café</a>
 					<a href="/gallery">Gallery</a>
 					<a href="/blog">Journal</a>
-					<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="cta">Get a Quote</a>
+					<a href="https://sulaindianrestaurant.com/request-a-quote/" class="cta">Get a Quote</a>
 				</nav>
 				<button class="hamburger" aria-label="Open menu" aria-expanded="false" id="hamburger-btn">
 					<span></span>
@@ -103,7 +103,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 				<a href="/catering-burnaby" class="mobile-menu-item small">Catering Burnaby</a>
 				<a href="/catering-richmond" class="mobile-menu-item small">Catering Richmond</a>
 				<a href="/catering-surrey" class="mobile-menu-item small">Catering Surrey</a>
-				<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="mobile-menu-cta">Get a Quote</a>
+				<a href="https://sulaindianrestaurant.com/request-a-quote/" class="mobile-menu-cta">Get a Quote</a>
 			</div>
 		</div>
 
@@ -140,7 +140,7 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 				<div class="footer-col">
 					<h4>Contact</h4>
 					<p>604-215-1130<br/>events@sulaindianrestaurant.com</p>
-					<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="footer-cta">Request a Quote →</a>
+					<a href="https://sulaindianrestaurant.com/request-a-quote/" class="footer-cta">Request a Quote →</a>
 				</div>
 				<div class="footer-col">
 					<h4>Visit Sula</h4>
@@ -209,7 +209,9 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.eyebrow{display:block;font-family:'Montserrat',sans-serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;font-weight:700}
 
 			/* HEADER */
-			.site-header{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--midnight) 30%,var(--plum-mid) 70%,var(--plum) 100%);color:var(--cream);padding:20px 0;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(184,149,106,0.2);box-shadow:0 4px 30px rgba(0,0,0,0.4);animation:fadeIn 0.8s ease}
+			.site-header{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--midnight) 30%,var(--plum-mid) 70%,var(--plum) 100%);color:var(--cream);padding:20px 0;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(184,149,106,0.2);box-shadow:0 4px 30px rgba(0,0,0,0.4);animation:fadeIn 0.8s ease;overflow:hidden}
+			.site-header::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Cpath d='M10 40 L10 25 Q10 12 25 12 Q40 12 40 25 L40 40 Z' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.5'/%3E%3Cpath d='M16 40 L16 27 Q16 18 25 18 Q34 18 34 27 L34 40' fill='none' stroke='%23d4b572' stroke-width='0.7' opacity='0.4'/%3E%3C/svg%3E");opacity:0.14;pointer-events:none;z-index:1}
+			.site-header > *{position:relative;z-index:2}
 			.header-inner{max-width:1280px;margin:0 auto;padding:0 32px;display:flex;flex-direction:column;align-items:center;gap:16px;position:relative}
 			.logo{display:flex;align-items:center;justify-content:center;transition:opacity 0.3s}
 			.logo:hover{opacity:0.85}
@@ -276,6 +278,8 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.text-center{text-align:center}
 			.section-cream{background:linear-gradient(180deg,var(--cream) 0%,var(--cream-soft) 100%);position:relative}
 			.section-dark{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--midnight) 30%,var(--navy) 60%,var(--plum) 100%);color:var(--cream);position:relative;overflow:hidden}
+			.section-dark > *{position:relative;z-index:2}
+			.section-dark.has-pattern::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='8' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.5'/%3E%3Ccircle cx='30' cy='30' r='14' fill='none' stroke='%23d4b572' stroke-width='0.8' opacity='0.4'/%3E%3Cpath d='M30 16 L32 22 L30 28 L28 22 Z M30 32 L32 38 L30 44 L28 38 Z M16 30 L22 32 L28 30 L22 28 Z M32 30 L38 32 L44 30 L38 28 Z' fill='%23d4b572' opacity='0.4'/%3E%3C/svg%3E");opacity:0.16;pointer-events:none;z-index:1}
 			.section-dark::before,.section-dark::after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 			.section-dark::before{top:0}
 			.section-dark::after{bottom:0}
@@ -283,6 +287,8 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.section-dark h1 em, .section-dark h2 em, .section-dark h3 em{color:var(--gold-light)}
 			.section-dark p{color:rgba(245,237,224,0.85)}
 			.section-plum{background:linear-gradient(135deg,var(--plum) 0%,var(--plum-rich) 50%,var(--plum-mid) 100%);color:var(--cream);position:relative;overflow:hidden}
+			.section-plum > *{position:relative;z-index:2}
+			.section-plum.has-pattern::after{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Cpath d='M35 12 Q44 18 44 28 Q44 38 35 44 Q26 38 26 28 Q26 18 35 12 Z' fill='%23d4b572' opacity='0.25'/%3E%3Cpath d='M35 12 Q40 16 40 24 M35 12 Q30 16 30 24 M30 24 Q35 28 40 24' stroke='%23e8c987' stroke-width='0.8' fill='none' opacity='0.5'/%3E%3Ccircle cx='35' cy='28' r='2' fill='%23e8c987' opacity='0.6'/%3E%3C/svg%3E");opacity:0.16;pointer-events:none;z-index:1}
 			.section-plum::before,.section-plum::after{content:'';position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 			.section-plum::before{top:0}
 			.section-plum::after{bottom:0}
@@ -305,6 +311,34 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 
 			/* SERVICE CARDS */
 			.service-grid-v2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:80px}
+
+			/* PATTERN OVERLAYS - 6 catering patterns */
+			.pattern-overlay{position:absolute;inset:0;pointer-events:none;z-index:1}
+			.pattern-mandala{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='8' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.6'/%3E%3Ccircle cx='30' cy='30' r='14' fill='none' stroke='%23d4b572' stroke-width='0.8' opacity='0.5'/%3E%3Cpath d='M30 16 L32 22 L30 28 L28 22 Z M30 32 L32 38 L30 44 L28 38 Z M16 30 L22 32 L28 30 L22 28 Z M32 30 L38 32 L44 30 L38 28 Z' fill='%23d4b572' opacity='0.5'/%3E%3C/svg%3E");opacity:0.45}
+			.pattern-damask{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='70' viewBox='0 0 70 70'%3E%3Cpath d='M35 12 Q44 18 44 28 Q44 38 35 44 Q26 38 26 28 Q26 18 35 12 Z' fill='%23d4b572' opacity='0.25'/%3E%3Cpath d='M35 12 Q40 16 40 24 M35 12 Q30 16 30 24 M30 24 Q35 28 40 24' stroke='%23e8c987' stroke-width='0.8' fill='none' opacity='0.5'/%3E%3Ccircle cx='35' cy='28' r='2' fill='%23e8c987' opacity='0.6'/%3E%3C/svg%3E");opacity:0.45}
+			.pattern-lotus{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 30 Q22 18 30 6 Q38 18 30 30 M30 30 Q22 42 30 54 Q38 42 30 30 M30 30 Q18 22 6 30 Q18 38 30 30 M30 30 Q42 22 54 30 Q42 38 30 30' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.6'/%3E%3Ccircle cx='30' cy='30' r='2' fill='%23e8c987' opacity='0.7'/%3E%3C/svg%3E");opacity:0.45}
+			.pattern-trellis{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 4 L36 20 L20 36 L4 20 Z' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.6'/%3E%3Cpath d='M20 12 L28 20 L20 28 L12 20 Z' fill='none' stroke='%23d4b572' stroke-width='0.7' opacity='0.5'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23e8c987' opacity='0.7'/%3E%3C/svg%3E");opacity:0.45}
+			.pattern-mihrab{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Cpath d='M10 40 L10 25 Q10 12 25 12 Q40 12 40 25 L40 40 Z' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.6'/%3E%3Cpath d='M16 40 L16 27 Q16 18 25 18 Q34 18 34 27 L34 40' fill='none' stroke='%23d4b572' stroke-width='0.7' opacity='0.5'/%3E%3C/svg%3E");opacity:0.45}
+			.pattern-sprig{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 8 L30 52' stroke='%23d4b572' stroke-width='0.8' opacity='0.5'/%3E%3Cpath d='M30 16 Q22 14 18 20 M30 22 Q38 20 42 26 M30 30 Q22 28 18 34 M30 38 Q38 36 42 42' stroke='%23d4b572' stroke-width='0.8' fill='none' opacity='0.5'/%3E%3Ccircle cx='30' cy='8' r='2' fill='%23e8c987' opacity='0.6'/%3E%3C/svg%3E");opacity:0.45}
+
+			/* PHOTO CARD - dark background with photo on top, patterns underneath */
+			.photo-card{background:linear-gradient(135deg,var(--midnight-deep) 0%,var(--navy) 50%,var(--plum-mid) 100%);overflow:hidden;position:relative;transition:transform 0.5s ease,box-shadow 0.5s ease;border:1px solid rgba(184,149,106,0.3);display:block;color:inherit;text-decoration:none}
+			.photo-card:hover{transform:translateY(-8px);box-shadow:0 22px 50px rgba(10,22,40,0.4)}
+			.photo-card-top-stripe{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep) 0%,var(--gold-light) 50%,var(--gold-deep) 100%);z-index:5}
+			.photo-card-img{padding:24px 24px 0;position:relative;z-index:2}
+			.photo-card-img img{width:100%;height:240px;object-fit:cover;display:block;border:1px solid rgba(184,149,106,0.3)}
+			.photo-card-img.portrait img{height:auto;aspect-ratio:2/3;object-fit:cover}
+			.photo-card-content{padding:24px 28px 30px;text-align:center;position:relative;z-index:2}
+			.photo-card-content .eyebrow{color:var(--gold-light);margin-bottom:10px}
+			.photo-card-content h3{font-family:'Libre Baskerville',Georgia,serif;font-size:24px;margin:0 0 10px;font-weight:700;line-height:1.3;color:var(--cream)}
+			.photo-card-content h3 em{color:var(--gold-light);font-style:italic;font-weight:400}
+			.photo-card-content p{font-size:14px;color:rgba(245,237,224,0.85);line-height:1.7;margin:0;font-weight:400}
+
+			/* PHOTO CARD GRID */
+			.photo-card-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:60px auto 0}
+			@media (max-width:900px){
+				.photo-card-grid-3{grid-template-columns:1fr;gap:20px;max-width:480px}
+			}
 			.service-card-v2{position:relative;display:block;overflow:hidden;color:inherit;text-decoration:none;aspect-ratio:4/3;transition:transform 0.5s ease}
 			.service-card-v2:hover{transform:translateY(-6px)}
 			.service-card-img{position:relative;width:100%;height:100%;overflow:hidden}
@@ -476,7 +510,9 @@ const fullCanonical = `https://sulacatering.com${canonical}`;
 			.location-card .phone{font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:18px;color:var(--gold);font-weight:700}
 
 			/* FOOTER */
-			.site-footer{background:linear-gradient(180deg,var(--midnight) 0%,var(--midnight-deep) 100%);color:var(--cream);padding:80px 32px 0;border-top:1px solid rgba(184,149,106,0.2)}
+			.site-footer{background:linear-gradient(180deg,var(--midnight) 0%,var(--midnight-deep) 100%);color:var(--cream);padding:80px 32px 0;border-top:1px solid rgba(184,149,106,0.2);position:relative;overflow:hidden}
+			.site-footer::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 4 L36 20 L20 36 L4 20 Z' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.5'/%3E%3Cpath d='M20 12 L28 20 L20 28 L12 20 Z' fill='none' stroke='%23d4b572' stroke-width='0.7' opacity='0.4'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23e8c987' opacity='0.6'/%3E%3C/svg%3E");opacity:0.14;pointer-events:none;z-index:1}
+			.site-footer > *{position:relative;z-index:2}
 			.footer-logo{text-align:center;margin-bottom:48px}
 			.footer-logo-img{height:80px;width:auto;display:inline-block}
 			.footer-tag{margin-top:16px;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);font-weight:700}
