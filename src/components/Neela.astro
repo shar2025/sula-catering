@@ -297,9 +297,39 @@
 	.neela-suggestions-inline{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;margin:2px 4px 6px;max-width:88%;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
 	.neela-suggestion-chip{font-size:13px;padding:6px 12px}
 
+	/* "View all options" expander, slim gold-outlined pill below the lead-3 tiers.
+	   Lighter weight than a tier card so it reads as a secondary affordance. */
+	.neela-tiers-more{display:flex;justify-content:center;align-self:stretch;margin:-2px 4px 10px;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both;transition:opacity 0.28s ease,max-height 0.28s ease}
+	.neela-tiers-more-btn{min-height:36px;padding:8px 18px;background:rgba(20,36,66,0.45);border:1px solid rgba(184,149,106,0.55);border-radius:999px;color:var(--cream);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13.5px;font-weight:600;letter-spacing:0.4px;cursor:pointer;line-height:1.2;transition:transform 0.25s ease,background 0.25s ease,border-color 0.25s ease,box-shadow 0.25s ease}
+	.neela-tiers-more-btn:hover,.neela-tiers-more-btn:focus-visible{background:rgba(184,149,106,0.16);border-color:var(--gold-shimmer);color:var(--gold-shimmer);transform:translateY(-1px);box-shadow:0 4px 12px rgba(184,149,106,0.22);outline:none}
+	.neela-tiers-more-btn:disabled{cursor:default;opacity:0.55}
+	.neela-tiers-more-collapsed{opacity:0;max-height:0;margin-top:0;margin-bottom:0;pointer-events:none}
+	.neela-tier-card-revealed{animation:neela-fade-up 0.32s cubic-bezier(0.4,0,0.2,1) both}
+
+	/* INLINE CONTACT FORM, brand-styled stack of labeled inputs + submit pill.
+	   Plum surrounding container, cream text, gold border focus on each input. */
+	.neela-inline-form{align-self:stretch;margin:6px 4px 10px;padding:14px 16px 16px;background:linear-gradient(135deg,rgba(37,4,45,0.45),rgba(20,36,66,0.4));border:1px solid rgba(184,149,106,0.4);border-radius:14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 0 0 1px rgba(232,201,135,0.06),0 6px 16px rgba(10,22,40,0.28);animation:neela-fade-up 0.35s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-inline-form-title{margin:0 0 2px;font-family:'Libre Baskerville',Georgia,serif;font-size:14px;font-weight:700;color:var(--gold-light);letter-spacing:0.3px;line-height:1.3}
+	.neela-inline-form-row{display:flex;flex-direction:column;gap:5px}
+	.neela-inline-form-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);opacity:0.85}
+	.neela-inline-form-input{width:100%;background:rgba(5,11,21,0.7);border:1px solid rgba(184,149,106,0.35);border-radius:10px;padding:11px 14px;color:var(--cream);font-family:'Montserrat',sans-serif;font-size:14.5px;letter-spacing:0.2px;outline:none;transition:border-color 0.25s ease,box-shadow 0.25s ease,background 0.25s ease;-webkit-appearance:none;appearance:none;box-sizing:border-box}
+	.neela-inline-form-input::placeholder{color:rgba(245,237,224,0.4)}
+	.neela-inline-form-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,149,106,0.18),0 0 14px rgba(184,149,106,0.16);background:rgba(5,11,21,0.85)}
+	.neela-inline-form-input-bad{border-color:rgba(217,107,103,0.7);box-shadow:0 0 0 2px rgba(217,107,103,0.18)}
+	.neela-inline-form-input[disabled]{opacity:0.6;cursor:not-allowed}
+	textarea.neela-inline-form-input{resize:vertical;min-height:72px;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px}
+	.neela-inline-form-err{font-family:'Montserrat',sans-serif;font-size:11.5px;color:rgba(217,107,103,0.95);letter-spacing:0.2px;margin-top:2px}
+	.neela-inline-form-submit{margin-top:6px;align-self:stretch;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));background-size:200% 100%;color:var(--midnight);border:none;border-radius:999px;padding:13px 22px;font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,background-position 0.5s ease;box-shadow:0 4px 14px rgba(184,149,106,0.32)}
+	.neela-inline-form-submit:hover,.neela-inline-form-submit:focus-visible{transform:translateY(-1px);box-shadow:0 6px 18px rgba(184,149,106,0.42);background-position:100% 0;outline:none}
+	.neela-inline-form-submit:active{transform:translateY(0)}
+	.neela-inline-form-submit:disabled{cursor:default;transform:none;box-shadow:none;opacity:0.7}
+	.neela-inline-form-confirm{margin:6px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13.5px;color:var(--gold-light);letter-spacing:0.3px;text-align:center}
+	.neela-inline-form-sent{opacity:0.85}
+
 	/* DISABLED: any quick-reply container the user has already answered past */
 	.neela-quick-disabled{opacity:0.45;pointer-events:none;filter:saturate(0.7)}
 	.neela-quick-disabled button{cursor:not-allowed}
+	.neela-quick-disabled input,.neela-quick-disabled textarea{cursor:not-allowed}
 
 	/* MOBILE, full-screen modal slide-up */
 	@media (max-width:600px){
@@ -370,7 +400,9 @@
 	// the tail of her prose:
 	//   <<<NEELA_ORDER_READY>>>   , final order JSON, renders as the order card
 	//   <<<NEELA_OPTIONS>>>       , inline tappable answer buttons
-	//   <<<NEELA_TIERS>>>         , menu-tier cards
+	//   <<<NEELA_TIERS>>>         , menu-tier cards (curated lead 3)
+	//   <<<NEELA_TIERS_MORE>>>    , additional tiers behind a "View all" expander
+	//   <<<NEELA_FORM>>>          , inline contact form (name / phone / email)
 	//   <<<NEELA_SUGGESTIONS>>>   , lightweight follow-up chips
 	// We strip every marker from the displayed text and render the structured
 	// element below the bubble. If a JSON block fails to parse, we still strip
@@ -379,6 +411,8 @@
 	const ORDER_MARKER_RE = /<<<NEELA_ORDER_READY>>>([\s\S]*?)<<<END_NEELA_ORDER_READY>>>/;
 	const OPTIONS_MARKER_RE = /<<<NEELA_OPTIONS>>>([\s\S]*?)<<<END_NEELA_OPTIONS>>>/;
 	const TIERS_MARKER_RE = /<<<NEELA_TIERS>>>([\s\S]*?)<<<END_NEELA_TIERS>>>/;
+	const TIERS_MORE_MARKER_RE = /<<<NEELA_TIERS_MORE>>>([\s\S]*?)<<<END_NEELA_TIERS_MORE>>>/;
+	const FORM_MARKER_RE = /<<<NEELA_FORM>>>([\s\S]*?)<<<END_NEELA_FORM>>>/;
 	const SUGGESTIONS_MARKER_RE = /<<<NEELA_SUGGESTIONS>>>([\s\S]*?)<<<END_NEELA_SUGGESTIONS>>>/;
 	function tryParseJson(raw, label) {
 		try { return JSON.parse(raw.trim()); }
@@ -386,16 +420,20 @@
 	}
 	function extractMarkers(text) {
 		let display = String(text);
-		let order = null, options = null, tiers = null, suggestions = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null;
 		const om = display.match(ORDER_MARKER_RE);
 		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
 		const opm = display.match(OPTIONS_MARKER_RE);
 		if (opm) { display = display.replace(OPTIONS_MARKER_RE, '').trim(); options = tryParseJson(opm[1], 'options'); }
+		const tmm = display.match(TIERS_MORE_MARKER_RE);
+		if (tmm) { display = display.replace(TIERS_MORE_MARKER_RE, '').trim(); tiersMore = tryParseJson(tmm[1], 'tiers_more'); }
 		const tm = display.match(TIERS_MARKER_RE);
 		if (tm) { display = display.replace(TIERS_MARKER_RE, '').trim(); tiers = tryParseJson(tm[1], 'tiers'); }
+		const fm = display.match(FORM_MARKER_RE);
+		if (fm) { display = display.replace(FORM_MARKER_RE, '').trim(); form = tryParseJson(fm[1], 'form'); }
 		const sm = display.match(SUGGESTIONS_MARKER_RE);
 		if (sm) { display = display.replace(SUGGESTIONS_MARKER_RE, '').trim(); suggestions = tryParseJson(sm[1], 'suggestions'); }
-		return { displayText: display, order, options, tiers, suggestions };
+		return { displayText: display, order, options, tiers, tiersMore, form, suggestions };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -410,7 +448,7 @@
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null, options = null, tiers = null, suggestions = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null;
 		let displayText = String(text);
 		if (role !== 'user') {
 			const ex = extractMarkers(displayText);
@@ -418,6 +456,8 @@
 			order = ex.order;
 			options = ex.options;
 			tiers = ex.tiers;
+			tiersMore = ex.tiersMore;
+			form = ex.form;
 			suggestions = ex.suggestions;
 		}
 
@@ -434,7 +474,16 @@
 			if (card) messagesEl.appendChild(card);
 		} else if (opts.allowInteractive !== false) {
 			if (tiers && Array.isArray(tiers.tiers) && tiers.tiers.length) {
-				const el = renderTierCards(tiers.tiers);
+				const tierWrap = renderTierCards(tiers.tiers);
+				if (tierWrap) messagesEl.appendChild(tierWrap);
+				// "View all options" expand button, only when TIERS_MORE has tiers.
+				if (tiersMore && Array.isArray(tiersMore.tiers) && tiersMore.tiers.length) {
+					const moreBtn = renderTiersMoreButton(tiersMore.tiers, tierWrap);
+					if (moreBtn) messagesEl.appendChild(moreBtn);
+				}
+			}
+			if (form && Array.isArray(form.fields) && form.fields.length) {
+				const el = renderInlineForm(form);
 				if (el) messagesEl.appendChild(el);
 			}
 			if (options && Array.isArray(options.options) && options.options.length) {
@@ -488,28 +537,33 @@
 		return wrap.children.length ? wrap : null;
 	}
 
+	function buildTierCardEl(t) {
+		if (!t || typeof t.title !== 'string' || !t.title.trim()) return null;
+		const card = document.createElement('button');
+		card.type = 'button';
+		card.className = 'neela-tier-card';
+		const badges = Array.isArray(t.badges) ? t.badges.filter((b) => typeof b === 'string' && b.trim()) : [];
+		card.innerHTML =
+			'<div class="neela-tier-card-head">' +
+				'<span class="neela-tier-card-title">' + escapeHtml(String(t.title)) + '</span>' +
+				(t.price ? '<span class="neela-tier-card-price">' + escapeHtml(String(t.price)) + '</span>' : '') +
+			'</div>' +
+			(t.summary ? '<p class="neela-tier-card-summary">' + escapeHtml(String(t.summary)) + '</p>' : '') +
+			(badges.length
+				? '<div class="neela-tier-card-badges">' +
+					badges.map((b) => '<span class="neela-tier-card-badge">' + escapeHtml(b) + '</span>').join('') +
+				  '</div>'
+				: '');
+		card.addEventListener('click', () => quickReplyTap(String(t.title)));
+		return card;
+	}
+
 	function renderTierCards(tiers) {
 		const wrap = document.createElement('div');
 		wrap.className = 'neela-tier-cards neela-quick-active';
 		tiers.forEach((t) => {
-			if (!t || typeof t.title !== 'string' || !t.title.trim()) return;
-			const card = document.createElement('button');
-			card.type = 'button';
-			card.className = 'neela-tier-card';
-			const badges = Array.isArray(t.badges) ? t.badges.filter((b) => typeof b === 'string' && b.trim()) : [];
-			card.innerHTML =
-				'<div class="neela-tier-card-head">' +
-					'<span class="neela-tier-card-title">' + escapeHtml(String(t.title)) + '</span>' +
-					(t.price ? '<span class="neela-tier-card-price">' + escapeHtml(String(t.price)) + '</span>' : '') +
-				'</div>' +
-				(t.summary ? '<p class="neela-tier-card-summary">' + escapeHtml(String(t.summary)) + '</p>' : '') +
-				(badges.length
-					? '<div class="neela-tier-card-badges">' +
-						badges.map((b) => '<span class="neela-tier-card-badge">' + escapeHtml(b) + '</span>').join('') +
-					  '</div>'
-					: '');
-			card.addEventListener('click', () => quickReplyTap(String(t.title)));
-			wrap.appendChild(card);
+			const card = buildTierCardEl(t);
+			if (card) wrap.appendChild(card);
 		});
 		return wrap.children.length ? wrap : null;
 	}
@@ -527,6 +581,173 @@
 			wrap.appendChild(btn);
 		});
 		return wrap.children.length ? wrap : null;
+	}
+
+	// Slim "View all options (+N more)" button rendered below the lead-3 tier
+	// cards. Tap reveals the additional tiers inline (animated expand) without
+	// firing a chat turn. Each revealed card behaves identically to the lead-3
+	// cards: tap submits the tier title as the user's reply.
+	function renderTiersMoreButton(extraTiers, leadTierWrap) {
+		const validExtras = (extraTiers || []).filter((t) => t && typeof t.title === 'string' && t.title.trim());
+		if (!validExtras.length) return null;
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-tiers-more neela-quick-active';
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.className = 'neela-tiers-more-btn';
+		btn.textContent = 'View all options (+' + validExtras.length + ' more)';
+		btn.addEventListener('click', () => {
+			if (btn.disabled) return;
+			btn.disabled = true;
+			// Build the additional tier cards into the SAME container as the lead 3,
+			// so the disable-on-next-turn class flips them all in one pass.
+			const target = leadTierWrap || wrap;
+			validExtras.forEach((t) => {
+				const card = buildTierCardEl(t);
+				if (card) {
+					card.classList.add('neela-tier-card-revealed');
+					target.appendChild(card);
+				}
+			});
+			// Fade the button out + remove from layout once the reveal animation runs.
+			wrap.classList.add('neela-tiers-more-collapsed');
+			setTimeout(() => { try { wrap.remove(); } catch (e) {} }, 320);
+			messagesEl.scrollTop = messagesEl.scrollHeight;
+		});
+		wrap.appendChild(btn);
+		return wrap;
+	}
+
+	// Inline contact form, brand-styled stack of labeled inputs + submit pill.
+	// Validates required fields on submit (HTML5 + email + phone format), fires
+	// ONE user message containing the values formatted naturally so the model
+	// parses them on its next turn.
+	function renderInlineForm(spec) {
+		if (!spec || !Array.isArray(spec.fields) || !spec.fields.length) return null;
+		const allowedTypes = { text: 1, tel: 1, email: 1, textarea: 1 };
+		const validFields = spec.fields.filter((f) =>
+			f && typeof f.key === 'string' && f.key.trim() &&
+			typeof f.label === 'string' && f.label.trim() &&
+			typeof f.type === 'string' && allowedTypes[f.type]
+		);
+		if (!validFields.length) return null;
+
+		const wrap = document.createElement('form');
+		wrap.className = 'neela-inline-form neela-quick-active';
+		wrap.noValidate = true;
+
+		if (spec.title && typeof spec.title === 'string' && spec.title.trim()) {
+			const titleEl = document.createElement('p');
+			titleEl.className = 'neela-inline-form-title';
+			titleEl.textContent = String(spec.title);
+			wrap.appendChild(titleEl);
+		}
+
+		const inputs = {};
+		validFields.forEach((f) => {
+			const row = document.createElement('label');
+			row.className = 'neela-inline-form-row';
+			const labelText = document.createElement('span');
+			labelText.className = 'neela-inline-form-label';
+			labelText.textContent = String(f.label) + (f.required ? ' *' : '');
+			row.appendChild(labelText);
+
+			let input;
+			if (f.type === 'textarea') {
+				input = document.createElement('textarea');
+				input.rows = 3;
+			} else {
+				input = document.createElement('input');
+				input.type = f.type;
+				input.autocomplete =
+					f.type === 'email' ? 'email' :
+					f.type === 'tel' ? 'tel' :
+					f.key === 'name' ? 'name' : 'off';
+			}
+			input.className = 'neela-inline-form-input';
+			input.name = String(f.key);
+			if (typeof f.placeholder === 'string') input.placeholder = f.placeholder;
+			if (f.required) input.required = true;
+			row.appendChild(input);
+
+			const errEl = document.createElement('span');
+			errEl.className = 'neela-inline-form-err';
+			errEl.hidden = true;
+			row.appendChild(errEl);
+
+			inputs[String(f.key)] = { input, errEl, field: f };
+			wrap.appendChild(row);
+		});
+
+		const submitLabel = (typeof spec.submitLabel === 'string' && spec.submitLabel.trim())
+			? String(spec.submitLabel) : 'Send my details';
+		const submitBtn = document.createElement('button');
+		submitBtn.type = 'submit';
+		submitBtn.className = 'neela-inline-form-submit';
+		submitBtn.textContent = submitLabel;
+		wrap.appendChild(submitBtn);
+
+		const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const PHONE_RE = /^[+()\-\s\d]{7,}$/;
+
+		function validate() {
+			let firstBad = null;
+			validFields.forEach((f) => {
+				const slot = inputs[String(f.key)];
+				if (!slot) return;
+				const raw = (slot.input.value || '').trim();
+				let err = '';
+				if (f.required && !raw) {
+					err = 'Required';
+				} else if (raw && f.type === 'email' && !EMAIL_RE.test(raw)) {
+					err = 'Enter a valid email';
+				} else if (raw && f.type === 'tel' && !PHONE_RE.test(raw)) {
+					err = 'Enter a valid phone';
+				}
+				if (err) {
+					slot.errEl.textContent = err;
+					slot.errEl.hidden = false;
+					slot.input.classList.add('neela-inline-form-input-bad');
+					if (!firstBad) firstBad = slot.input;
+				} else {
+					slot.errEl.hidden = true;
+					slot.input.classList.remove('neela-inline-form-input-bad');
+				}
+			});
+			return firstBad;
+		}
+
+		wrap.addEventListener('submit', (e) => {
+			e.preventDefault();
+			if (submitBtn.disabled) return;
+			const firstBad = validate();
+			if (firstBad) { try { firstBad.focus(); } catch (_) {} return; }
+
+			// Build a natural-language sentence so the model parses cleanly.
+			const parts = validFields.map((f) => {
+				const slot = inputs[String(f.key)];
+				const raw = (slot.input.value || '').trim();
+				return String(f.label) + ': ' + raw;
+			});
+			const composed = parts.join(', ');
+
+			// Disable inputs + button so the form is visually frozen, then swap to a
+			// small confirmation line. The actual chat-turn dispatch goes through
+			// quickReplyTap() so it shares the typed-message path (history push,
+			// disableActiveQuickReplies, API call, render, etc.).
+			Object.values(inputs).forEach((slot) => { slot.input.disabled = true; });
+			submitBtn.disabled = true;
+			wrap.classList.add('neela-inline-form-sent');
+
+			const confirm = document.createElement('p');
+			confirm.className = 'neela-inline-form-confirm';
+			confirm.textContent = 'Got your details, sending the quote now.';
+			wrap.appendChild(confirm);
+
+			quickReplyTap(composed);
+		});
+
+		return wrap;
 	}
 
 	function renderOrderCard(order) {
@@ -937,7 +1158,9 @@
 		return String(text)
 			.replace(/<<<NEELA_ORDER_READY>>>[\s\S]*?<<<END_NEELA_ORDER_READY>>>/g, '')
 			.replace(/<<<NEELA_OPTIONS>>>[\s\S]*?<<<END_NEELA_OPTIONS>>>/g, '')
+			.replace(/<<<NEELA_TIERS_MORE>>>[\s\S]*?<<<END_NEELA_TIERS_MORE>>>/g, '')
 			.replace(/<<<NEELA_TIERS>>>[\s\S]*?<<<END_NEELA_TIERS>>>/g, '')
+			.replace(/<<<NEELA_FORM>>>[\s\S]*?<<<END_NEELA_FORM>>>/g, '')
 			.replace(/<<<NEELA_SUGGESTIONS>>>[\s\S]*?<<<END_NEELA_SUGGESTIONS>>>/g, '')
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
