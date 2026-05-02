@@ -27,6 +27,7 @@ import {
 } from '../src/lib/neela-knowledge.js';
 import { FORM_KNOWLEDGE, FORM_KNOWLEDGE_GENERATED_AT } from '../src/lib/neela-form-knowledge.js';
 import { POLICIES_KNOWLEDGE, POLICIES_KNOWLEDGE_VERSION } from '../src/lib/neela-policies.js';
+import { PUBLIC_KNOWLEDGE, PUBLIC_KNOWLEDGE_VERSION } from '../src/lib/neela-public-knowledge.js';
 
 export const config = { maxDuration: 60 };
 
@@ -122,6 +123,9 @@ PRECEDENCE: The walkthrough takes precedence over the simpler "give pricing + of
 
 POLICIES & EDGE CASES
 You also have a SULA POLICIES & EDGE CASES block below covering lead times, tastings, deposits, cancellations, service area, halal certification, allergens (especially nut cross-contamination), alcohol (we don't serve it), equipment rental, drop-off vs full service, outdoor events, and last-minute orders. Use it whenever the conversation goes off the menu sheet. When the policies block hedges with "we'll confirm" or "best to confirm", reflect that hedge in your reply. Never invent a hard deposit percentage, cancellation window, or out-of-region commitment.
+
+PUBLIC KNOWLEDGE & CREDIBILITY
+Inside the same block (after the policies content) you'll find SULA AWARDS & RECOGNITION, SULA HISTORY & TEAM, SULA CAFÉ MENU, CATERING REPUTATION, and RESTAURANT FACTS sections. These are verified-public details from 2025 coverage in Vancouver Magazine, Georgia Straight, OpenTable, TripAdvisor, Restaurant Guru, and Daily Hive. Use them to answer credibility questions ("are you any good?", "why Sula?", "what awards have you won?"), to ground wedding and large-event conversations (Chef Kailash's Oberoi background is real and worth surfacing for big events), and to answer specific Sula Café menu questions. Pick at most one or two of these points per reply, never list them all, never invent additional awards or chefs, and hedge café prices as "around $X" since they're 2025 figures.
 
 BEHAVIOR
 - When you don't know something specific (a particular menu item, a specific quote, exact availability, anything dietary-medical), hand off to email or Calendly. Never invent menu items, prices, dates, or guarantees.
@@ -351,10 +355,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
-	if (POLICIES_KNOWLEDGE && POLICIES_KNOWLEDGE.length > 0) {
+	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms, policies+public).
+	// Public knowledge is concatenated onto policies so they share a single cached block.
+	const policiesAndPublic =
+		POLICIES_KNOWLEDGE +
+		(PUBLIC_KNOWLEDGE && PUBLIC_KNOWLEDGE.length > 0 ? '\n\n' + PUBLIC_KNOWLEDGE : '');
+	if (policiesAndPublic.length > 0) {
 		systemBlocks.push({
 			type: 'text',
-			text: POLICIES_KNOWLEDGE,
+			text: policiesAndPublic,
 			cache_control: { type: 'ephemeral' }
 		});
 	}
@@ -366,6 +375,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		kbGenerated: KNOWLEDGE_GENERATED_AT,
 		formKbGenerated: FORM_KNOWLEDGE_GENERATED_AT,
 		policiesVersion: POLICIES_KNOWLEDGE_VERSION,
+		publicVersion: PUBLIC_KNOWLEDGE_VERSION,
 		ip: ip.slice(0, 16)
 	});
 
