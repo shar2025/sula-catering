@@ -306,6 +306,9 @@
 	/* SUGGESTION CHIPS, lighter pill set after info / browsing replies */
 	.neela-suggestions-inline{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;margin:2px 4px 6px;max-width:88%;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
 	.neela-suggestion-chip{font-size:13px;padding:6px 12px}
+	/* Post-submit close chips, hidden until the order card flips to "sent". */
+	.neela-suggestions-pending{display:none}
+	.neela-suggestions-revealed{display:flex;animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both}
 
 	/* "View all options" expander, slim gold-outlined pill below the lead-3 tiers.
 	   Lighter weight than a tier card so it reads as a secondary affordance. */
@@ -478,10 +481,23 @@
 		div.innerHTML = paragraphs;
 		messagesEl.appendChild(div);
 
-		// Order marker is exclusive: the card replaces inline quick-replies.
+		// Order marker is mostly exclusive: the card replaces inline quick-replies,
+		// tier cards, options, and forms. The ONE allowed pairing is the post-submit
+		// interactive close, ORDER_READY + SUGGESTIONS, where the close chips render
+		// below the card but stay hidden via .neela-suggestions-pending until the
+		// customer presses Send and the card flips to .neela-order-card-sent. Then
+		// submitOrder() flips the chips to .neela-suggestions-revealed so they fade
+		// in as the natural pause after a quote is submitted.
 		if (order) {
 			const card = renderOrderCard(order);
 			if (card) messagesEl.appendChild(card);
+			if (card && suggestions && Array.isArray(suggestions.chips) && suggestions.chips.length) {
+				const chipsEl = renderSuggestionChips(suggestions.chips);
+				if (chipsEl) {
+					chipsEl.classList.add('neela-suggestions-pending');
+					messagesEl.appendChild(chipsEl);
+				}
+			}
 		} else if (opts.allowInteractive !== false) {
 			if (tiers && Array.isArray(tiers.tiers) && tiers.tiers.length) {
 				const tierWrap = renderTierCards(tiers.tiers);
@@ -944,6 +960,21 @@
 					'<p class="neela-order-sent-title">Quote request submitted</p>' +
 					'<p class="neela-order-sent-body">Reference <strong>' + ref + '</strong>. The events team will send your written quote within one business day. Booking confirms once you approve the quote, no charge or commitment until then.</p>' +
 					'<a class="neela-order-view-invoice" href="' + invoiceUrl + '" target="_blank" rel="noopener noreferrer">View your details ↗</a>';
+				// Reveal the post-submit close chips ("Look at the dining options",
+				// "Location details", "View the menu") that were rendered hidden
+				// below this card. Walk siblings in DOM order until we hit either
+				// the chips wrap or another order card (defensive against multiple
+				// orders in one session).
+				let sib = card.nextElementSibling;
+				while (sib) {
+					if (sib.classList && sib.classList.contains('neela-order-card')) break;
+					if (sib.classList && sib.classList.contains('neela-suggestions-pending')) {
+						sib.classList.remove('neela-suggestions-pending');
+						sib.classList.add('neela-suggestions-revealed');
+						break;
+					}
+					sib = sib.nextElementSibling;
+				}
 				// Order locked in → exit voice loop (natural conversation pause).
 				// User can re-engage by tapping mic again if they want to keep chatting.
 				exitVoiceLoop();
