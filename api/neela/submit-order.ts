@@ -179,6 +179,41 @@ function makeReference(): string {
 	return `SC-${mm}${dd}-${suffix}`;
 }
 
+// Server-side lead-time check. Mirrors the persona HARD RULE: LEAD TIME ENFORCEMENT.
+//   ≤25 guests → minimum 24 hours from now to event start
+//   >25 guests → minimum 72 hours from now to event start
+// Soft-block: never rejects the order. Returns a warning that gets surfaced
+// to the events team (subject prefix [RUSH], banner in the email body) and
+// to the frontend (in the response JSON) so the UX can warn the customer.
+// Returns null when the check can't be evaluated (fuzzy date, no time, no
+// numeric guest count). The persona decline-and-redirect pattern catches
+// those cases in chat.
+interface LeadTimeWarning {
+	belowThreshold: boolean;
+	guestCount: number;
+	requiredHours: number;
+	hoursUntilEvent: number;
+	eventStartIso: string;
+}
+function checkLeadTime(order: Order): LeadTimeWarning | null {
+	const guestN = typeof order.guestCount === 'number' ? order.guestCount : NaN;
+	if (!Number.isFinite(guestN) || guestN < 1) return null;
+	if (!order.eventDate || !order.deliveryTime) return null;
+	const requiredHours = guestN > 25 ? 72 : 24;
+	const combined = `${order.eventDate} ${order.deliveryTime}`;
+	const parsed = new Date(combined);
+	if (Number.isNaN(parsed.getTime())) return null;
+	const now = new Date();
+	const hoursUntilEvent = (parsed.getTime() - now.getTime()) / (1000 * 60 * 60);
+	return {
+		belowThreshold: hoursUntilEvent < requiredHours,
+		guestCount: guestN,
+		requiredHours,
+		hoursUntilEvent: Math.round(hoursUntilEvent * 10) / 10,
+		eventStartIso: parsed.toISOString()
+	};
+}
+
 // Catches the model's tendency to default eventDate to a training-cutoff year
 // (mid-2025 for Sonnet 4.6) when the customer gave a month + day with no year.
 // Strategy: if the captured eventDate string contains an explicit YYYY and the
@@ -518,21 +553,22 @@ function isBuyoutOrder(order: Order): boolean {
 	return false;
 }
 
-function modeSubject(reference: string, order: Order): string {
+function modeSubject(reference: string, order: Order, leadTime: LeadTimeWarning | null): string {
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const dateStr = order.eventDate || 'TBD';
 	const typeStr = order.eventType || 'event';
+	const rushPrefix = leadTime && leadTime.belowThreshold ? '[RUSH] ' : '';
 	if (order.mode === 'quick') {
-		return `[Neela inquiry ${reference}] Looking at ${typeStr} for ${guestStr} around ${dateStr}`;
+		return `${rushPrefix}[Neela inquiry ${reference}] Looking at ${typeStr} for ${guestStr} around ${dateStr}`;
 	}
 	if (order.mode === 'consultation') {
-		return `[Neela call request ${reference}] ${order.contact.name} wants a Calendly chat`;
+		return `${rushPrefix}[Neela call request ${reference}] ${order.contact.name} wants a Calendly chat`;
 	}
 	if (isBuyoutOrder(order)) {
 		const loc = order.location?.venueOrAddress || order.location?.city || 'Sula';
-		return `[Neela buyout ${reference}] ${loc} for ${guestStr} on ${dateStr}`;
+		return `${rushPrefix}[Neela buyout ${reference}] ${loc} for ${guestStr} on ${dateStr}`;
 	}
-	return `[Neela order ${reference}] ${typeStr} for ${guestStr} on ${dateStr}`;
+	return `${rushPrefix}[Neela order ${reference}] ${typeStr} for ${guestStr} on ${dateStr}`;
 }
 
 function modeReplyMessage(reference: string, mode: Mode): string {
@@ -545,7 +581,17 @@ function modeReplyMessage(reference: string, mode: Mode): string {
 	return `Got it! Sent over to the events team. They'll be in touch within a business day. Reference ${reference} in case you want to follow up.`;
 }
 
-function buildOrderEmailHtml(reference: string, order: Order): string {
+function buildLeadTimeBannerHtml(w: LeadTimeWarning): string {
+	const hoursStr = w.hoursUntilEvent < 0
+		? 'event start is in the past'
+		: `event starts in ${w.hoursUntilEvent}h`;
+	return `<tr><td style="padding:14px 32px;background:#fff4e0;border-bottom:1px solid #b8956a">
+		<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#8a3a00;line-height:1.5;font-weight:700;letter-spacing:0.3px;text-transform:uppercase">RUSH ORDER, BELOW LEAD TIME</p>
+		<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#5a3000;line-height:1.55">${escapeHtml(hoursStr)} (${w.guestCount} guests, minimum ${w.requiredHours}h required). Confirm capacity with kitchen + staff before responding to the customer.</p>
+	</td></tr>`;
+}
+
+function buildOrderEmailHtml(reference: string, order: Order, leadTime: LeadTimeWarning | null): string {
 	const dateLabel = new Date().toLocaleDateString('en-CA', {
 		weekday: 'long',
 		month: 'long',
@@ -588,6 +634,8 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 				<h1 style="margin:8px 0 4px;font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;color:#f5ede0;letter-spacing:0.5px">${escapeHtml(reference)}</h1>
 				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:rgba(245,237,224,0.78);letter-spacing:0.3px">${escapeHtml(dateLabel)}</p>
 			</td></tr>
+
+			${leadTime && leadTime.belowThreshold ? buildLeadTimeBannerHtml(leadTime) : ''}
 
 			<tr><td style="padding:24px 32px 8px">
 				<h2 style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;color:#b8956a;font-size:20px;letter-spacing:0.4px;font-weight:600">At a glance</h2>
@@ -804,7 +852,7 @@ function shouldGeneratePdf(order: Order): boolean {
 	return order.mode !== 'consultation';
 }
 
-async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: boolean; emailId?: string; error?: string }> {
+async function sendOrderEmail(reference: string, order: Order, leadTime: LeadTimeWarning | null): Promise<{ sent: boolean; emailId?: string; error?: string }> {
 	const apiKey = process.env.RESEND_API_KEY;
 	if (!apiKey) {
 		console.log('[neela-order] no resend key, skipped email send', { reference });
@@ -834,8 +882,8 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const fromAddr = emailFrom();
 		const teamRecipient = recipient();
 		const testMode = isTestMode();
-		const subject = modeSubject(reference, order);
-		const html = buildOrderEmailHtml(reference, order);
+		const subject = modeSubject(reference, order, leadTime);
+		const html = buildOrderEmailHtml(reference, order, leadTime);
 		const text = buildOrderEmailText(reference, order);
 
 		// 1) Events team gets BOTH attachments as separate documents so they
@@ -1047,7 +1095,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		}
 	}
 
-	const { sent, error: emailError } = await sendOrderEmail(reference, v.order);
+	const leadTime = checkLeadTime(v.order);
+	if (leadTime && leadTime.belowThreshold) {
+		console.warn('[neela-order] RUSH order, below lead time', {
+			reference,
+			guestCount: leadTime.guestCount,
+			requiredHours: leadTime.requiredHours,
+			hoursUntilEvent: leadTime.hoursUntilEvent,
+			eventStartIso: leadTime.eventStartIso
+		});
+	}
+
+	const { sent, error: emailError } = await sendOrderEmail(reference, v.order, leadTime);
 
 	console.log('[neela-order] complete', {
 		reference,
@@ -1055,7 +1114,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		emailed: sent,
 		emailError: emailError || null,
 		eventType: v.order.eventType,
-		guestCount: v.order.guestCount
+		guestCount: v.order.guestCount,
+		leadTimeFlag: leadTime?.belowThreshold ?? null
 	});
 
 	return res.status(200).json({
@@ -1064,6 +1124,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		mode: v.order.mode,
 		emailed: sent,
 		...(emailError ? { emailError } : {}),
+		...(leadTime ? { leadTime } : {}),
 		message: modeReplyMessage(reference, v.order.mode)
 	});
 }
