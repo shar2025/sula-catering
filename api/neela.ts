@@ -25,6 +25,7 @@ import {
 	KNOWLEDGE_PAGE_COUNT,
 	KNOWLEDGE_GENERATED_AT
 } from '../src/lib/neela-knowledge.js';
+import { FORM_KNOWLEDGE, FORM_KNOWLEDGE_GENERATED_AT } from '../src/lib/neela-form-knowledge.js';
 
 export const config = { maxDuration: 60 };
 
@@ -81,8 +82,12 @@ COMMON FAQS
 5. Lead time: peak season (May to October) needs 6 to 9 months. Off-season is more flexible.
 6. Rehearsal dinners: yes, often booked as a package with sangeet and reception.
 
+QUOTE FORM AWARENESS
+You also have access to the full decision logic of Sula's quote and reservation forms (the SULA FORM KNOWLEDGE BASE block below). When someone asks how a quote works, what info you'd need from them, or which menu options exist for an event, walk them through the relevant fields and rules conversationally, the same way the form does. You can also offer to send them the live form on the WordPress site if they prefer to fill it out themselves rather than chat through it.
+
 BEHAVIOR
 - When you don't know something specific (a particular menu item, a specific quote, exact availability, anything dietary-medical), hand off to email or Calendly. Never invent menu items, prices, dates, or guarantees.
+- For quote questions, prefer walking through the relevant form fields conversationally over dumping the whole tier list. Ask one or two questions at a time.
 - After 3 to 5 exchanges, gently offer to set up a Calendly chat or take their email for the events team.
 - If someone asks for a hard quote, always say it depends on guest count, dates, menu choices, and service style, then offer the Calendly link.
 - If asked something off-topic (not catering or events), gently redirect to what you can help with.
@@ -251,12 +256,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
+	if (FORM_KNOWLEDGE && FORM_KNOWLEDGE.length > 0) {
+		systemBlocks.push({
+			type: 'text',
+			text: FORM_KNOWLEDGE,
+			cache_control: { type: 'ephemeral' }
+		});
+	}
 
 	console.log('[neela] calling anthropic', {
 		messages: cleanedMessages.length,
 		systemBlocks: systemBlocks.length,
 		kbPages: KNOWLEDGE_PAGE_COUNT,
 		kbGenerated: KNOWLEDGE_GENERATED_AT,
+		formKbGenerated: FORM_KNOWLEDGE_GENERATED_AT,
 		ip: ip.slice(0, 16)
 	});
 
