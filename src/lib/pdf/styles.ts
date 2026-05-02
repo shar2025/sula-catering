@@ -1,14 +1,13 @@
-// Sula PDF style system, elevated to match the brand aesthetic of the live
-// Sula chat panel (Neela) and the marketing site:
-//   midnight + navy backgrounds for the masthead band
-//   plum accents for headings and total stripe
-//   gold rules, dividers, badges, brand marks, prices
-//   cream text against dark, dark text against light
+// Sula PDF style system, elevated to match the live sulacatering.com aesthetic:
+// midnight + navy header panel, cream warm body, plum accents, gold rules and
+// ornaments throughout. Reads like a fine-dining catering presentation, not an
+// invoice with a brand sticker on top.
 //
-// Pages still print cleanly black-on-white in the body so the document stays
-// readable when printed: the rich brand colour lives in the masthead band,
-// section rules, table chrome, and footer. Body text is dark on white for
-// legibility and contrast on cheap office printers.
+// COLOUR PHILOSOPHY:
+//   page base   = cream (#f5ede0)        warm restaurant tablecloth feel
+//   alt rows    = white (#ffffff)        pop against the cream
+//   header band = midnight to navy       deep, considered, signature
+//   accents     = gold (#b8956a) and plum (#25042d)
 //
 // LETTER-SPACING POLICY: tracking stays at 0 on every multi-letter run.
 // pdftotext extracts wide-tracked uppercase as separate glyphs ("D I E TA R Y")
@@ -16,7 +15,8 @@
 // weight, size, colour, fill, and underlines, not letter spacing.
 //
 // CHARACTER POLICY: never use em dashes (U+2014) or en dashes (U+2013) in any
-// label, separator, or copy. Use commas, periods, or middle dot (·, U+00B7).
+// label, separator, or copy. Use commas, periods, middle dot (·, U+00B7), or
+// the gold diamond ornament (◆, U+25C6) as decorative separators.
 
 import { Font, StyleSheet } from '@react-pdf/renderer';
 
@@ -29,22 +29,26 @@ export const COLORS = {
 	textSoft: '#3a3a3a',
 	muted: '#6b6b6b',
 	rule: '#1a1a1a',
-	ruleSoft: '#cccccc',
-	bg: '#ffffff',
-	zebra: '#fbf6ec',          // very faint cream, alternating row bg
-	creamSoft: '#fbf6ec',      // alias for soft cream surface
-	zebraDark: '#f0e5d0',      // darker tint inside totals stripe
+	ruleSoft: '#cfc4ad',        // warm cream-toned rule on cream base
+	bg: '#f5ede0',              // page base, soft cream (was #ffffff)
+	white: '#ffffff',           // alt-row pop colour on cream base
+	zebra: '#ffffff',           // alternating row bg, white on cream base
+	creamSoft: '#fbf6ec',       // very faint cream surface
+	zebraDark: '#ebe0c8',       // darker tint for emphasis blocks
 
 	// Brand
 	midnight: '#0a1628',
 	navy: '#142442',
+	navySoft: '#1c2f55',        // mid-tone navy for gradient layer
 	plum: '#25042d',
 	plumSoft: '#3d1547',
 	gold: '#b8956a',
 	goldSoft: '#d4b88a',
+	goldDeep: '#9b7b54',         // darker gold for inner ornament accents
 	goldFaint: 'rgba(184,149,106,0.32)',
 	cream: '#f5ede0',
-	creamMuted: 'rgba(245,237,224,0.78)'
+	creamMuted: 'rgba(245,237,224,0.78)',
+	creamDim: 'rgba(245,237,224,0.55)'
 };
 
 // ---------- Logo ----------
@@ -112,7 +116,7 @@ export const styles = StyleSheet.create({
 		fontSize: 10,
 		paddingTop: 0,
 		paddingHorizontal: 0,
-		paddingBottom: 44
+		paddingBottom: 50
 	},
 
 	// Inner content wrapper, applies the body horizontal padding so brand bands
@@ -122,69 +126,134 @@ export const styles = StyleSheet.create({
 		paddingTop: 10
 	},
 
-	// ---------- Brand band (top of every page) ----------
-	// Solid midnight band with the elephant logo + Sula wordmark + tagline.
-	// Two stacked Views (midnight then navy) approximate a soft gradient.
+	// ---------- Brand panel (top of every page) ----------
+	// Full-bleed midnight panel, taller than a thin band. Logo enlarged, name
+	// in bigger weight, italic gold tagline, gold ornament line below.
+	// A second View at the bottom acts as a navy gradient shade so the
+	// midnight->navy transition reads as a soft vertical gradient on cheap
+	// printers and on screen.
 	brandBand: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 18,
-		paddingBottom: 14,
+		paddingTop: 22,
+		paddingBottom: 22,
 		paddingHorizontal: HORIZONTAL_PADDING,
-		alignItems: 'center'
+		alignItems: 'center',
+		position: 'relative'
+	},
+	// Compact variant used on Page 2 (Invoice) and Page 3 (Kitchen) so the
+	// document doesn't burn a quarter of every page on chrome. Same midnight
+	// background + gold rule, just less vertical padding and a smaller logo.
+	brandBandCompact: {
+		backgroundColor: COLORS.midnight,
+		paddingTop: 11,
+		paddingBottom: 11,
+		paddingHorizontal: HORIZONTAL_PADDING,
+		alignItems: 'center',
+		position: 'relative'
 	},
 	brandBandShade: {
-		// Lower half of the band, slightly lighter to fake a vertical gradient
 		position: 'absolute',
 		left: 0,
 		right: 0,
 		bottom: 0,
-		height: 24,
+		height: 50,
 		backgroundColor: COLORS.navy,
-		opacity: 0.85
+		opacity: 0.55
+	},
+	brandBandShadeMid: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		bottom: 14,
+		height: 32,
+		backgroundColor: COLORS.navySoft,
+		opacity: 0.30
 	},
 	brandBandRule: {
 		height: 2,
 		backgroundColor: COLORS.gold
 	},
-	brandLogo: { width: 44, height: 44, marginBottom: 6 },
-	brandLogoSmall: { width: 30, height: 30, marginBottom: 4 },
+	brandLogo: { width: 56, height: 56, marginBottom: 6 },
+	brandLogoLarge: { width: 70, height: 70, marginBottom: 8 },
+	brandLogoSmall: { width: 38, height: 38, marginBottom: 4 },
 	brandName: {
 		fontFamily: FONTS.bold,
-		fontSize: 17,
+		fontSize: 20,
 		color: COLORS.cream,
-		marginBottom: 2
+		marginBottom: 3
 	},
 	brandTagline: {
 		fontFamily: FONTS.italic,
-		fontSize: 10,
+		fontSize: 10.5,
 		color: COLORS.gold,
-		marginBottom: 1
+		marginBottom: 4
 	},
 	brandEst: {
 		fontSize: 8.5,
-		color: COLORS.creamMuted
+		color: COLORS.creamMuted,
+		marginBottom: 3
+	},
+	// Gold ornament row inside the brand band: ◆  Sula Indian Restaurant  ◆
+	// Used by Page 1; we also use a thin gold rule + diamond combo for Page 2/3.
+	brandOrnamentRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginTop: 4
+	},
+	brandOrnamentRule: {
+		width: 32,
+		height: 0.7,
+		backgroundColor: COLORS.gold,
+		marginHorizontal: 8
+	},
+	brandOrnamentGlyph: {
+		fontFamily: FONTS.bold,
+		fontSize: 9,
+		color: COLORS.gold
 	},
 
 	// ---------- Document title block (below brand band) ----------
+	// Centered title flanked by gold diamond ornaments and thin gold rules.
+	// Sits on the cream page surface immediately below the midnight panel.
 	docTitleWrap: {
 		alignItems: 'center',
-		marginTop: 8,
+		marginTop: 10,
 		marginBottom: 2
+	},
+	docTitleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginBottom: 4
+	},
+	docTitleSideRule: {
+		flex: 1,
+		height: 0.6,
+		backgroundColor: COLORS.gold,
+		maxWidth: 110
+	},
+	docTitleOrnament: {
+		fontFamily: FONTS.bold,
+		fontSize: 11,
+		color: COLORS.gold,
+		marginHorizontal: 8
 	},
 	docTitle: {
 		fontFamily: FONTS.bold,
-		fontSize: 17,
+		fontSize: 16,
 		color: COLORS.plum,
-		textAlign: 'center'
+		textAlign: 'center',
+		marginHorizontal: 6
 	},
-	docTitleRule: {
-		marginTop: 6,
-		width: 60,
-		height: 1.4,
-		backgroundColor: COLORS.gold
+	docTitleSmall: {
+		fontFamily: FONTS.bold,
+		fontSize: 14,
+		color: COLORS.plum,
+		textAlign: 'center',
+		marginHorizontal: 6
 	},
 	locationsLine: {
-		fontSize: 9.5,
+		fontSize: 9,
 		color: COLORS.textSoft,
 		textAlign: 'center',
 		marginTop: 6,
@@ -207,26 +276,25 @@ export const styles = StyleSheet.create({
 		borderTopColor: COLORS.gold,
 		borderTopStyle: 'solid',
 		marginTop: 4,
-		marginBottom: 8
+		marginBottom: 6
 	},
 
 	// ---------- Section header (across all pages) ----------
-	// Larger, gold ink, with a thicker gold underline rule. Renders as a
-	// horizontal block so we can prepend a small gold square accent.
+	// Gold diamond ornament + plum text + thin gold underline rule.
 	section: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginTop: 6,
+		marginTop: 4,
 		marginBottom: 6,
 		paddingBottom: 3,
 		borderBottomWidth: 0.8,
 		borderBottomColor: COLORS.gold,
 		borderBottomStyle: 'solid'
 	},
-	sectionAccent: {
-		width: 4,
-		height: 12,
-		backgroundColor: COLORS.gold,
+	sectionOrnament: {
+		fontFamily: FONTS.bold,
+		fontSize: 10,
+		color: COLORS.gold,
 		marginRight: 8
 	},
 	sectionText: {
@@ -239,17 +307,17 @@ export const styles = StyleSheet.create({
 	sectionGold: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginTop: 8,
+		marginTop: 6,
 		marginBottom: 3,
 		paddingBottom: 2,
 		borderBottomWidth: 0.6,
 		borderBottomColor: COLORS.gold,
 		borderBottomStyle: 'solid'
 	},
-	sectionGoldAccent: {
-		width: 3,
-		height: 10,
-		backgroundColor: COLORS.gold,
+	sectionGoldOrnament: {
+		fontFamily: FONTS.bold,
+		fontSize: 9,
+		color: COLORS.gold,
 		marginRight: 6
 	},
 	sectionGoldText: {
@@ -259,24 +327,26 @@ export const styles = StyleSheet.create({
 	},
 
 	// ---------- Two-column field grid (Page 1 details) ----------
+	// On the cream base, alternate rows pop white. The faint gold-tinted rule
+	// underneath each row reads as a thin restaurant menu divider.
 	fieldRow: {
 		flexDirection: 'row',
 		alignItems: 'flex-start',
-		paddingVertical: 3,
+		paddingVertical: 3.5,
+		paddingHorizontal: 6,
 		borderBottomWidth: 0.4,
-		borderBottomColor: COLORS.ruleSoft,
+		borderBottomColor: COLORS.goldFaint,
 		borderBottomStyle: 'solid'
 	},
 	fieldRowAlt: {
-		backgroundColor: COLORS.zebra
+		backgroundColor: COLORS.white
 	},
 	fieldLabel: {
 		fontFamily: FONTS.bold,
 		fontSize: 9.5,
 		color: COLORS.plum,
 		width: 160,
-		paddingRight: 8,
-		paddingLeft: 4
+		paddingRight: 8
 	},
 	fieldValue: {
 		fontFamily: FONTS.body,
@@ -302,7 +372,7 @@ export const styles = StyleSheet.create({
 
 	// ---------- Page 1 footer block ----------
 	page1Footer: {
-		marginTop: 12,
+		marginTop: 14,
 		paddingTop: 8,
 		borderTopWidth: 0.4,
 		borderTopColor: COLORS.gold,
@@ -320,25 +390,36 @@ export const styles = StyleSheet.create({
 		marginBottom: 6,
 		textAlign: 'center'
 	},
+	// Subtotal "chip" floats top-right above the table. Gold-bordered cream
+	// fill so it reads as a restraint accent, not a heavy gold block.
 	subtotalChip: {
 		alignSelf: 'flex-end',
 		marginTop: 4,
 		marginBottom: 8,
 		paddingVertical: 4,
 		paddingHorizontal: 12,
-		backgroundColor: COLORS.gold,
+		backgroundColor: COLORS.white,
+		borderWidth: 0.8,
+		borderColor: COLORS.gold,
+		borderStyle: 'solid',
 		borderRadius: 2
+	},
+	subtotalChipLabel: {
+		fontFamily: FONTS.bold,
+		fontSize: 8.5,
+		color: COLORS.muted,
+		marginRight: 6
 	},
 	subtotalChipText: {
 		fontFamily: FONTS.bold,
 		fontSize: 10,
-		color: COLORS.midnight
+		color: COLORS.plum
 	},
 
 	// ---------- Order line-item table (Page 2) ----------
 	tableHeaderRow: {
 		flexDirection: 'row',
-		paddingVertical: 7,
+		paddingVertical: 8,
 		paddingHorizontal: 10,
 		backgroundColor: COLORS.plum,
 		marginBottom: 0
@@ -353,12 +434,12 @@ export const styles = StyleSheet.create({
 		paddingVertical: 6,
 		paddingHorizontal: 10,
 		borderBottomWidth: 0.4,
-		borderBottomColor: COLORS.ruleSoft,
+		borderBottomColor: COLORS.goldFaint,
 		borderBottomStyle: 'solid',
 		alignItems: 'flex-start'
 	},
 	tableRowAlt: {
-		backgroundColor: COLORS.zebra
+		backgroundColor: COLORS.white
 	},
 	colProduct: { flex: 3.4, paddingRight: 8 },
 	colQty: { flex: 0.7, textAlign: 'right', paddingRight: 8 },
@@ -369,7 +450,7 @@ export const styles = StyleSheet.create({
 	priceCell: { fontFamily: FONTS.bold, fontSize: 10, color: COLORS.plum },
 	totalRow: {
 		flexDirection: 'row',
-		paddingVertical: 10,
+		paddingVertical: 12,
 		paddingHorizontal: 10,
 		backgroundColor: COLORS.plum,
 		marginTop: 4,
@@ -385,7 +466,7 @@ export const styles = StyleSheet.create({
 	},
 	totalValue: {
 		fontFamily: FONTS.bold,
-		fontSize: 13,
+		fontSize: 14,
 		color: COLORS.gold,
 		flex: 1.1,
 		textAlign: 'right'
@@ -393,9 +474,9 @@ export const styles = StyleSheet.create({
 
 	// ---------- Page 2 footer block ----------
 	thankYou: {
-		marginTop: 14,
+		marginTop: 16,
 		fontFamily: FONTS.italic,
-		fontSize: 12,
+		fontSize: 13,
 		color: COLORS.plum,
 		textAlign: 'center'
 	},
@@ -418,15 +499,16 @@ export const styles = StyleSheet.create({
 		fontSize: 17,
 		color: COLORS.cream,
 		textAlign: 'center',
-		marginTop: 4
+		marginTop: 2,
+		marginBottom: 3
 	},
 	kitchenSubhead: {
 		fontFamily: FONTS.bold,
 		fontSize: 9,
 		color: COLORS.gold,
 		textAlign: 'center',
-		marginTop: 4,
-		marginBottom: 2
+		marginTop: 1,
+		marginBottom: 1
 	},
 
 	// 2-col header field block on Page 3
@@ -455,7 +537,7 @@ export const styles = StyleSheet.create({
 	// Portioning table (3 cols: Item | Portions | Notes)
 	portTableHeaderRow: {
 		flexDirection: 'row',
-		paddingVertical: 6,
+		paddingVertical: 7,
 		paddingHorizontal: 10,
 		backgroundColor: COLORS.plum
 	},
@@ -484,11 +566,11 @@ export const styles = StyleSheet.create({
 		paddingVertical: 3,
 		paddingHorizontal: 10,
 		borderBottomWidth: 0.4,
-		borderBottomColor: COLORS.ruleSoft,
+		borderBottomColor: COLORS.goldFaint,
 		borderBottomStyle: 'solid',
 		alignItems: 'flex-start'
 	},
-	portRowAlt: { backgroundColor: COLORS.zebra },
+	portRowAlt: { backgroundColor: COLORS.white },
 	portBullet: {
 		fontFamily: FONTS.bold,
 		fontSize: 9,
@@ -536,7 +618,7 @@ export const styles = StyleSheet.create({
 		paddingVertical: 2.5,
 		paddingHorizontal: 4,
 		borderBottomWidth: 0.4,
-		borderBottomColor: COLORS.ruleSoft,
+		borderBottomColor: COLORS.goldFaint,
 		borderBottomStyle: 'solid'
 	},
 	threeColCellLabel: {
@@ -582,11 +664,12 @@ export const styles = StyleSheet.create({
 		gap: 8
 	},
 	checkbox: {
-		width: 10,
-		height: 10,
-		borderWidth: 0.8,
+		width: 11,
+		height: 11,
+		borderWidth: 1,
 		borderColor: COLORS.gold,
-		borderStyle: 'solid'
+		borderStyle: 'solid',
+		backgroundColor: COLORS.white
 	},
 	checklistText: {
 		fontFamily: FONTS.body,
@@ -595,6 +678,8 @@ export const styles = StyleSheet.create({
 	},
 
 	// ---------- Footer (page-number row) ----------
+	// Anchored 22pt above the bottom edge with a thin gold top rule, on a
+	// transparent surface so the cream page bg shows through.
 	footer: {
 		position: 'absolute',
 		bottom: 22,
@@ -626,10 +711,10 @@ export const styles = StyleSheet.create({
 	// ---------- Faint elephant watermark on internal pages ----------
 	pageWatermark: {
 		position: 'absolute',
-		top: 260,
+		top: 280,
 		left: 180,
 		right: 180,
-		opacity: 0.06,
+		opacity: 0.05,
 		width: 240,
 		height: 240,
 		alignSelf: 'center'

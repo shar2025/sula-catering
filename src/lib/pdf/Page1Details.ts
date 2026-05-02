@@ -92,14 +92,23 @@ function brandBand(logoBuffer: Buffer | null | undefined) {
 		e(
 			View,
 			{ style: styles.brandBand },
+			e(View, { style: styles.brandBandShadeMid }),
 			e(View, { style: styles.brandBandShade }),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
-				{ src: logoBuffer, style: styles.brandLogo }
+				{ src: logoBuffer, style: styles.brandLogoLarge }
 			),
 			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
 			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.'),
-			e(Text, { style: styles.brandEst }, 'Est. 2010')
+			e(Text, { style: styles.brandEst }, 'Est. 2010'),
+			// Gold ornament row: thin rule  ◆  thin rule
+			e(
+				View,
+				{ style: styles.brandOrnamentRow },
+				e(View, { style: styles.brandOrnamentRule }),
+				e(Text, { style: styles.brandOrnamentGlyph }, '◆'),
+				e(View, { style: styles.brandOrnamentRule })
+			)
 		),
 		e(View, { style: styles.brandBandRule })
 	);
@@ -184,12 +193,19 @@ export function renderPage1(
 			View,
 			{ style: styles.contentInner },
 
-			// Document title block
+			// Document title block: thin gold rule  ◆  TITLE  ◆  thin gold rule
 			e(
 				View,
 				{ style: styles.docTitleWrap },
-				e(Text, { style: styles.docTitle }, docTitle),
-				e(View, { style: styles.docTitleRule })
+				e(
+					View,
+					{ style: styles.docTitleRow },
+					e(View, { style: styles.docTitleSideRule }),
+					e(Text, { style: styles.docTitleOrnament }, '◆'),
+					e(Text, { style: styles.docTitle }, docTitle),
+					e(Text, { style: styles.docTitleOrnament }, '◆'),
+					e(View, { style: styles.docTitleSideRule })
+				)
 			),
 
 			e(Text, { style: styles.locationsLine }, LOCATIONS),
@@ -204,11 +220,11 @@ export function renderPage1(
 
 			e(View, { style: styles.headerRule }),
 
-			// Section: Catering Details
+			// Section: Catering Details (gold diamond ornament + plum text)
 			e(
 				View,
 				{ style: styles.section },
-				e(View, { style: styles.sectionAccent }),
+				e(Text, { style: styles.sectionOrnament }, '◆'),
 				e(Text, { style: styles.sectionText }, 'Catering Details')
 			),
 

@@ -89,7 +89,7 @@ function kitchenBand(logoBuffer: Buffer | null | undefined) {
 		null,
 		e(
 			View,
-			{ style: styles.brandBand },
+			{ style: styles.brandBandCompact },
 			e(View, { style: styles.brandBandShade }),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
@@ -102,12 +102,12 @@ function kitchenBand(logoBuffer: Buffer | null | undefined) {
 	);
 }
 
-// Helper: render a plum-accented section header (with leading gold tab).
+// Helper: render a plum-accented section header with leading gold diamond.
 function sectionHeader(label: string) {
 	return e(
 		View,
 		{ style: styles.sectionGold },
-		e(View, { style: styles.sectionGoldAccent }),
+		e(Text, { style: styles.sectionGoldOrnament }, '◆'),
 		e(Text, { style: styles.sectionGoldText }, label)
 	);
 }

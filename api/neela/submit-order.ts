@@ -835,10 +835,11 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 		<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid rgba(184,149,106,0.30);border-collapse:separate">
 
 			<!-- Brand band -->
-			<tr><td style="padding:28px 32px 22px;background:linear-gradient(180deg,#0a1628 0%,#142442 100%);background-color:#0a1628">
+			<tr><td align="center" style="padding:32px 32px 26px;background:linear-gradient(180deg,#0a1628 0%,#142442 100%);background-color:#0a1628;text-align:center">
 				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#b8956a;text-transform:uppercase;font-weight:700">Sula Indian Catering</p>
-				<p style="margin:6px 0 2px;font-family:Georgia,serif;font-size:24px;color:#f5ede0;font-weight:600;line-height:1.2">Submission received</p>
-				<p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.78);line-height:1.4">Bold spices. Warm hospitality.</p>
+				<p style="margin:8px 0 4px;font-family:Georgia,serif;font-size:26px;color:#f5ede0;font-weight:600;line-height:1.2">Submission received</p>
+				<p style="margin:0 0 10px;font-family:Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.78);line-height:1.4">Bold spices. Warm hospitality.</p>
+				<p style="margin:0;font-family:Georgia,serif;font-size:14px;color:#b8956a;letter-spacing:8px">&#9670;</p>
 			</td></tr>
 
 			<!-- Gold rule -->
@@ -861,10 +862,11 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 				</table>
 			</td></tr>
 
-			<!-- Sign-off -->
+			<!-- Sign-off with centered gold ornament -->
 			<tr><td style="padding:8px 32px 20px;background:#ffffff">
 				<p style="margin:0 0 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">Talk soon,</p>
-				<p style="margin:0;font-family:Georgia,serif;font-size:16px;color:#25042d;font-weight:600;line-height:1.4">The Sula events team</p>
+				<p style="margin:0 0 14px;font-family:Georgia,serif;font-size:16px;color:#25042d;font-weight:600;line-height:1.4">The Sula events team</p>
+				<p style="margin:0;text-align:center;font-family:Georgia,serif;font-size:13px;color:#b8956a;letter-spacing:6px">&#9670; &#9670; &#9670;</p>
 			</td></tr>
 
 			<!-- Footer band -->

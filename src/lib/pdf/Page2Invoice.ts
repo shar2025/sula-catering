@@ -31,11 +31,11 @@ function brandBand(logoBuffer: Buffer | null | undefined) {
 		null,
 		e(
 			View,
-			{ style: styles.brandBand },
+			{ style: styles.brandBandCompact },
 			e(View, { style: styles.brandBandShade }),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
-				{ src: logoBuffer, style: styles.brandLogo }
+				{ src: logoBuffer, style: styles.brandLogoSmall }
 			),
 			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
 			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.')
@@ -171,12 +171,19 @@ export function renderPage2(
 			View,
 			{ style: styles.contentInner },
 
-			// Document title
+			// Document title block: thin gold rule  ◆  INVOICE  ◆  thin gold rule
 			e(
 				View,
 				{ style: styles.docTitleWrap },
-				e(Text, { style: styles.docTitle }, 'CATERING INVOICE'),
-				e(View, { style: styles.docTitleRule })
+				e(
+					View,
+					{ style: styles.docTitleRow },
+					e(View, { style: styles.docTitleSideRule }),
+					e(Text, { style: styles.docTitleOrnament }, '◆'),
+					e(Text, { style: styles.docTitleSmall }, 'INVOICE'),
+					e(Text, { style: styles.docTitleOrnament }, '◆'),
+					e(View, { style: styles.docTitleSideRule })
+				)
 			),
 			e(Text, { style: styles.locationsLine }, LOCATIONS),
 			e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
@@ -195,13 +202,18 @@ export function renderPage2(
 			e(
 				View,
 				{ style: styles.section },
-				e(View, { style: styles.sectionAccent }),
+				e(Text, { style: styles.sectionOrnament }, '◆'),
 				e(Text, { style: styles.sectionText }, 'Order')
 			),
 			subStr && e(
 				View,
 				{ style: styles.subtotalChip },
-				e(Text, { style: styles.subtotalChipText }, `SUBTOTAL  ${subStr}`)
+				e(
+					Text,
+					null,
+					e(Text, { style: styles.subtotalChipLabel }, 'SUBTOTAL  '),
+					e(Text, { style: styles.subtotalChipText }, subStr)
+				)
 			),
 
 			// Table header
