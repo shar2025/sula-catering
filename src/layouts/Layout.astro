@@ -49,7 +49,10 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="description" content={description} />
 		<link rel="canonical" href={fullCanonical} />
-		<link rel="icon" type="image/png" href="https://sulaindianrestaurant.com/images/logos/logo-icon.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="icon" href="/favicon.ico" />
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
@@ -177,40 +180,55 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 				<a href="/" aria-label="Sula Catering Home">
 					<img src="https://sulaindianrestaurant.com/images/logos/logo-sula.png" alt="Sula Catering Vancouver" class="footer-logo-img" />
 				</a>
-				<p class="footer-tag">Catering · Vancouver</p>
+				<p class="footer-tag">Catering across Vancouver since 2010</p>
 				<div class="gold-divider-ornament"><span></span><div class="diamond"></div><span></span></div>
 			</div>
 			<div class="footer-inner">
 				<div class="footer-col">
 					<h4>Sula Catering</h4>
-					<p>Award-winning Indian catering across Vancouver, Burnaby, Richmond, Surrey & North Vancouver since 2010.</p>
+					<span class="footer-glyph">◆</span>
+					<p>Award-winning Indian catering across Vancouver, Burnaby, Richmond, Surrey, and North Vancouver since 2010.</p>
 				</div>
-				<div class="footer-col">
-					<h4>Services</h4>
-					<a href="/weddings">Wedding Catering</a>
-					<a href="/corporate">Corporate Catering</a>
-					<a href="/private-parties">Private Parties</a>
-					<a href="/cafe-catering">Café & Chai Catering</a>
-					<a href="/pricing">Pricing</a>
-					<a href="/gallery">Gallery</a>
-					<a href="/blog">Journal</a>
+				<div class="footer-col footer-col-links">
+					<h4>Useful Links</h4>
+					<span class="footer-glyph">◆</span>
+					<a href="/weddings"><span class="chev">›</span>Wedding Catering</a>
+					<a href="/corporate"><span class="chev">›</span>Corporate Catering</a>
+					<a href="/private-parties"><span class="chev">›</span>Private Parties</a>
+					<a href="/cafe-catering"><span class="chev">›</span>Café & Chai Catering</a>
+					<a href="/pricing"><span class="chev">›</span>Pricing</a>
+					<a href="/gallery"><span class="chev">›</span>Gallery</a>
+					<a href="/blog"><span class="chev">›</span>Journal</a>
 				</div>
-				<div class="footer-col">
-					<h4>Cities</h4>
-					<a href="/catering-vancouver">Catering Vancouver</a>
-					<a href="/catering-burnaby">Catering Burnaby</a>
-					<a href="/catering-richmond">Catering Richmond</a>
-					<a href="/catering-surrey">Catering Surrey</a>
+				<div class="footer-col footer-col-links">
+					<h4>Cities We Serve</h4>
+					<span class="footer-glyph">◆</span>
+					<a href="/catering-vancouver"><span class="chev">›</span>Catering Vancouver</a>
+					<a href="/catering-burnaby"><span class="chev">›</span>Catering Burnaby</a>
+					<a href="/catering-richmond"><span class="chev">›</span>Catering Richmond</a>
+					<a href="/catering-surrey"><span class="chev">›</span>Catering Surrey</a>
 				</div>
-				<div class="footer-col">
-					<h4>Contact</h4>
-					<p>604-215-1130<br/>events@sulaindianrestaurant.com</p>
-					<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="footer-cta">Request a Quote →</a>
+				<div class="footer-col footer-col-visit">
+					<h4>Visit Us</h4>
+					<span class="footer-glyph">◆</span>
+					<p class="footer-address">1128 Commercial Drive<br/>Vancouver, BC</p>
+					<a href="tel:+16042151130" class="footer-contact">604-215-1130</a>
+					<a href="mailto:events@sulaindianrestaurant.com" class="footer-contact footer-contact-italic">events@sulaindianrestaurant.com</a>
+					<a href="https://www.instagram.com/sularestaurant/" target="_blank" rel="noopener noreferrer" class="footer-ig" aria-label="Follow Sula Catering on Instagram">
+						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect x="3" y="3" width="18" height="18" rx="5"/>
+							<circle cx="12" cy="12" r="4"/>
+							<circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none"/>
+						</svg>
+						<span>Follow <em>@sularestaurant</em></span>
+					</a>
 				</div>
-				<div class="footer-col">
-					<h4>Visit Sula</h4>
+				<div class="footer-col footer-col-family">
+					<h4>The Sula Family</h4>
+					<span class="footer-glyph">◆</span>
 					<a href="https://sulaindianrestaurant.com" target="_blank" rel="noopener" class="footer-visit-btn">Sula Indian Restaurant ↗</a>
 					<a href="https://sulacafe.com" target="_blank" rel="noopener" class="footer-visit-btn">Sula Café ↗</a>
+					<a href="https://sulaindianrestaurant.com/sula-catering-order/" target="_blank" rel="noopener" class="footer-cta">Request a Quote →</a>
 				</div>
 			</div>
 			<div class="footer-bottom"><p>© 2026 Sula Indian Restaurant · All Rights Reserved</p></div>
@@ -625,22 +643,58 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 			.location-card .phone{font-family:'Libre Baskerville',Georgia,serif;font-style:italic;font-size:18px;color:var(--gold);font-weight:700}
 
 			/* FOOTER */
-			.site-footer{background:linear-gradient(180deg,var(--midnight) 0%,var(--midnight-deep) 100%);color:var(--cream);padding:80px 32px 0;border-top:1px solid rgba(184,149,106,0.2);position:relative;overflow:hidden}
+			.site-footer{background:linear-gradient(180deg,var(--midnight) 0%,var(--midnight-deep) 100%);color:var(--cream);padding:92px 32px 0;border-top:1px solid rgba(184,149,106,0.2);position:relative;overflow:hidden}
 			.site-footer::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 4 L36 20 L20 36 L4 20 Z' fill='none' stroke='%23d4b572' stroke-width='1' opacity='0.5'/%3E%3Cpath d='M20 12 L28 20 L20 28 L12 20 Z' fill='none' stroke='%23d4b572' stroke-width='0.7' opacity='0.4'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23e8c987' opacity='0.6'/%3E%3C/svg%3E");opacity:0.14;pointer-events:none;z-index:1}
 			.site-footer > *{position:relative;z-index:2}
-			.footer-logo{text-align:center;margin-bottom:48px}
-			.footer-logo-img{height:80px;width:auto;display:inline-block}
-			.footer-tag{margin-top:16px;font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);font-weight:700}
-			.footer-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:40px;text-align:center;justify-items:center;padding-bottom:48px}
-			.footer-col h4{font-family:'Montserrat',sans-serif;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:4px;font-weight:700;margin-bottom:20px}
-			.footer-col a{display:block;color:rgba(245,237,224,0.7);margin-bottom:10px;font-size:13px;font-weight:400;letter-spacing:0.5px;transition:color 0.3s,padding-left 0.3s;font-family:'Montserrat',sans-serif}
-			.footer-col a:hover{color:var(--gold-light);padding-left:4px}
-			.footer-col p{color:rgba(245,237,224,0.7);font-size:13px;font-weight:400;font-family:'Montserrat',sans-serif;letter-spacing:0.3px;line-height:1.7}
-			.footer-cta{display:inline-block !important;color:var(--gold-light) !important;font-weight:700 !important;border-bottom:1px solid var(--gold);padding-bottom:2px;margin-top:12px;font-family:'Montserrat',sans-serif;font-size:12px !important;letter-spacing:1px !important}
-			.footer-visit-btn{display:inline-block !important;padding:10px 20px !important;border:1px solid var(--gold) !important;color:var(--gold-light) !important;font-size:11px !important;letter-spacing:2px !important;text-transform:uppercase !important;font-weight:700 !important;margin-bottom:12px !important;transition:all 0.4s ease !important;font-family:'Montserrat',sans-serif !important}
-			.footer-visit-btn:hover{background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold) 50%,var(--gold-light) 100%) !important;color:var(--midnight) !important;padding-left:20px !important;transform:translateY(-2px)}
-			.footer-bottom{border-top:1px solid rgba(184,149,106,0.15);padding:24px 0;text-align:center}
-			.footer-bottom p{color:rgba(245,237,224,0.5);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400}
+			.footer-logo{text-align:center;margin-bottom:54px}
+			.footer-logo-img{height:92px;width:auto;display:inline-block}
+			.footer-tag{margin-top:18px;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:18px;letter-spacing:0.06em;color:var(--gold-light);font-weight:500;line-height:1.5;max-width:340px;margin-left:auto;margin-right:auto}
+			.footer-inner{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:48px;text-align:center;justify-items:center;padding-bottom:56px}
+			.footer-col{max-width:240px}
+			.footer-col h4{font-family:'Montserrat',sans-serif;color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:0.22em;font-weight:700;margin-bottom:10px;line-height:1.3}
+			.footer-glyph{display:block;color:var(--gold);font-size:8px;line-height:1;margin-bottom:18px;opacity:0.85}
+			.footer-col a{display:block;color:rgba(245,237,224,0.78);margin-bottom:12px;font-size:14px;font-weight:400;letter-spacing:0.3px;transition:color 0.3s ease;font-family:'Montserrat',sans-serif}
+			.footer-col a:hover{color:var(--gold-light)}
+			.footer-col p{color:rgba(245,237,224,0.78);font-size:14px;font-weight:400;font-family:'Montserrat',sans-serif;letter-spacing:0.3px;line-height:1.75}
+
+			/* USEFUL LINKS / CITIES - chevron prefix + animated underline on hover */
+			.footer-col-links a{position:relative;color:var(--gold);opacity:0.92;display:inline-flex;align-items:center;gap:6px;padding-bottom:2px;margin-bottom:14px}
+			.footer-col-links a .chev{color:var(--gold);opacity:0.6;font-family:'Libre Baskerville',Georgia,serif;font-size:14px;line-height:1;display:inline-block;transition:opacity 0.3s ease,transform 0.3s ease}
+			.footer-col-links a::after{content:'';position:absolute;left:50%;bottom:-2px;width:0;height:1px;background:var(--gold-shimmer);transition:width 0.3s ease,left 0.3s ease}
+			.footer-col-links a:hover{color:var(--gold-shimmer)}
+			.footer-col-links a:hover::after{width:100%;left:0}
+			.footer-col-links a:hover .chev{opacity:1;transform:translateX(2px)}
+
+			/* VISIT US column - dedicated address/phone/email/IG */
+			.footer-col-visit{text-align:center}
+			.footer-col-visit .footer-address{color:var(--gold);opacity:0.9;font-family:'Montserrat',sans-serif;font-size:14px;line-height:1.6;margin-bottom:10px;letter-spacing:0.2px}
+			.footer-contact{display:block;font-family:'Montserrat',sans-serif;font-size:14px;color:var(--gold);font-weight:500;line-height:1.7;letter-spacing:0.2px;transition:color 0.3s ease;margin-bottom:8px !important}
+			.footer-contact:hover{color:var(--gold-shimmer)}
+			.footer-contact-italic{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:16px;color:var(--gold-shimmer);font-weight:500;letter-spacing:0.3px;border-bottom:1px solid transparent;padding-bottom:1px;margin-bottom:6px !important;transition:color 0.3s ease,border-color 0.3s ease}
+			.footer-contact-italic:hover{color:var(--gold-light);border-bottom-color:var(--gold-shimmer)}
+			.footer-ig{display:inline-flex !important;align-items:center;gap:10px;margin-top:18px !important;padding-top:14px;border-top:1px solid rgba(184,149,106,0.25);color:var(--gold) !important;transition:color 0.3s ease,transform 0.3s ease}
+			.footer-ig:hover{color:var(--gold-shimmer) !important;transform:translateY(-1px)}
+			.footer-ig svg{display:block}
+			.footer-ig span{font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;font-weight:500;letter-spacing:0.3px}
+			.footer-ig span em{font-style:italic;font-weight:600;color:var(--gold-light)}
+
+			/* SULA FAMILY column - external buttons + CTA */
+			.footer-cta{display:inline-block !important;color:var(--gold-light) !important;font-weight:700 !important;border-bottom:1px solid var(--gold);padding-bottom:2px;margin-top:14px !important;font-family:'Montserrat',sans-serif;font-size:12px !important;letter-spacing:1px !important}
+			.footer-visit-btn{display:inline-block !important;padding:10px 20px !important;border:1px solid var(--gold) !important;color:var(--gold-light) !important;font-size:11px !important;letter-spacing:2px !important;text-transform:uppercase !important;font-weight:700 !important;margin-bottom:14px !important;transition:all 0.4s ease !important;font-family:'Montserrat',sans-serif !important}
+			.footer-visit-btn:hover{background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold) 50%,var(--gold-light) 100%) !important;color:var(--midnight) !important;transform:translateY(-2px)}
+
+			.footer-bottom{border-top:1px solid rgba(184,149,106,0.15);padding:28px 0;text-align:center;margin-top:8px}
+			.footer-bottom p{color:rgba(245,237,224,0.55);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400}
+
+			/* FOOTER MOBILE - tighter letter-spacing on labels to avoid crop, center align */
+			@media (max-width:600px){
+				.site-footer{padding:64px 24px 0}
+				.footer-logo-img{height:76px}
+				.footer-inner{gap:40px;padding-bottom:44px}
+				.footer-col h4{letter-spacing:0.15em;font-size:11px}
+				.footer-col-links a{justify-content:center}
+				.footer-ig{justify-content:center;width:100%}
+			}
 
 			/* RESPONSIVE - MOBILE */
 			@media (max-width:900px){
