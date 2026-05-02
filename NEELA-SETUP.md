@@ -53,3 +53,42 @@ Quick options:
 ## Customizing Neela's persona
 
 Neela's voice, knowledge, FAQs, and behaviour live in the `SYSTEM_PROMPT` constant inside `api/neela.ts`. Update there, redeploy, done. Anthropic prompt caching means the first request after a deploy is slightly slower while the cache rebuilds, then it's back to fast.
+
+## Phase 2: Email ingestion
+
+When the events team is ready, an `.mbox` export from their Gmail inbox can be turned into a Q&A corpus that Neela can learn from. The pipeline lives in `scripts/ingest-emails.mjs`.
+
+### Run
+
+```bash
+# Drop the export(s) into data/, then:
+npm run ingest:emails -- data/sula-emails.mbox
+
+# Multi-part exports: pass the directory, all .mbox files in it merge
+npm run ingest:emails -- data/sula-emails-2026/
+
+# Test locally without an LLM:
+npm run ingest:emails -- data/synthetic-test-emails.mbox --no-llm
+
+# Build but don't write the file:
+npm run ingest:emails -- data/sula-emails.mbox --dry
+```
+
+Set `ANTHROPIC_API_KEY` (or `Neela`) in your shell before running for proper LLM-based summaries; without it the script falls back to mechanical extraction (subject + first user message + first Sula reply, truncated).
+
+### What it does
+
+1. Parses the mbox via `mailparser` (lazy-loaded, only when needed).
+2. Threads messages by **Message-ID + In-Reply-To + References** (RFC-822-correct), with normalized-subject fallback when headers are missing.
+3. PII-strips every body: emails → `[email]`, NA-format phones → `[phone]`, street addresses → `[address]`, 16-digit cards → `[card]`. Preserves dollar amounts, dates, guest counts, dietary mentions, dish names, venue names.
+4. Filters: drops auto-replies (subject regex + `noreply`/`mailer-daemon` senders), thanks-only one-liners, threads under 30 words total.
+5. For each kept thread, asks Claude Sonnet for a JSON `{topic, summary, key_exchange: {q, a}}` triple. Falls back to mechanical extraction on LLM failure.
+6. Writes `src/lib/neela-email-corpus.ts` exporting `EMAIL_CORPUS`, `EMAIL_CORPUS_THREAD_COUNT`, `EMAIL_CORPUS_TOKEN_ESTIMATE`, `EMAIL_CORPUS_OVER_BUDGET`.
+
+### Token budget
+
+Inline-prompt path supports up to **25k tokens**. If the corpus is larger, the script logs `RAG mode required — corpus exceeds prompt budget; switch to vector retrieval` and sets `EMAIL_CORPUS_OVER_BUDGET = true`. The downstream wiring in `api/neela.ts` should branch at that point: under budget = inline as a 5th cache_control block (with one of persona/site/forms/policies merged to free a slot, since Anthropic caps at 4); over budget = move to a vector index (Voyage AI embed → Cloudflare Vectorize) and retrieve top-k per chat turn.
+
+### Status
+
+The pipeline is **not yet wired** into Neela's prompt. The corpus file is generated and committed for inspection. After the real export is processed and reviewed, add the import + cache_control block in `api/neela.ts`.
