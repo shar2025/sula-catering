@@ -6,10 +6,10 @@
  *
  * Notes:
  * - Uses claude-sonnet-4-6 with prompt caching on the system prompt.
- * - Streams responses via SSE so the first token reaches the user in 1–2s
- *   (Vercel Hobby's 10s default function timeout was killing long replies).
- * - Early-exit cases (rate limit, conversation cap, missing key) still return
- *   JSON; the streaming path only kicks in once we actually call Anthropic.
+ * - Non-streaming: a previous SSE attempt left the function hanging until
+ *   Vercel's 300s hard kill. Reverted to a single `messages.create` call
+ *   with an explicit 25s SDK timeout + AbortController. Sonnet typically
+ *   replies in 4-8s for this prompt size; well under the budget.
  * - In-memory rate limit: 10 user messages per IP per 24h. Resets when the
  *   serverless container cycles. Acceptable for now; upgrade to Vercel KV
  *   for hard guarantees if abuse becomes an issue.
@@ -18,6 +18,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 export const maxDuration = 60;
+const ANTHROPIC_TIMEOUT_MS = 25000;
 
 type Role = 'user' | 'assistant';
 interface ChatMessage {
@@ -148,62 +149,61 @@ export default async function handler(req: Request): Promise<Response> {
 		.filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0)
 		.map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
 
-	const client = new Anthropic({ apiKey });
-	const encoder = new TextEncoder();
+	const client = new Anthropic({ apiKey, maxRetries: 0 });
+	const abortController = new AbortController();
+	const abortTimer = setTimeout(() => abortController.abort(), ANTHROPIC_TIMEOUT_MS);
 
-	const responseStream = new ReadableStream<Uint8Array>({
-		async start(controller) {
-			const enqueue = (obj: unknown) => {
-				try {
-					controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
-				} catch (e) {
-					// Controller already closed; ignore.
-				}
-			};
+	console.log('[neela] calling anthropic', {
+		messages: cleanedMessages.length,
+		ip: ip.slice(0, 16)
+	});
 
-			try {
-				const stream = client.messages.stream({
-					model: 'claude-sonnet-4-6',
-					max_tokens: 1024,
-					system: [
-						{
-							type: 'text',
-							text: SYSTEM_PROMPT,
-							cache_control: { type: 'ephemeral' }
-						}
-					],
-					messages: cleanedMessages
-				});
-
-				for await (const event of stream) {
-					if (
-						event.type === 'content_block_delta' &&
-						event.delta.type === 'text_delta'
-					) {
-						enqueue({ text: event.delta.text });
+	try {
+		const response = await client.messages.create(
+			{
+				model: 'claude-sonnet-4-6',
+				max_tokens: 1024,
+				system: [
+					{
+						type: 'text',
+						text: SYSTEM_PROMPT,
+						cache_control: { type: 'ephemeral' }
 					}
-				}
-
-				try {
-					controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-				} catch (e) { /* ignore */ }
-			} catch (err) {
-				console.error('[neela] stream error', err);
-				enqueue({ error: 'stream', fallback: FALLBACK_MSG });
-			} finally {
-				try { controller.close(); } catch (e) { /* already closed */ }
+				],
+				messages: cleanedMessages
+			},
+			{
+				signal: abortController.signal,
+				timeout: ANTHROPIC_TIMEOUT_MS
 			}
-		}
-	});
+		);
 
-	return new Response(responseStream, {
-		status: 200,
-		headers: {
-			'Content-Type': 'text/event-stream; charset=utf-8',
-			'Cache-Control': 'no-cache, no-transform',
-			Connection: 'keep-alive',
-			'X-Accel-Buffering': 'no',
-			'X-Neela-Remaining': String(rate.remaining)
+		const reply = response.content
+			.filter((block): block is Anthropic.TextBlock => block.type === 'text')
+			.map((block) => block.text)
+			.join('\n')
+			.trim();
+
+		console.log('[neela] anthropic ok', {
+			replyLen: reply.length,
+			inputTokens: response.usage?.input_tokens,
+			outputTokens: response.usage?.output_tokens,
+			cacheRead: response.usage?.cache_read_input_tokens,
+			cacheCreation: response.usage?.cache_creation_input_tokens
+		});
+
+		return jsonResponse({ reply: reply || FALLBACK_MSG, remaining: rate.remaining });
+	} catch (err: unknown) {
+		const isAbort =
+			abortController.signal.aborted ||
+			(err instanceof Error && (err.name === 'AbortError' || err.message.toLowerCase().includes('abort')));
+		if (isAbort) {
+			console.error('[neela] anthropic timed out (>25s)');
+			return jsonResponse({ reply: FALLBACK_MSG }, 504);
 		}
-	});
+		console.error('[neela] anthropic error', err);
+		return jsonResponse({ reply: FALLBACK_MSG }, 502);
+	} finally {
+		clearTimeout(abortTimer);
+	}
 }
