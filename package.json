@@ -17,7 +17,8 @@
     "@anthropic-ai/sdk": "^0.92.0",
     "@astrojs/sitemap": "^3.7.2",
     "@neondatabase/serverless": "^1.1.0",
-    "astro": "^6.1.9"
+    "astro": "^6.1.9",
+    "resend": "^6.12.2"
   },
   "devDependencies": {
     "@vercel/node": "^5.7.15",

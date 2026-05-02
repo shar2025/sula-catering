@@ -1,0 +1,8 @@
+{
+	"crons": [
+		{
+			"path": "/api/cron/neela-digest",
+			"schedule": "0 16 * * *"
+		}
+	]
+}
