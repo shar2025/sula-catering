@@ -126,9 +126,6 @@
 	.neela-speaker[aria-pressed="true"] .neela-speaker-on{display:block}
 	.neela-speaker[aria-pressed="true"] .neela-speaker-off{display:none}
 	.neela-speaker[aria-pressed="true"]{color:var(--gold-shimmer);background:rgba(184,149,106,0.14)}
-	/* "Premium voice coming soon" — small gold dot badge on the speaker icon when ElevenLabs key isn't set */
-	.neela-speaker.voice-soon{position:relative}
-	.neela-speaker.voice-soon::after{content:'';position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--gold-shimmer);box-shadow:0 0 6px rgba(232,201,135,0.7)}
 
 	/* MESSAGES */
 	.neela-messages{flex:1;overflow-y:auto;padding:18px 18px 8px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:rgba(184,149,106,0.4) transparent}
@@ -592,74 +589,35 @@
 	//   1. Try ElevenLabs via /api/neela-voice (premium voice; needs ELEVENLABS_API_KEY).
 	//   2. Fall back to browser Web Speech Synthesis (free, robotic, works immediately).
 	//   3. If both fail, hide the speaker toggle.
-	// Speaker default: ON. State persists across navigation via sessionStorage.
-	const SPEAKER_STATE_KEY = 'neela-speaker-on';
-	const VOICE_QUALITY_KEY = 'neela-voice-quality'; // 'premium' | 'browser', set from first /api/neela response
+	// Speaker default: ALWAYS ON now that ElevenLabs is wired in production.
+	// User's explicit mute persists across sessions via localStorage. Bumped
+	// the storage key to v2 so any old sessionStorage default-OFF value from
+	// the pre-ElevenLabs era doesn't bleed through.
+	const SPEAKER_STATE_KEY = 'neela_speaker_v2';
+	const VOICE_QUALITY_KEY = 'neela-voice-quality'; // 'premium' | 'browser', set from first /api/neela response (kept for analytics)
 	let voiceQuality = (() => {
 		try { return sessionStorage.getItem(VOICE_QUALITY_KEY) || 'unknown'; } catch (e) { return 'unknown'; }
 	})();
 	function readSpeakerState() {
-		// Explicit user choice always wins
+		// Explicit user choice persists across sessions in localStorage.
 		try {
-			const v = sessionStorage.getItem(SPEAKER_STATE_KEY);
+			const v = localStorage.getItem(SPEAKER_STATE_KEY);
 			if (v === '0') return false;
 			if (v === '1') return true;
 		} catch (e) {}
-		// No explicit choice yet: only default ON if we know premium voice is wired.
-		// If we don't know yet (first session) or we know it's browser-only, default OFF
-		// to avoid surprising customers with the robotic browser TTS voice.
-		return voiceQuality === 'premium';
+		// No explicit choice yet → default ON. ElevenLabs is the production voice path.
+		return true;
 	}
 	function saveSpeakerState() {
-		try { sessionStorage.setItem(SPEAKER_STATE_KEY, speakerOn ? '1' : '0'); } catch (e) {}
+		try { localStorage.setItem(SPEAKER_STATE_KEY, speakerOn ? '1' : '0'); } catch (e) {}
 	}
 	function applySpeakerUI() {
 		speakerBtn.setAttribute('aria-pressed', speakerOn ? 'true' : 'false');
 		speakerBtn.setAttribute('aria-label', 'Voice replies, currently ' + (speakerOn ? 'on' : 'off'));
+		speakerBtn.setAttribute('title', 'Voice replies');
 	}
 	speakerOn = readSpeakerState();
 	applySpeakerUI();
-
-	// Voice quality affects speaker title + a "soon" badge on the icon, and the
-	// nudge copy (don't promise spoken replies if we know it's the rough browser voice).
-	function applyVoiceQualityUI() {
-		if (!speakerBtn) return;
-		if (voiceQuality === 'premium') {
-			speakerBtn.classList.remove('voice-soon');
-			speakerBtn.setAttribute('title', 'Voice replies');
-		} else if (voiceQuality === 'browser') {
-			speakerBtn.classList.add('voice-soon');
-			speakerBtn.setAttribute('title', 'Premium voice coming soon, browser voice for now');
-		} else {
-			// unknown — leave neutral
-			speakerBtn.classList.remove('voice-soon');
-			speakerBtn.setAttribute('title', 'Voice replies');
-		}
-		// If user hasn't explicitly chosen, realign the speaker default based on quality.
-		try {
-			const explicit = sessionStorage.getItem(SPEAKER_STATE_KEY);
-			if (explicit !== '0' && explicit !== '1') {
-				const want = voiceQuality === 'premium';
-				if (speakerOn !== want) {
-					speakerOn = want;
-					applySpeakerUI();
-				}
-			}
-		} catch (e) {}
-		// Nudge copy adjusts based on quality (resolve via DOM directly, since the
-		// closured `nudgeEl` is still in TDZ at first call from init).
-		const nEl = document.getElementById('neela-voice-nudge');
-		if (nEl) {
-			const txtEl = nEl.querySelector('.neela-voice-nudge-text');
-			if (txtEl) {
-				txtEl.textContent = voiceQuality === 'premium'
-					? '🎤 Want to talk instead? Tap the mic.'
-					: '🎤 Want to talk? Tap the mic.';
-			}
-		}
-	}
-	// Apply once at init based on cached value
-	applyVoiceQualityUI();
 
 	const speechSynthAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 	let elevenLabsUnavailable = false; // becomes true after a 503 from /api/neela-voice
@@ -1035,13 +993,12 @@
 			}
 			const data = await resp.json().catch(() => ({}));
 			const reply = data && data.reply ? String(data.reply) : FALLBACK_MSG;
-			// Cache server-reported voice quality so we can flip the speaker default
-			// once ElevenLabs is wired (no robotic browser TTS by default).
+			// Cache server-reported voice quality for analytics. Speaker default is
+			// always ON now that ElevenLabs is wired in production; this flag no
+			// longer drives any behavior.
 			if (data && (data.voiceQuality === 'premium' || data.voiceQuality === 'browser')) {
-				const previous = voiceQuality;
 				voiceQuality = data.voiceQuality;
 				try { sessionStorage.setItem(VOICE_QUALITY_KEY, voiceQuality); } catch (e) {}
-				if (previous !== voiceQuality) applyVoiceQualityUI();
 			}
 			showTyping(false);
 			renderMessage('bot', reply);
