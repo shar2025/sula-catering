@@ -342,6 +342,22 @@ function modeEyebrow(mode: Mode): string {
 	return 'Neela &middot; new order captured';
 }
 
+function isBuyoutOrder(order: Order): boolean {
+	// Heuristic: customer notes mention restaurant / buyout / in-restaurant /
+	// at-Sula language, OR location.venueOrAddress matches one of the three
+	// Sula addresses, OR the notes literally contain "buyout".
+	const hay = (
+		(order.notes || '') + ' ' +
+		(order.location?.venueOrAddress || '') + ' ' +
+		(order.dietary?.notes || '')
+	).toLowerCase();
+	if (/\bbuyout\b/.test(hay)) return true;
+	if (/\b(at|host(?:ing)? at|at the) sula\b/.test(hay)) return true;
+	if (/in[- ]restaurant/.test(hay)) return true;
+	if (/(commercial drive|main street|davie street).*sula|sula.*(commercial drive|main street|davie street)/.test(hay)) return true;
+	return false;
+}
+
 function modeSubject(reference: string, order: Order): string {
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const dateStr = order.eventDate || 'TBD';
@@ -351,6 +367,10 @@ function modeSubject(reference: string, order: Order): string {
 	}
 	if (order.mode === 'consultation') {
 		return `[Neela call request ${reference}] ${order.contact.name} wants a Calendly chat`;
+	}
+	if (isBuyoutOrder(order)) {
+		const loc = order.location?.venueOrAddress || order.location?.city || 'Sula';
+		return `[Neela buyout ${reference}] ${loc} for ${guestStr} on ${dateStr}`;
 	}
 	return `[Neela order ${reference}] ${typeStr} for ${guestStr} on ${dateStr}`;
 }

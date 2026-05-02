@@ -28,6 +28,7 @@ import {
 import { FORM_KNOWLEDGE, FORM_KNOWLEDGE_GENERATED_AT } from '../src/lib/neela-form-knowledge.js';
 import { POLICIES_KNOWLEDGE, POLICIES_KNOWLEDGE_VERSION } from '../src/lib/neela-policies.js';
 import { PUBLIC_KNOWLEDGE, PUBLIC_KNOWLEDGE_VERSION } from '../src/lib/neela-public-knowledge.js';
+import { BUYOUT_KNOWLEDGE, BUYOUT_KNOWLEDGE_VERSION } from '../src/lib/neela-buyout-knowledge.js';
 
 export const config = { maxDuration: 60 };
 
@@ -228,6 +229,13 @@ CRITICAL: the public-knowledge block opens with a HARD RULE on the ownership nar
 Use this content to answer questions like "who founded Sula?" (warm founder story, Shar only), "where are your locations?" (the four sites with details), "what awards have you won?" (1-2 picked, not the whole list), "tell me about your chef" (Kailash + Oberoi for big events; Bal for Davie-specific), "do you do vegan?" (yes, dedicated menu + vegan naan), "what makes Sula different?" (mother gravies + house-ground masalas + Mangalore range + eco packaging).
 
 Rules: pick at most one or two credibility points per reply, never list them all, never invent additional awards or chefs, hedge café prices as "around $X" since they're 2025 figures, and defer ownership/finance/internal-operations questions beyond the verified founder story to the events team.
+
+IN-RESTAURANT GROUP RESERVATIONS & BUYOUTS
+The same merged block contains an IN-RESTAURANT GROUP RESERVATIONS & BUYOUTS section with verified minimum-spend matrices for the three buyout tiers (12-30, 30-40, 40-120 guests), restaurant capacities, menu options, and routing rules.
+
+Critical: catering and buyouts are DIFFERENT products. Catering = food delivered TO the customer's location. Buyout = customer dines AT one of the three Sula restaurants on a minimum-spend basis. When a customer says "host my birthday at Sula" or "office party at your restaurant", that's a BUYOUT. When they say "Sula food at our office", that's CATERING. Use the section's routing rules (7-12 = regular reservation, 12-30 = partial buyout no published minimum, 30-40 = partial with day/time-specific minimum, 40-120 = full buyout with setup-style choice) to slot the inquiry. Quote minimums verbatim from the matrix. Do not invent numbers. Be honest when a per-person estimate falls below the minimum.
+
+For buyout intent, run the same mode='full' walkthrough but capture buyout-specific fields: location (Commercial / Main / Davie), date + time slot, guest count → tier, setup style if 40-120, menu preference (family-style / chef-tailored / daily specials), contact info, notes. eventType in the JSON can be 'private' or 'corporate'; flag in notes that it's an in-restaurant booking so the events team routes correctly.
 
 BEHAVIOR
 - When you don't know something specific (a particular menu item, a specific quote, exact availability, anything dietary-medical), hand off to email or Calendly. Never invent menu items, prices, dates, or guarantees.
@@ -551,11 +559,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
-	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms, policies+public).
-	// Public knowledge is concatenated onto policies so they share a single cached block.
+	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms, policies+public+buyout).
+	// Public + buyout knowledge are concatenated onto policies so they share a single cached block.
 	const policiesAndPublic =
 		POLICIES_KNOWLEDGE +
-		(PUBLIC_KNOWLEDGE && PUBLIC_KNOWLEDGE.length > 0 ? '\n\n' + PUBLIC_KNOWLEDGE : '');
+		(PUBLIC_KNOWLEDGE && PUBLIC_KNOWLEDGE.length > 0 ? '\n\n' + PUBLIC_KNOWLEDGE : '') +
+		(BUYOUT_KNOWLEDGE && BUYOUT_KNOWLEDGE.length > 0 ? '\n\n' + BUYOUT_KNOWLEDGE : '');
 	if (policiesAndPublic.length > 0) {
 		systemBlocks.push({
 			type: 'text',
@@ -572,6 +581,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		formKbGenerated: FORM_KNOWLEDGE_GENERATED_AT,
 		policiesVersion: POLICIES_KNOWLEDGE_VERSION,
 		publicVersion: PUBLIC_KNOWLEDGE_VERSION,
+		buyoutVersion: BUYOUT_KNOWLEDGE_VERSION,
 		ip: ip.slice(0, 16)
 	});
 
