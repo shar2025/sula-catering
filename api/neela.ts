@@ -664,7 +664,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			conversationLength: cleanedMessages.length
 		});
 
-		return res.status(200).json({ reply: finalReply, remaining: rate.remaining });
+		return res.status(200).json({
+			reply: finalReply,
+			remaining: rate.remaining,
+			voiceQuality: process.env.ELEVENLABS_API_KEY ? 'premium' : 'browser'
+		});
 	} catch (err: unknown) {
 		const isAbort =
 			abortController.signal.aborted ||
