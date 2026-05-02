@@ -102,20 +102,20 @@
 
 <style is:global>
 	/* NEELA FAB */
-	.neela-fab{position:fixed;right:24px;bottom:24px;z-index:97;display:inline-flex;align-items:center;gap:10px;padding:0 18px 0 0;height:64px;background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold) 50%,var(--gold-light) 100%);background-size:200% 100%;border:none;border-radius:999px;cursor:pointer;color:var(--midnight);font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;font-weight:600;letter-spacing:0.3px;box-shadow:0 8px 28px rgba(10,22,40,0.35),0 0 24px rgba(184,149,106,0.4);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s cubic-bezier(0.4,0,0.2,1),background-position 0.5s ease;isolation:isolate;animation:neela-pulse 2.4s ease-in-out infinite}
-	.neela-fab:hover{transform:translateY(-2px);background-position:100% 0;box-shadow:0 14px 36px rgba(10,22,40,0.45),0 0 32px rgba(232,201,135,0.55)}
+	.neela-fab{position:fixed;right:24px;bottom:24px;z-index:97;display:inline-flex;align-items:center;gap:10px;padding:0 18px 0 0;height:64px;background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold) 50%,var(--gold-light) 100%);background-size:200% 100%;border:none;border-radius:999px;cursor:pointer;color:var(--midnight);font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;font-weight:600;letter-spacing:0.3px;box-shadow:0 8px 28px rgba(10,22,40,0.35),0 0 24px rgba(58,10,69,0.55);transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s cubic-bezier(0.4,0,0.2,1),background-position 0.5s ease;isolation:isolate;animation:neela-pulse 2.4s ease-in-out infinite}
+	.neela-fab:hover{transform:translateY(-2px);background-position:100% 0;box-shadow:0 14px 36px rgba(10,22,40,0.45),0 0 32px rgba(158,100,188,0.65)}
 	.neela-fab-glyph{width:36px;height:36px;border-radius:50%;display:block;background:rgba(5,11,21,0.92);padding:4px;flex-shrink:0;margin:6px 0 6px 6px;box-shadow:inset 0 0 0 1px rgba(232,201,135,0.5)}
 	.neela-fab-label{white-space:nowrap;font-style:normal}
 	.neela-fab-label em{font-style:italic;font-weight:700;letter-spacing:0.4px}
-	.neela-fab-halo{position:absolute;inset:-4px;border-radius:999px;pointer-events:none;border:1px solid rgba(232,201,135,0.4);opacity:0;animation:neela-halo 3.6s ease-in-out infinite}
-	@keyframes neela-pulse{0%,100%{box-shadow:0 8px 28px rgba(10,22,40,0.4),0 0 24px rgba(184,149,106,0.5)}50%{box-shadow:0 10px 34px rgba(10,22,40,0.5),0 0 44px rgba(232,201,135,0.78),0 0 68px rgba(184,149,106,0.38)}}
+	.neela-fab-halo{position:absolute;inset:-4px;border-radius:999px;pointer-events:none;border:1px solid rgba(158,100,188,0.5);opacity:0;animation:neela-halo 3.6s ease-in-out infinite}
+	@keyframes neela-pulse{0%,100%{box-shadow:0 8px 28px rgba(10,22,40,0.4),0 0 24px rgba(58,10,69,0.55)}50%{box-shadow:0 10px 34px rgba(10,22,40,0.5),0 0 44px rgba(158,100,188,0.78),0 0 68px rgba(58,10,69,0.45)}}
 	@keyframes neela-halo{0%,100%{opacity:0;transform:scale(1)}50%{opacity:0.7;transform:scale(1.04)}}
 	/* Always-on rotating conic shimmer ring around the FAB outline. Uses @property so the
 	   gradient angle animates smoothly without rotating the pill bounding box itself. */
 	@property --neela-fab-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
-	.neela-fab::before{content:'';position:absolute;inset:-3px;border-radius:inherit;padding:3px;background:conic-gradient(from var(--neela-fab-angle,0deg),rgba(184,149,106,0) 0deg,rgba(232,201,135,0.95) 90deg,rgba(184,149,106,0.85) 180deg,rgba(232,201,135,0.45) 270deg,rgba(184,149,106,0) 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none;animation:neela-fab-spin 8s linear infinite}
+	.neela-fab::before{content:'';position:absolute;inset:-3px;border-radius:inherit;padding:3px;background:conic-gradient(from var(--neela-fab-angle,0deg),rgba(58,10,69,0) 0deg,rgba(158,100,188,0.95) 90deg,rgba(58,10,69,0.85) 180deg,rgba(158,100,188,0.55) 270deg,rgba(58,10,69,0) 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none;animation:neela-fab-spin 8s linear infinite}
 	@keyframes neela-fab-spin{to{--neela-fab-angle:360deg}}
-	@media (prefers-reduced-motion:reduce){.neela-fab,.neela-fab::before,.neela-fab-halo{animation:none}.neela-fab{box-shadow:0 8px 28px rgba(10,22,40,0.35),0 0 30px rgba(184,149,106,0.55)}}
+	@media (prefers-reduced-motion:reduce){.neela-fab,.neela-fab::before,.neela-fab-halo{animation:none}.neela-fab{box-shadow:0 8px 28px rgba(10,22,40,0.35),0 0 30px rgba(58,10,69,0.6)}}
 	body.menu-open .neela-fab,body.neela-open .neela-fab{opacity:0;pointer-events:none;transform:translateY(20px)}
 
 	/* NEELA MODAL */
