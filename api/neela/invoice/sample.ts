@@ -1,14 +1,13 @@
 /**
  * /api/neela/invoice/sample, public PDF preview using mock data.
  * No DB read, no Resend, no env vars required. Generates the same Sula-branded
- * PDF the real endpoint produces, with a "SAMPLE" gold watermark on pages 1+2
- * so it's never confused for a real order.
+ * PDF the real endpoint produces, with a "SAMPLE" gold watermark on every
+ * page so it's never confused for a real order.
  *
  *   GET /api/neela/invoice/sample                 → all 3 pages
- *   GET /api/neela/invoice/sample?audience=customer → pages 1+2 (what customer sees)
- *   GET /api/neela/invoice/sample?audience=kitchen  → page 3 (what kitchen sees)
- *
- * Useful for showing the brand to stakeholders without spinning up a real order.
+ *   GET /api/neela/invoice/sample?audience=customer → pages 1+2 (Catering Details + Invoice)
+ *   GET /api/neela/invoice/sample?audience=kitchen  → page 3 only
+ *   GET /api/neela/invoice/sample?audience=internal → all 3 pages (events team copy)
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -24,40 +23,53 @@ const SAMPLE_ORDER: InvoiceOrder = {
 	createdAt: new Date().toISOString(),
 	mode: 'full',
 	eventType: 'wedding',
-	eventDate: 'August 15, 2026',
-	guestCount: 80,
+	eventDate: '2026-04-22',
+	guestCount: 15,
 	serviceType: 'drop-off',
-	location: { city: 'Surrey', venueOrAddress: 'Grand Taj Banquet Hall' },
-	timeWindow: '6:00 PM service',
+	deliveryAddress: '4567 Commercial Drive, Vancouver, BC V5N 4G7',
+	deliveryTime: '5:45 PM',
+	timeWindow: '5:45 PM',
+	deliveryKm: 13.5,
+	spiceLevel: 'Medium',
+	paymentMethod: 'Cash',
 	dietary: {
-		vegetarianPct: 60,
-		hasJain: false,
+		vegetarianPct: 100,
 		hasGlutenFree: true,
-		hasNutAllergy: true,
-		notes: '60% vegetarian; one guest with a tree-nut allergy at table 3'
+		notes: 'Two guests gluten-free; one tree-nut allergy at table 3.'
 	},
-	menuTier: 'Vegetarian/Vegan ($24.95 + tax per guest)',
+	menuTier: 'Vegetarian/Vegan ($22.95 + tax per guest)',
 	addOns: ['Onion Bhajia appetizer (+$5/guest)'],
-	setupStyle: 'Heated stainless steel',
+	additionalMenuItems: 'Onion Bhajia (Dairy & Gluten free)',
+	menuItems: [
+		{ kind: 'veg', name: 'Paneer Butter Masala', diet: 'Gluten Free' },
+		{ kind: 'veg', name: 'Dal Makhani' },
+		{ kind: 'appetizer', name: 'Onion Bhajia', diet: 'Dairy & Gluten Free' }
+	],
+	setupStyle: 'Aluminium Trays (Free)',
+	setupType: 'aluminium_trays',
+	platesAndCutlery: 'required',
+	servingSpoons: 'required',
+	dinnerwarePerGuest: 6.9,
 	contact: {
-		name: 'Sample Customer',
-		email: 'customer@example.com',
+		name: 'Shar Vittal',
+		email: 'shar@example.com',
 		phone: '604-555-0100'
 	},
-	notes: 'Sangeet ceremony, please coordinate delivery with venue 6pm sharp. Sample reference, not a real order.',
+	notes: '',
 	quote: {
 		line_items: [
-			{ label: 'Vegetarian/Vegan menu × 80 guests @ $24.95', amount: 1996.00 },
-			{ label: 'Onion Bhajia appetizer × 80 @ $5.00', amount: 400.00 },
-			{ label: 'Heated stainless steel setup', amount: 325.00 },
-			{ label: 'Delivery (10 to 15 km zone)', amount: 5.00 }
+			{ label: 'Vegetarian/Vegan ($22.95 + tax per guest)', qty: 15, unit_price: 22.95, amount: 344.25 },
+			{ label: 'Add Onion Bhajia (Dairy & Gluten free)', qty: 15, unit_price: 5.00, amount: 75.00 },
+			{ label: 'Dinnerware ($6.90/Person)', qty: 15, unit_price: 6.90, amount: 103.50 },
+			{ label: 'Aluminium Trays (Free)', qty: 1, unit_price: 0, amount: 0 },
+			{ label: 'Delivery Fee (13.5 KM)', qty: 1, unit_price: 5.00, amount: 5.00 }
 		],
-		subtotal: 2726.00,
+		subtotal: 527.75,
 		tax_label: 'GST 5%',
-		tax_amount: 136.30,
-		total: 2862.30,
+		tax_amount: 26.39,
+		total: 554.14,
 		currency: 'CAD',
-		disclaimer: 'Preliminary estimate. Final quote in writing from the events team.'
+		disclaimer: 'Preliminary estimate. Final quote will come from the events team in writing.'
 	}
 };
 
@@ -66,6 +78,7 @@ function parseAudience(raw: string | string[] | undefined): Audience {
 	const s = String(v).toLowerCase();
 	if (s === 'customer') return 'customer';
 	if (s === 'kitchen') return 'kitchen';
+	if (s === 'internal') return 'internal';
 	return 'all';
 }
 
@@ -73,9 +86,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	const audience = parseAudience(req.query?.audience);
 	console.log('[neela-invoice-sample] hit', { audience });
 
-	// Match the menu the kitchen sheet would render for the sample's tier.
-	// Reference test: 15 guests Veg/Vegan = Onion Bhajia + Paneer Butter + Dal Makhani.
-	// For 80 guests at the same tier, identical menu shape, just bigger portions.
 	const sheet = calculatePortions({
 		guestCount: SAMPLE_ORDER.guestCount as number,
 		appetizers: [{ name: 'Onion Bhajia', isNonVeg: false }],
@@ -103,7 +113,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 				: 'SC-SAMPLE-full.pdf';
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-		res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min cache; sample is static
+		res.setHeader('Cache-Control', 'public, max-age=300');
 		console.log('[neela-invoice-sample] rendered', { audience, bytes: buffer.length, hasLogo: !!logoBuffer });
 		return res.status(200).send(buffer);
 	} catch (err) {

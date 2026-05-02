@@ -823,40 +823,28 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 	}
 }
 
-// Customer-facing email body. Pages-1-only PDF attached. The customer does NOT
-// see Neela's preliminary pricing line items, events team controls when the
-// real quote goes out. Body copy makes the no-commitment workflow explicit:
-// quote request now, written quote within a business day, booking confirms
-// only after the customer reviews + approves that quote.
+// Customer-facing email body. Page-1-only Catering Details PDF attached. The
+// customer does NOT see prices in this email or the attachment, the events
+// team is reviewing and sending a formal written quote. Tone: warm, casual,
+// Vancouver-local. No prices, no itemised totals, no em dashes.
 function buildCustomerEmailHtml(reference: string, order: Order): string {
-	const dateLabel = new Date().toLocaleDateString('en-CA', {
-		weekday: 'long',
-		month: 'long',
-		day: 'numeric',
-		year: 'numeric',
-		timeZone: 'America/Vancouver'
-	});
-	const heading = 'Your event details';
-	const subline = 'For your records';
-	const body = "Thanks for sharing your event details with Neela. Attached is a copy of what we captured for your records. Our events team will review and send a written quote within one business day. Your event is confirmed once you review and approve that quote, no charge or commitment until then.";
+	const firstName = (order.contact.name || '').split(/\s+/)[0] || 'there';
+	const body = `Hi ${firstName}, thanks for the request. The events team is reviewing the quote and will send the formal one shortly. Your details are attached for reference. Reply if anything's off.`;
 	return `<!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#f5ede0;font-family:'Helvetica Neue',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5ede0">
+<html><body style="margin:0;padding:0;background:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff">
 	<tr><td align="center" style="padding:32px 16px">
-		<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid rgba(184,149,106,0.25);max-width:600px">
-			<tr><td style="padding:30px 32px 22px;background:linear-gradient(135deg,#0a1628 0%,#25042d 70%);text-align:center">
-				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#b8956a">Sula Indian Catering</p>
-				<h1 style="margin:8px 0 4px;font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;color:#f5ede0;letter-spacing:0.4px;font-style:italic">${escapeHtml(heading)}</h1>
-				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(245,237,224,0.78);letter-spacing:2px;text-transform:uppercase">${escapeHtml(subline)} &middot; <strong style="color:#d4b572;letter-spacing:0.5px">${escapeHtml(reference)}</strong></p>
+		<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px">
+			<tr><td style="padding:0 8px 18px">
+				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:14px;color:#25042d">Sula Indian Catering</p>
+				<p style="margin:2px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-style:italic;font-size:12px;color:#6b6b6b">Bold spices. Warm hospitality.</p>
 			</td></tr>
-			<tr><td style="padding:24px 32px">
-				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
-				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">${escapeHtml(body)}</p>
-				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">Reply to this email if anything in the attached needs adjusting before we put together the quote.</p>
-				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; mail.sharathvittal@gmail.com &middot; 604-215-1130</p>
-			</td></tr>
-			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
-				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>
+			<tr><td style="padding:0 8px">
+				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6">${escapeHtml(body)}</p>
+				<p style="margin:0 0 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#6b6b6b;line-height:1.55">Reference: <strong style="color:#1a1a1a">${escapeHtml(reference)}</strong></p>
+				<p style="margin:0 0 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">Talk soon,</p>
+				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">Sula events team</p>
+				<p style="margin:2px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b6b6b">events.sula@gmail.com  ·  604-215-1130</p>
 			</td></tr>
 		</table>
 	</td></tr>

@@ -1,27 +1,27 @@
-// Page 1, Catering Order welcome page.
-// Plum-dominant page with midnight hero band, gold elephant logo, customer
-// name set in giant Cormorant italic gold-shimmer, then a cream content card
-// with two-column event details.
+// Page 1, Catering Details (customer-facing).
+// Matches the format Sula's catering ops already uses: brand block with
+// tagline + 4 locations + contact line, then a label/value field grid.
+// Black-on-white, no full-bleed colour, no letter-spacing tricks.
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS } from './styles.js';
-import type { InvoiceOrder } from './InvoicePdf.js';
+import { styles } from './styles.js';
+import type { InvoiceOrder, MenuLine } from './InvoicePdf.js';
 
 const e = React.createElement;
 
-function dietaryLine(d: InvoiceOrder['dietary']): string {
-	if (!d) return '';
-	const parts: string[] = [];
-	if (typeof d.vegetarianPct === 'number') parts.push(`${d.vegetarianPct}% vegetarian`);
-	if (d.hasJain) parts.push('Jain prep');
-	if (d.hasVegan) parts.push('Vegan options');
-	if (d.hasGlutenFree) parts.push('Gluten-free');
-	if (d.hasDairyFree) parts.push('Dairy-free');
-	if (d.hasNutAllergy) parts.push('Nut allergy flagged');
-	if (d.hasShellfishAllergy) parts.push('Shellfish allergy flagged');
-	if (d.notes) parts.push(d.notes);
-	return parts.join(' · ');
+const LOCATIONS = 'Commercial Drive  ·  Main Street  ·  Davie Street  ·  Sula Cafe';
+const CONTACT_LINE = 'events.sula@gmail.com  ·  sulaindianrestaurant.com';
+const STANDARD_INCLUDES = 'Tandoori Naan, Garlic Naan, Basmati Rice, Mango Chutney, Hot Sauce & Lentil Wafers';
+
+function formatEventDate(s: string | undefined): string {
+	if (!s) return '';
+	const d = new Date(s);
+	if (isNaN(d.getTime())) return s;
+	const dd = String(d.getDate()).padStart(2, '0');
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	const yyyy = d.getFullYear();
+	return `${dd}/${mm}/${yyyy}`;
 }
 
 function locationLine(order: InvoiceOrder): string {
@@ -32,34 +32,49 @@ function locationLine(order: InvoiceOrder): string {
 	return loc.venueOrAddress || loc.city || '';
 }
 
-function rentalsLine(order: InvoiceOrder): string {
-	const parts: string[] = [];
-	if (order.rentalsRequired === true) parts.push('Rentals: required');
-	else if (order.rentalsRequired === false) parts.push('Rentals: not required');
-	if (order.platesAndCutlery === 'required') parts.push('Plates + cutlery: required');
-	else if (order.platesAndCutlery === 'not_required') parts.push('Plates + cutlery: not required');
-	if (order.servingSpoons === 'required') parts.push('Serving spoons: required');
-	else if (order.servingSpoons === 'not_required') parts.push('Serving spoons: not required');
-	return parts.join(' · ');
+function eventTypeLabel(order: InvoiceOrder): string {
+	if (!order.eventType) return '';
+	const raw = order.eventType.replace(/[-_]+/g, ' ');
+	return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
-function field(label: string, value: string | undefined, hero = false) {
+// Group menu items by kind so we can render them as Veg Curry #1, Veg Curry #2,
+// Vegan Curry #1, Non-Veg Curry #1 etc. Returns the list of label/value pairs
+// to slot into the field grid.
+function menuItemRows(items: MenuLine[] | undefined): { label: string; value: string; diet?: string }[] {
+	if (!items || items.length === 0) return [];
+	const groups: Record<MenuLine['kind'], MenuLine[]> = { veg: [], vegan: [], nonveg: [], appetizer: [] };
+	for (const it of items) {
+		if (groups[it.kind]) groups[it.kind].push(it);
+	}
+	const rows: { label: string; value: string; diet?: string }[] = [];
+	for (const [i, m] of groups.veg.entries()) {
+		rows.push({ label: `Veg Curry #${i + 1}`, value: m.name, diet: m.diet });
+	}
+	for (const [i, m] of groups.vegan.entries()) {
+		rows.push({ label: `Vegan Curry #${i + 1}`, value: m.name, diet: m.diet });
+	}
+	for (const [i, m] of groups.nonveg.entries()) {
+		rows.push({ label: `Non-Veg Curry #${i + 1}`, value: m.name, diet: m.diet });
+	}
+	for (const [i, m] of groups.appetizer.entries()) {
+		rows.push({ label: groups.appetizer.length === 1 ? 'Appetizer' : `Appetizer #${i + 1}`, value: m.name, diet: m.diet });
+	}
+	return rows;
+}
+
+function fieldRow(label: string, value: string | undefined, opts: { bold?: boolean; diet?: string } = {}) {
 	if (!value) return null;
 	return e(
 		View,
-		null,
+		{ style: styles.fieldRow, key: label },
 		e(Text, { style: styles.fieldLabel }, label),
-		e(Text, { style: hero ? styles.fieldValue : styles.fieldValueSmall }, value)
-	);
-}
-
-function diamondDivider() {
-	return e(
-		View,
-		{ style: styles.diamondRow },
-		e(View, { style: styles.diamondLine }),
-		e(Text, { style: styles.diamondGlyph }, '◆'),
-		e(View, { style: styles.diamondLine })
+		e(
+			Text,
+			{ style: opts.bold ? styles.fieldValueBold : styles.fieldValue },
+			value,
+			opts.diet ? e(Text, { style: styles.dietBadge }, '  (', opts.diet, ')') : null
+		)
 	);
 }
 
@@ -67,13 +82,13 @@ function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footer, fixed: true },
-		e(Text, { style: styles.footerLight }, 'Sula Indian Catering · Vancouver since 2010 · sulacatering.com'),
+		e(Text, { style: styles.footerText }, 'Sula Indian Catering  ·  Vancouver since 2010'),
 		e(
 			Text,
 			{
-				style: styles.footerLight,
+				style: styles.footerText,
 				render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-					`${pageNumber} of ${totalPages}`
+					`Page ${pageNumber} of ${totalPages}`
 			}
 		)
 	);
@@ -83,96 +98,85 @@ export function renderPage1(
 	order: InvoiceOrder,
 	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean } = {}
 ) {
-	const customerName = order.contact?.name || 'Your Order';
-	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
-	const eventTypeDisplay = order.eventType
-		? order.eventType.charAt(0).toUpperCase() + order.eventType.slice(1).replace('-', ' ')
-		: 'Catering';
+	const guestStr = order.guestCount === undefined ? '' : String(order.guestCount);
+	const eventTypeText = eventTypeLabel(order);
+	const addressText = locationLine(order) || (opts.forCustomer ? 'To be confirmed with the events team' : '');
+	const deliveryTimeText = order.deliveryTime || order.timeWindow || '';
+	const eventDateText = formatEventDate(order.eventDate) || order.eventDate || '';
 
-	const leftCol = [
-		field('Event type', eventTypeDisplay, true),
-		field('Date', order.eventDate, true),
-		field('Delivery time', order.deliveryTime || order.timeWindow, true),
-		field('Guests', guestStr, true),
-		field('Service', order.serviceType, true),
-		field('Delivery address', locationLine(order), true)
-	].filter(Boolean);
+	const curryRows = menuItemRows(order.menuItems);
 
-	const rightCol = [
-		field('Menu tier', order.menuTier, true),
-		order.addOns && order.addOns.length ? field('Add-ons', order.addOns.join(' · ')) : null,
-		field('Setup style', order.setupStyle),
-		field('Rentals + service items', rentalsLine(order)),
-		field('Dietary', dietaryLine(order.dietary)),
-		order.customMenuDetails ? field('Custom menu details', order.customMenuDetails) : null,
-		order.notes ? field('Customer notes', order.notes) : null
-	].filter(Boolean);
+	const rows: React.ReactNode[] = [];
+	rows.push(fieldRow('Name', order.contact?.name, { bold: true }));
+	if (order.contact?.phone) rows.push(fieldRow('Phone', order.contact.phone));
+	if (order.contact?.email) rows.push(fieldRow('Email', order.contact.email));
+	rows.push(fieldRow('Event Date (dd/mm/yyyy)', eventDateText, { bold: true }));
+	rows.push(fieldRow('Delivery Time', deliveryTimeText));
+	rows.push(fieldRow('Event Address', addressText));
+	rows.push(fieldRow('Event Type', eventTypeText));
+	if (guestStr) rows.push(fieldRow('Number of Guests', guestStr));
+	for (const r of curryRows) {
+		rows.push(fieldRow(r.label, r.value, { diet: r.diet }));
+	}
+	if (curryRows.length === 0 && order.menuTier) {
+		rows.push(fieldRow('Menu', order.menuTier));
+	}
+	if (order.spiceLevel) rows.push(fieldRow('Spice Level', order.spiceLevel));
+	rows.push(fieldRow('Includes', STANDARD_INCLUDES));
+	if (order.additionalMenuItems) {
+		rows.push(fieldRow('Additional Menu Items', order.additionalMenuItems));
+	} else if (order.addOns && order.addOns.length) {
+		rows.push(fieldRow('Additional Menu Items', order.addOns.join(', ')));
+	}
+	if (order.paymentMethod) rows.push(fieldRow('Method of Payment', order.paymentMethod));
 
-	const heroEyebrowText = `CATERING ORDER · ${formatDateForEyebrow(order.eventDate || order.createdAt)}`;
+	const filteredRows = rows.filter(Boolean);
 
 	return e(
 		Page,
-		{ size: 'LETTER', style: styles.pageDark },
-		// Hero band
+		{ size: 'LETTER', style: styles.page },
+
+		// Brand block
 		e(
 			View,
-			{ style: styles.heroBand },
-			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.heroLogo }),
-			e(Text, { style: styles.heroEyebrow }, heroEyebrowText),
-			e(
-				Text,
-				{ style: styles.heroBrand },
-				'Sula Indian',
-				e(Text, { style: styles.heroBrandGold }, ' Catering')
-			),
-			e(Text, { style: styles.heroDiamond }, '◆'),
-			e(Text, { style: styles.heroCustomerLabel }, 'Prepared for'),
-			e(Text, { style: styles.heroCustomerName }, customerName)
+			{ style: styles.brandBlock },
+			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.brandLogo }),
+			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
+			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.'),
+			e(Text, { style: styles.brandEst }, 'Est. 2010')
 		),
 
-		// Cream content card
+		e(Text, { style: styles.docTitle }, 'CATERING INVOICE'),
+
+		e(Text, { style: styles.locationsLine }, LOCATIONS),
+		e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
+		e(Text, { style: styles.contactLine }, CONTACT_LINE),
+
+		e(View, { style: styles.headerRule }),
+
+		// Section: Catering Details
+		e(Text, { style: styles.section }, 'Catering Details'),
+
+		// Field grid
+		e(View, null, ...filteredRows),
+
+		// Reference number (small, end of page 1)
 		e(
-			View,
-			{ style: styles.creamCard },
-			e(View, { style: styles.creamCardAccent }),
-			e(Text, { style: styles.sectionEyebrow }, opts.forCustomer ? 'For your records' : 'Your event'),
-			e(
-				Text,
-				{ style: styles.sectionTitle },
-				'The ',
-				e(Text, { style: styles.sectionTitleGold }, 'details')
-			),
-			e(
-				View,
-				{ style: styles.twoCol },
-				e(View, { style: styles.col }, ...leftCol),
-				e(View, { style: styles.col }, ...rightCol)
-			),
-			diamondDivider(),
-			e(Text, { style: styles.fieldLabel }, 'Reference'),
-			e(Text, { style: styles.fieldValue }, order.reference),
-			// Customer-copy-only note: sets expectations that pricing follows from
-			// the events team in writing, NOT from this PDF. Renders as a quiet
-			// italic line under the reference number.
-			opts.forCustomer && e(
-				Text,
-				{ style: styles.forRecordsNote },
-				'Quote request received. The events team will send your written quote within one business day. Booking confirms once you review and approve that quote, no charge or commitment until then.'
-			)
+			Text,
+			{ style: { ...styles.contactLine, marginTop: 14, fontSize: 8.5 } },
+			`Reference: ${order.reference}`
 		),
 
-		// Optional rotated watermark behind the content (used by sample preview)
+		// Closing italic line
+		e(
+			Text,
+			{ style: styles.page1Footer },
+			'Visit Sula Cafe for Breakfast, Brunch & Finger Food Catering'
+		),
+
+		// Optional sample watermark
 		opts.watermark && e(Text, { style: styles.sampleWatermark }, opts.watermark),
 
 		pageFooter()
 	);
-}
-
-function formatDateForEyebrow(s: string | undefined): string {
-	if (!s) return '';
-	const d = new Date(s);
-	if (isNaN(d.getTime())) return s.toUpperCase();
-	return d
-		.toLocaleDateString('en-CA', { month: 'long', year: 'numeric', timeZone: 'America/Vancouver' })
-		.toUpperCase();
 }

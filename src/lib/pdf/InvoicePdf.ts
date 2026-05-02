@@ -1,13 +1,13 @@
-// Top-level Sula PDF document. Composes Page1 (catering details), Page2
-// (estimate / invoice), and Page3 (kitchen sheet), filtered by audience.
+// Top-level Sula PDF document. Composes Page1 (Catering Details), Page2
+// (formal Invoice with line-item table), and Page3 (Kitchen Order Sheet),
+// filtered by audience.
 //
-//   audience='customer' → page 1 ONLY (catering details, no pricing).
-//                         The customer never sees Neela's preliminary line-item
-//                         math, events team reviews and sends the official
-//                         quote in writing. Page 1 ends with a "for your records"
-//                         note to set the expectation.
-//   audience='kitchen'  → page 3 only (kitchen sheet)
-//   audience='internal' → all 3 pages (events team copy: details + estimate + kitchen)
+//   audience='customer' → page 1 ONLY (Catering Details summary).
+//                         The customer doesn't see prices in the attachment,
+//                         the events team reviews and sends the formal quote
+//                         in writing; this PDF is just the "we got it" record.
+//   audience='kitchen'  → page 3 only (Kitchen Order Sheet)
+//   audience='internal' → all 3 pages (events team copy: details + invoice + kitchen)
 //   audience='all'      → alias for 'internal' (back-compat with older callers)
 //   default             → all 3 pages
 //
@@ -24,6 +24,23 @@ import type { KitchenSheet } from '../portioning.js';
 
 export type Audience = 'all' | 'internal' | 'customer' | 'kitchen';
 
+// A single curry / appetizer / vegan dish on the menu. The diet badge (e.g.
+// "Gluten Free", "Dairy Free") renders in italic muted next to the name.
+export interface MenuLine {
+	kind: 'veg' | 'vegan' | 'nonveg' | 'appetizer';
+	name: string;
+	diet?: string;
+}
+
+// A single line on the formal invoice (Page 2). qty + unit_price are
+// optional, when omitted only `amount` renders under the Price column.
+export interface InvoiceLineItem {
+	label: string;
+	amount: number;
+	qty?: number;
+	unit_price?: number;
+}
+
 export interface InvoiceOrder {
 	reference: string;
 	createdAt: string;
@@ -36,6 +53,9 @@ export interface InvoiceOrder {
 	deliveryAddress?: string;
 	deliveryTime?: string;
 	timeWindow?: string;
+	deliveryKm?: number;          // distance for delivery zone (Page 3 needs it)
+	spiceLevel?: string;          // 'Mild' | 'Medium' | 'Hot' | 'Extra Hot' free-text
+	paymentMethod?: string;       // 'Cash', 'Card', 'E-transfer', etc.
 	dietary?: {
 		vegetarianPct?: number;
 		hasJain?: boolean;
@@ -44,21 +64,24 @@ export interface InvoiceOrder {
 		hasNutAllergy?: boolean;
 		hasShellfishAllergy?: boolean;
 		hasDairyFree?: boolean;
-		// halal omitted by design, kitchen is halal-certified by default since 2010.
+		// halal omitted by design; kitchen is halal-certified by default since 2010.
 		notes?: string;
 	};
 	menuTier?: string;
 	addOns?: string[];
+	menuItems?: MenuLine[];       // structured curries / apps / vegan / non-veg
+	additionalMenuItems?: string; // free-text "Additional Menu Items" line for Page 1
 	setupStyle?: string;
 	setupType?: string;
 	rentalsRequired?: boolean;
 	platesAndCutlery?: 'required' | 'not_required';
 	servingSpoons?: 'required' | 'not_required';
+	dinnerwarePerGuest?: number;  // typically $6.90/person (only when plates required)
 	customMenuDetails?: string;
 	contact: { name: string; email: string; phone?: string };
 	notes?: string;
 	quote?: {
-		line_items: { label: string; amount: number }[];
+		line_items: InvoiceLineItem[];
 		subtotal?: number;
 		tax_label?: string;
 		tax_amount?: number;
@@ -72,17 +95,16 @@ export function buildInvoicePdf(opts: {
 	order: InvoiceOrder;
 	sheet: KitchenSheet;
 	audience: Audience;
-	watermark?: string; // optional rotated text behind the cream card on Page 1 (e.g. "SAMPLE")
-	logoBuffer?: Buffer | null; // pre-fetched logo PNG; if null, pages render without the elephant glyph
+	watermark?: string;
+	logoBuffer?: Buffer | null;
 }) {
 	ensureFonts();
 	const e = React.createElement;
 	const { order, sheet, audience, watermark, logoBuffer } = opts;
 
 	const children: React.ReactNode[] = [];
-	// 'customer' = page 1 ONLY (no pricing). Events team controls when/how the
-	// real quote goes out, so the customer's confirmation copy is just a record
-	// of what was captured.
+	// 'customer' = Catering Details ONLY. No prices, no kitchen sheet. The
+	// formal quote follows by email from the events team.
 	if (audience === 'customer') {
 		children.push(renderPage1(order, { watermark, logoBuffer, forCustomer: true }));
 	} else if (audience === 'kitchen') {
@@ -99,7 +121,7 @@ export function buildInvoicePdf(opts: {
 		{
 			title: `Sula Catering ${order.reference}`,
 			author: 'Sula Indian Catering',
-			subject: 'Catering Order',
+			subject: 'Catering Invoice',
 			creator: 'Neela',
 			producer: 'Sula Catering Vancouver'
 		} as Record<string, unknown>,

@@ -1,28 +1,28 @@
-// Page 3, Kitchen Order Sheet (back of house drama).
-// Full plum #25042d background with cream type. Inverted cream card for
-// customer info, navy-band table headers with gold portion column in giant
-// Cormorant italic, gold-outlined cards for setup + delivery, gold checkbox
-// pre-delivery checklist in 2 columns. Chef's prep sheet aesthetic.
+// Page 3, Kitchen Order Sheet (internal).
+// Stripped-down operational sheet for the line cooks: customer + event header
+// fields, portioning table, setup + delivery details, pre-delivery checklist.
+// Black-on-white. Plum accent on the "INTERNAL USE ONLY" subhead so it can't
+// be mistaken for a customer-facing page.
 
 import React from 'react';
-import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS } from './styles.js';
+import { Page, View, Text } from '@react-pdf/renderer';
+import { styles } from './styles.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 import type { KitchenSheet } from '../portioning.js';
 
 const e = React.createElement;
 
-function pageFooterDark() {
+function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footer, fixed: true },
-		e(Text, { style: styles.footerDark }, 'Sula Indian Restaurant · Kitchen · Confidential'),
+		e(Text, { style: styles.footerTextConfidential }, 'Sula Indian Restaurant  ·  Kitchen Order Sheet  ·  CONFIDENTIAL'),
 		e(
 			Text,
 			{
-				style: styles.footerDark,
+				style: styles.footerText,
 				render: ({ pageNumber, totalPages }: { pageNumber: number; totalPages: number }) =>
-					`${pageNumber} of ${totalPages}`
+					`Page ${pageNumber} of ${totalPages}`
 			}
 		)
 	);
@@ -36,171 +36,186 @@ function locationLine(order: InvoiceOrder): string {
 	return loc.venueOrAddress || loc.city || '';
 }
 
-function dietaryFlags(d: InvoiceOrder['dietary']): string[] {
-	if (!d) return [];
-	const flags: string[] = [];
-	// NOTE: no HALAL flag, Sula's kitchen is halal-certified by default since 2010,
-	// so every meat dish is already halal. Surfacing it would be noise for the line cooks.
-	if (d.hasJain) flags.push('JAIN PREP');
-	if (d.hasVegan) flags.push('VEGAN');
-	if (typeof d.vegetarianPct === 'number') flags.push(`VEG ${d.vegetarianPct}%`);
-	return flags;
+function formatEventDate(s: string | undefined): string {
+	if (!s) return '';
+	const d = new Date(s);
+	if (isNaN(d.getTime())) return s;
+	const dd = String(d.getDate()).padStart(2, '0');
+	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	const yyyy = d.getFullYear();
+	return `${dd}/${mm}/${yyyy}`;
 }
 
-// Hard allergy/dietary-restriction flags, surfaced in a prominent gold-bordered
-// callout box at the top of the kitchen sheet, separate from the soft dietary
-// flags strip. Cross-contamination risk = needs a chef's eyes on it.
-function allergyFlags(d: InvoiceOrder['dietary']): string[] {
-	if (!d) return [];
-	const flags: string[] = [];
-	if (d.hasNutAllergy) flags.push('NUT ALLERGY');
-	if (d.hasShellfishAllergy) flags.push('SHELLFISH ALLERGY');
-	if (d.hasDairyFree) flags.push('DAIRY-FREE');
-	if (d.hasGlutenFree) flags.push('GLUTEN-FREE');
-	return flags;
+function shortOption(menuTier: string | undefined): string {
+	if (!menuTier) return '';
+	const t = menuTier.toLowerCase();
+	if (t.includes('vegetarian') || t.includes('vegan')) return 'Veg/Vegan';
+	const m = menuTier.match(/option\s*\d/i);
+	if (m) return m[0].replace(/\s+/g, ' ');
+	if (t.includes('meat lovers')) return 'Meat Lovers';
+	return menuTier;
+}
+
+function kitchenField(label: string, value: string | undefined) {
+	if (!value) return null;
+	return e(
+		View,
+		{ style: styles.kitchenFieldRow, key: label },
+		e(Text, { style: styles.kitchenFieldLabel }, label),
+		e(Text, { style: styles.kitchenFieldValue }, value)
+	);
+}
+
+function deliveryZoneNote(km: number | undefined | null): string {
+	if (km === undefined || km === null || !Number.isFinite(km)) return 'Distance to be confirmed';
+	if (km <= 10) return `${km.toFixed(1)} KM  ·  Free zone (0-10 KM)`;
+	if (km <= 15) return `${km.toFixed(1)} KM  ·  $5 zone (10-15 KM)`;
+	if (km <= 30) return `${km.toFixed(1)} KM  ·  $15 zone (15-30 KM)`;
+	return `${km.toFixed(1)} KM  ·  Manual review (30+ KM)`;
 }
 
 export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { logoBuffer?: Buffer | null } = {}) {
-	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
-	const flags = dietaryFlags(order.dietary);
-	const flagsLine = flags.length ? flags.join(' · ') : 'No special dietary flags';
-	const allergies = allergyFlags(order.dietary);
-	const dietaryNotes = order.dietary?.notes;
+	const guests = typeof order.guestCount === 'number' ? order.guestCount : parseInt(String(order.guestCount || '0'), 10) || sheet.guestCount;
+	const address = locationLine(order) || 'To be confirmed with customer';
+	const payment = order.paymentMethod || '';
+	const paymentNote = /cash/i.test(payment) ? 'Bring payment machine as backup' : '';
+
+	// Header field block (2-col)
+	const left: React.ReactNode[] = [];
+	left.push(kitchenField('Customer', order.contact?.name || ''));
+	left.push(kitchenField('Guests', String(guests || sheet.guestCount)));
+	left.push(kitchenField('Event Date', formatEventDate(order.eventDate)));
+	left.push(kitchenField('Delivery', order.deliveryTime || order.timeWindow));
+
+	const right: React.ReactNode[] = [];
+	right.push(kitchenField('Option', shortOption(order.menuTier)));
+	right.push(kitchenField('Spice', order.spiceLevel));
+	right.push(kitchenField('Address', address));
+	right.push(kitchenField('Payment', payment));
 
 	const checklist = [
-		'Confirm guest count with client (24h before)',
-		'Allergy + Jain + dietary flags reviewed by lead chef',
-		'Setup gear loaded (trays / heated / copper)',
-		'Dinnerware + serving spoons packed',
-		'Chutneys + sides portioned per sheet',
-		'Hot food temped at departure (>74°C)',
-		'Cold food temped at departure (<4°C)',
-		'Delivery contact + address confirmed',
-		'Spice level dialed for the room',
-		'Driver briefed on access notes (loading dock, parking)'
+		'All items packed & counted',
+		'Chutneys & sauces sealed',
+		'Dinnerware loaded',
+		'Payment machine charged',
+		'Delivery address confirmed',
+		'Customer notified'
 	];
+
+	// Setup line
+	const setupLabel = order.setupStyle || (order.setupType ? order.setupType.replace(/_/g, ' ') : 'Aluminium Trays');
+	const setupIsAlumi = /alum/i.test(setupLabel);
+	const dinnerwarePerGuest = order.dinnerwarePerGuest ?? 6.9;
 
 	return e(
 		Page,
-		{ size: 'LETTER', style: styles.pageDark },
+		{ size: 'LETTER', style: styles.page },
 
-		// Plum hero (no separate band, page is already plum)
+		e(Text, { style: styles.kitchenHeader }, 'KITCHEN ORDER SHEET'),
+		e(Text, { style: styles.kitchenSubhead }, 'INTERNAL USE ONLY  ·  DO NOT SHARE WITH CUSTOMER'),
+		e(View, { style: styles.headerRule }),
+
+		// Header field block (2-col)
 		e(
 			View,
-			{ style: styles.kitchenHero },
-			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.kitchenLogo }),
-			e(
-				View,
-				{ style: styles.kitchenHeroText },
-				e(Text, { style: styles.kitchenHeroEyebrow }, 'Internal · do not share'),
-				e(Text, { style: styles.kitchenHeroTitle }, 'KITCHEN ORDER'),
-				e(Text, { style: styles.kitchenHeroSub }, 'Reference ' + order.reference + ' · ' + (order.eventDate || 'TBD'))
-			)
+			{ style: styles.twoColRow },
+			e(View, { style: styles.twoColCell }, ...left.filter(Boolean)),
+			e(View, { style: styles.twoColCell }, ...right.filter(Boolean))
 		),
 
-		// Body
+		// Portioning section
+		e(Text, { style: styles.sectionGold }, `PORTIONING (${guests || sheet.guestCount} Guests)`),
+
+		// Portioning table header
 		e(
 			View,
-			{ style: styles.kitchenBody },
+			{ style: styles.portTableHeaderRow },
+			e(Text, { style: styles.portHeaderItem }, '   Item'),
+			e(Text, { style: styles.portHeaderPortions }, 'Portions'),
+			e(Text, { style: styles.portHeaderNotes }, 'Notes')
+		),
 
-			// Inverted cream card: customer info + event facts
+		// Portioning rows
+		...sheet.lines.map((line, i) =>
 			e(
 				View,
-				{ style: styles.invertedCard },
+				{ style: i % 2 === 1 ? { ...styles.portRow, ...styles.portRowAlt } : styles.portRow, key: `port-${i}` },
 				e(
 					View,
-					{ style: styles.invertedCol },
-					e(Text, { style: styles.invertedColTitle }, 'Customer'),
-					e(Text, { style: styles.invertedColLineHero }, order.contact?.name || ''),
-					e(Text, { style: styles.invertedColLine }, order.contact?.email || ''),
-					order.contact?.phone && e(Text, { style: styles.invertedColLine }, order.contact.phone)
+					{ style: styles.portCellItem },
+					e(Text, { style: styles.portBullet }, '■'),
+					e(Text, { style: styles.portCellItemText }, line.item)
 				),
-				e(
-					View,
-					{ style: styles.invertedCol },
-					e(Text, { style: styles.invertedColTitle }, 'Event'),
-					e(Text, { style: styles.invertedColLineHero }, guestStr + ' guests · ' + (order.eventType || 'event')),
-					e(Text, { style: styles.invertedColLine }, order.eventDate || 'Date TBD'),
-					order.timeWindow && e(Text, { style: styles.invertedColLine }, order.timeWindow),
-					locationLine(order) && e(Text, { style: styles.invertedColLine }, locationLine(order))
-				)
-			),
-
-			// Allergy callout, only renders if any hard allergy/restriction flagged.
-			// Cross-contamination risk; lead chef has to sign off.
-			allergies.length > 0 && e(
-				View,
-				{ style: styles.allergyCallout },
-				e(Text, { style: styles.allergyCalloutLabel }, '⚠ Allergy / restriction flags, chef sign-off required'),
-				e(Text, { style: styles.allergyCalloutBody }, allergies.join(' · ')),
-				e(Text, { style: styles.allergyCalloutNote }, 'Confirm separate prep surface, dedicated utensils, and ingredient check on all sauces. Cross-contamination risk on shared kitchen equipment, flag any uncertainty to the lead chef before service.')
-			),
-
-			// Dietary flags strip
-			e(
-				View,
-				{ style: styles.plumCard },
-				e(Text, { style: styles.plumCardLabel }, 'Dietary flags'),
-				e(Text, { style: styles.plumCardLine }, flagsLine),
-				dietaryNotes && e(Text, { style: styles.plumCardLineMuted }, 'Notes: ' + dietaryNotes)
-			),
-
-			// Portioning table title
-			e(Text, { style: styles.portTitle }, 'Portioning'),
-
-			// Table header
-			e(
-				View,
-				{ style: styles.portTableHeader },
-				e(Text, { style: styles.portCellHeaderItem }, 'Item'),
-				e(Text, { style: styles.portCellHeaderQty }, 'Qty'),
-				e(Text, { style: styles.portCellHeaderNotes }, 'Notes')
-			),
-
-			// Table rows
-			...sheet.lines.map((line, i) =>
-				e(
-					View,
-					{ style: i % 2 === 1 ? styles.portRowAltMerged : styles.portRow, key: String(i) },
-					e(Text, { style: styles.portCellItem }, line.item),
-					e(Text, { style: styles.portCellPortions }, line.portions),
-					e(Text, { style: styles.portCellNotes }, line.notes)
-				)
-			),
-
-			// Setup & Delivery cards
-			e(
-				View,
-				{ style: styles.plumCard },
-				e(Text, { style: styles.plumCardLabel }, 'Setup'),
-				e(Text, { style: styles.plumCardLine }, order.setupStyle || 'Aluminum trays (default)'),
-				order.menuTier && e(Text, { style: styles.plumCardLineMuted }, 'Menu tier: ' + order.menuTier)
-			),
-			e(
-				View,
-				{ style: styles.plumCard },
-				e(Text, { style: styles.plumCardLabel }, 'Delivery / Service'),
-				e(Text, { style: styles.plumCardLine }, locationLine(order) || 'Address TBD'),
-				order.timeWindow && e(Text, { style: styles.plumCardLineMuted }, 'Time: ' + order.timeWindow),
-				order.serviceType && e(Text, { style: styles.plumCardLineMuted }, 'Service: ' + order.serviceType)
-			),
-
-			// Pre-delivery checklist
-			e(Text, { style: styles.checklistTitle }, 'Pre-delivery checklist'),
-			e(
-				View,
-				{ style: styles.checklistGrid },
-				...checklist.map((item, i) =>
-					e(
-						View,
-						{ style: styles.checklistItem, key: String(i) },
-						e(View, { style: styles.checkbox }),
-						e(Text, { style: styles.checklistText }, item)
-					)
-				)
+				e(Text, { style: styles.portCellPortions }, line.portions),
+				e(Text, { style: styles.portCellNotes }, line.notes)
 			)
 		),
 
-		pageFooterDark()
+		// Footnote — chef confirms specific dishes
+		e(
+			Text,
+			{ style: styles.portFootnote },
+			'Specific dishes confirmed by chef based on tier and dietary requirements.'
+		),
+
+		// Setup & Equipment
+		e(Text, { style: styles.sectionGold }, 'SETUP & EQUIPMENT'),
+		e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Aluminium Trays'),
+			e(Text, { style: styles.threeColCellValue }, setupIsAlumi ? 'Yes' : 'No'),
+			e(Text, { style: styles.threeColCellNote }, setupIsAlumi ? 'Free' : setupLabel)
+		),
+		order.platesAndCutlery === 'required' && e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Dinnerware'),
+			e(Text, { style: styles.threeColCellValue }, `${guests || sheet.guestCount} sets`),
+			e(Text, { style: styles.threeColCellNote }, `$${dinnerwarePerGuest.toFixed(2)}/person`)
+		),
+		order.servingSpoons && e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Serving Spoons'),
+			e(Text, { style: styles.threeColCellValue }, order.servingSpoons === 'required' ? 'Required' : 'Not required'),
+			e(Text, { style: styles.threeColCellNote }, '')
+		),
+
+		// Delivery
+		e(Text, { style: styles.sectionGold }, 'DELIVERY'),
+		e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Address'),
+			e(Text, { style: { ...styles.threeColCellValue, flex: 3.5 } }, address)
+		),
+		e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Distance'),
+			e(Text, { style: styles.threeColCellValue }, deliveryZoneNote(order.deliveryKm)),
+			e(Text, { style: styles.threeColCellNote }, order.deliveryTime || order.timeWindow || '')
+		),
+		payment && e(
+			View,
+			{ style: styles.threeColRow },
+			e(Text, { style: styles.threeColCellLabel }, 'Payment'),
+			e(Text, { style: styles.threeColCellValue }, payment),
+			e(Text, { style: styles.threeColCellNote }, paymentNote)
+		),
+
+		// Pre-delivery checklist
+		e(Text, { style: styles.sectionGold }, 'PRE-DELIVERY CHECKLIST'),
+		...checklist.map((item, i) =>
+			e(
+				View,
+				{ style: styles.checklistItem, key: `chk-${i}` },
+				e(View, { style: styles.checkbox }),
+				e(Text, { style: styles.checklistText }, item)
+			)
+		),
+
+		pageFooter()
 	);
 }
