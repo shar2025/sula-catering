@@ -232,7 +232,10 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 					<a href="https://sulaindianrestaurant.com/sula-catering-order/" target="_blank" rel="noopener" class="footer-cta">Request a Quote →</a>
 				</div>
 			</div>
-			<div class="footer-bottom"><p>© 2026 Sula Indian Restaurant · All Rights Reserved</p></div>
+			<div class="footer-bottom">
+				<p>© 2026 Sula Indian Restaurant · All Rights Reserved</p>
+				<p class="footer-builtby"><a href="https://sulacafe.com" target="_blank" rel="noopener">Built by Sula</a></p>
+			</div>
 		</footer>
 
 		<Neela />
@@ -687,7 +690,10 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 			.footer-visit-btn:hover{background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold) 50%,var(--gold-light) 100%) !important;color:var(--midnight) !important;transform:translateY(-2px)}
 
 			.footer-bottom{border-top:1px solid rgba(184,149,106,0.15);padding:28px 0;text-align:center;margin-top:8px}
-			.footer-bottom p{color:rgba(245,237,224,0.55);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400}
+			.footer-bottom p{color:rgba(245,237,224,0.55);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400;margin:0}
+			.footer-builtby{margin-top:10px !important;color:rgba(245,237,224,0.32) !important;letter-spacing:1.5px !important;font-size:10px !important}
+			.footer-builtby a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(184,149,106,0.2);padding-bottom:1px;transition:color 0.3s ease,border-color 0.3s ease}
+			.footer-builtby a:hover{color:var(--gold-light) !important;border-bottom-color:var(--gold)}
 
 			/* FOOTER MOBILE - tighter letter-spacing on labels to avoid crop, center align */
 			@media (max-width:600px){
