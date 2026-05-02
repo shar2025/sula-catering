@@ -14,6 +14,9 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHash } from 'node:crypto';
 import { neon } from '@neondatabase/serverless';
 import { Resend } from 'resend';
+import { renderToBuffer } from '@react-pdf/renderer';
+import { buildInvoicePdf, type InvoiceOrder, type Audience } from '../../src/lib/pdf/InvoicePdf.js';
+import { calculatePortions, type MenuItem } from '../../src/lib/portioning.js';
 
 export const config = { maxDuration: 30 };
 
@@ -493,33 +496,218 @@ function buildOrderEmailText(reference: string, order: Order): string {
 	return lines.join('\n');
 }
 
+// ---------- PDF generation helpers ----------
+
+// Best-effort menu inference (mirrors the route's heuristic so kitchen-sheet
+// portioning matches what /api/neela/invoice/[ref] would produce).
+function inferMenuForOrder(order: Order): { appetizers: MenuItem[]; curries: MenuItem[] } {
+	const appetizers: MenuItem[] = [];
+	const curries: MenuItem[] = [];
+	const tier = String(order.menuTier || '').toLowerCase();
+
+	if (tier.includes('vegetarian') || tier.includes('vegan')) {
+		appetizers.push({ name: 'Onion Bhajia', isNonVeg: false });
+		curries.push({ name: 'Paneer Butter Masala', isNonVeg: false });
+		curries.push({ name: 'Dal Makhani', isNonVeg: false });
+	} else if (tier.includes('meat lovers')) {
+		curries.push({ name: 'Butter Chicken', isNonVeg: true });
+		curries.push({ name: 'Chicken Saagwala', isNonVeg: true });
+		curries.push({ name: 'Lamb Rogan Josh', isNonVeg: true });
+		curries.push({ name: 'Lamb Pasanda', isNonVeg: true });
+	} else if (tier.includes('option 1')) {
+		curries.push({ name: 'Veg Curry #1', isNonVeg: false });
+		curries.push({ name: 'Veg Curry #2', isNonVeg: false });
+		curries.push({ name: 'Non-Veg Curry', isNonVeg: true });
+	} else if (tier.includes('option 2')) {
+		curries.push({ name: 'Veg Curry #1', isNonVeg: false });
+		curries.push({ name: 'Veg Curry #2', isNonVeg: false });
+		curries.push({ name: 'Non-Veg Curry #1', isNonVeg: true });
+		curries.push({ name: 'Non-Veg Curry #2', isNonVeg: true });
+	} else if (tier.includes('option 3')) {
+		appetizers.push({ name: 'Veg Appetizer', isNonVeg: false });
+		curries.push({ name: 'Veg Curry #1', isNonVeg: false });
+		curries.push({ name: 'Veg Curry #2', isNonVeg: false });
+		curries.push({ name: 'Non-Veg Curry #1', isNonVeg: true });
+		curries.push({ name: 'Non-Veg Curry #2', isNonVeg: true });
+	} else if (tier.includes('option 4')) {
+		appetizers.push({ name: 'Non-Veg Appetizer', isNonVeg: true });
+		curries.push({ name: 'Veg Curry #1', isNonVeg: false });
+		curries.push({ name: 'Veg Curry #2', isNonVeg: false });
+		curries.push({ name: 'Non-Veg Curry #1', isNonVeg: true });
+		curries.push({ name: 'Non-Veg Curry #2', isNonVeg: true });
+	}
+	return { appetizers, curries };
+}
+
+function orderToInvoiceOrder(reference: string, order: Order, createdAt: string): InvoiceOrder {
+	return {
+		reference,
+		createdAt,
+		mode: order.mode,
+		eventType: order.eventType,
+		eventDate: order.eventDate,
+		guestCount: order.guestCount,
+		serviceType: order.serviceType,
+		location: order.location,
+		timeWindow: order.timeWindow,
+		dietary: order.dietary,
+		menuTier: order.menuTier,
+		addOns: order.addOns,
+		setupStyle: order.setupStyle,
+		contact: order.contact,
+		notes: order.notes,
+		quote: order.quote
+	};
+}
+
+async function renderInvoicePdfBuffer(
+	reference: string,
+	order: Order,
+	audience: Audience
+): Promise<Buffer | null> {
+	try {
+		const invoiceOrder = orderToInvoiceOrder(reference, order, new Date().toISOString());
+		const { appetizers, curries } = inferMenuForOrder(order);
+		const guestCount = typeof order.guestCount === 'number'
+			? order.guestCount
+			: parseInt(String(order.guestCount || '0'), 10) || 0;
+		const sheet = calculatePortions({ guestCount, appetizers, curries });
+		const doc = buildInvoicePdf({ order: invoiceOrder, sheet, audience });
+		const buf = await renderToBuffer(doc as unknown as Parameters<typeof renderToBuffer>[0]);
+		return buf;
+	} catch (err) {
+		console.error('[neela-order] pdf render failed', { reference, audience, err });
+		return null;
+	}
+}
+
+// Skip PDF for consultation mode (just contact + notes, not enough to render
+// a meaningful kitchen sheet). Quick + Full both get PDFs.
+function shouldGeneratePdf(order: Order): boolean {
+	return order.mode !== 'consultation';
+}
+
 async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: boolean; emailId?: string }> {
 	const apiKey = process.env.RESEND_API_KEY;
 	if (!apiKey) {
 		console.log('[neela-order] no resend key, skipped email send', { reference });
 		return { sent: false };
 	}
+
+	// Render PDFs in parallel where possible
+	const generatePdfs = shouldGeneratePdf(order);
+	const [fullBuffer, customerBuffer, kitchenBuffer] = generatePdfs
+		? await Promise.all([
+			renderInvoicePdfBuffer(reference, order, 'all'),
+			renderInvoicePdfBuffer(reference, order, 'customer'),
+			process.env.KITCHEN_EMAIL ? renderInvoicePdfBuffer(reference, order, 'kitchen') : Promise.resolve(null)
+		])
+		: [null, null, null];
+
 	try {
 		const resend = new Resend(apiKey);
 		const subject = modeSubject(reference, order);
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
-		const result = await resend.emails.send({
+
+		// 1) Events team — full 3-page PDF attached
+		const teamAttachments = fullBuffer
+			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
+			: undefined;
+		const teamResult = await resend.emails.send({
 			from: EMAIL_FROM,
 			to: [EMAIL_TO],
 			replyTo: order.contact.email,
 			subject,
 			html,
-			text
+			text,
+			attachments: teamAttachments
 		});
-		const emailId = (result.data && (result.data as { id?: string }).id) || undefined;
-		console.log('[neela-order] sent', { reference, emailId });
+		const emailId = (teamResult.data && (teamResult.data as { id?: string }).id) || undefined;
+		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer });
 		await markEmailed(reference);
+
+		// 2) Customer copy — pages 1 + 2 only (no kitchen sheet)
+		if (customerBuffer && order.contact.email) {
+			try {
+				const customerSubject = order.mode === 'quick'
+					? `Sula Catering, your inquiry ${reference}`
+					: `Sula Catering, your order ${reference}`;
+				const customerHtml = buildCustomerEmailHtml(reference, order);
+				await resend.emails.send({
+					from: EMAIL_FROM,
+					to: [order.contact.email],
+					replyTo: EMAIL_TO,
+					subject: customerSubject,
+					html: customerHtml,
+					attachments: [{ filename: `Sula-Catering-${reference}.pdf`, content: customerBuffer }]
+				});
+				console.log('[neela-order] sent customer copy', { reference });
+			} catch (err) {
+				console.warn('[neela-order] customer email failed (non-fatal)', err);
+			}
+		}
+
+		// 3) Optional kitchen-only email (when KITCHEN_EMAIL is set)
+		if (kitchenBuffer && process.env.KITCHEN_EMAIL) {
+			try {
+				await resend.emails.send({
+					from: EMAIL_FROM,
+					to: [process.env.KITCHEN_EMAIL],
+					subject: `[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim(),
+					html: `<p style="font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">Kitchen prep sheet for reference <strong>${reference}</strong> attached. ${order.guestCount || ''} guests, ${order.eventDate || 'date TBD'}.</p>`,
+					attachments: [{ filename: `${reference}-kitchen.pdf`, content: kitchenBuffer }]
+				});
+				console.log('[neela-order] sent kitchen copy', { reference });
+			} catch (err) {
+				console.warn('[neela-order] kitchen email failed (non-fatal)', err);
+			}
+		}
+
 		return { sent: true, emailId };
 	} catch (err) {
 		console.error('[neela-order] email send failed', err);
 		return { sent: false };
 	}
+}
+
+// Customer-facing email body (warmer, simpler, no transcript dump)
+function buildCustomerEmailHtml(reference: string, order: Order): string {
+	const dateLabel = new Date().toLocaleDateString('en-CA', {
+		weekday: 'long',
+		month: 'long',
+		day: 'numeric',
+		year: 'numeric',
+		timeZone: 'America/Vancouver'
+	});
+	const isQuick = order.mode === 'quick';
+	const heading = isQuick ? 'Thanks for the inquiry' : 'Your order is in';
+	const sub = isQuick
+		? 'Our events team will be back within a business day with menu ideas and tailored pricing.'
+		: 'Our events team will be in touch within a business day to confirm details.';
+	return `<!DOCTYPE html>
+<html><body style="margin:0;padding:0;background:#f5ede0;font-family:'Helvetica Neue',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5ede0">
+	<tr><td align="center" style="padding:32px 16px">
+		<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid rgba(184,149,106,0.25);max-width:600px">
+			<tr><td style="padding:30px 32px 22px;background:linear-gradient(135deg,#0a1628 0%,#25042d 70%);text-align:center">
+				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#b8956a">Sula Indian Catering</p>
+				<h1 style="margin:8px 0 4px;font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;color:#f5ede0;letter-spacing:0.4px;font-style:italic">${escapeHtml(heading)}</h1>
+				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:rgba(245,237,224,0.78);letter-spacing:0.3px">Reference <strong style="color:#d4b572">${escapeHtml(reference)}</strong></p>
+			</td></tr>
+			<tr><td style="padding:24px 32px">
+				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
+				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${escapeHtml(sub)}</p>
+				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">Attached is a PDF copy of what we have on file so far. Reply to this email if anything needs to change.</p>
+				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">Sula Indian Catering &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
+			</td></tr>
+			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
+				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>
+			</td></tr>
+		</table>
+	</td></tr>
+</table>
+</body></html>`;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

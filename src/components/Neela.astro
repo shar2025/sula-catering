@@ -213,6 +213,8 @@
 	.neela-order-sent-body{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;font-style:italic;color:rgba(245,237,224,0.85);line-height:1.55;letter-spacing:0.2px}
 	.neela-order-sent-body strong{font-style:normal;font-family:'Montserrat',sans-serif;font-size:13px;letter-spacing:1.2px;color:var(--gold-shimmer);background:rgba(184,149,106,0.14);padding:2px 8px;border-radius:4px}
 	.neela-order-sent-body a{color:var(--gold-shimmer);text-decoration:underline;text-decoration-color:rgba(232,201,135,0.4)}
+	.neela-order-view-invoice{display:inline-block;margin-top:14px;padding:10px 18px;border:1px solid var(--gold);border-radius:999px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold-light);text-decoration:none;transition:background 0.3s ease,color 0.3s ease,transform 0.3s ease}
+	.neela-order-view-invoice:hover{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));color:var(--midnight);transform:translateY(-1px)}
 	.neela-order-card-errored{border-color:rgba(232,123,90,0.55)}
 	.neela-order-card-errored .neela-order-sent-title{color:#f0c1a8}
 
@@ -510,10 +512,13 @@
 			if (resp.ok && data.ok && data.reference) {
 				card.classList.remove('neela-order-card-submitting');
 				card.classList.add('neela-order-card-sent');
+				const ref = escapeHtml(String(data.reference));
+				const invoiceUrl = '/api/neela/invoice/' + encodeURIComponent(String(data.reference)) + '?audience=customer';
 				card.innerHTML =
 					'<p class="neela-order-sent-icon">✓</p>' +
 					'<p class="neela-order-sent-title">Sent</p>' +
-					'<p class="neela-order-sent-body">Your reference is <strong>' + escapeHtml(String(data.reference)) + '</strong>. The events team will reach out within a business day.</p>';
+					'<p class="neela-order-sent-body">Your reference is <strong>' + ref + '</strong>. The events team will reach out within a business day.</p>' +
+					'<a class="neela-order-view-invoice" href="' + invoiceUrl + '" target="_blank" rel="noopener noreferrer">View invoice ↗</a>';
 			} else {
 				throw new Error((data && data.error) || ('http ' + resp.status));
 			}
