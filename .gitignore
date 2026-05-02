@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # Auto-generated knowledge base for Neela (regenerated on every build)
 src/lib/neela-knowledge.ts
+
+# Local PDF render outputs (sample/preview rendering)
+outputs/

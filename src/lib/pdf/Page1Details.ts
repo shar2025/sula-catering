@@ -1,17 +1,26 @@
-// Page 1, Catering Details (customer-facing).
-// Matches the format Sula's catering ops already uses: brand block with
-// tagline + 4 locations + contact line, then a label/value field grid.
-// Black-on-white, no full-bleed colour, no letter-spacing tricks.
+// Page 1, Catering Details.
+// Audience-aware title:
+//   forCustomer=true  → "CATERING SUBMISSION RECORD"
+//                       (at the customer stage it's neither an invoice nor a
+//                       final quote, just a record of their request, the
+//                       events team will follow up with the formal quote)
+//   forCustomer=false → "CATERING INVOICE"
+//                       (page 1 of the formal events-team copy)
+//
+// Layout: full-bleed midnight brand band at the top, gold dividing rule,
+// document title block, label/value field grid, gold-accented footer.
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles } from './styles.js';
+import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder, MenuLine } from './InvoicePdf.js';
 
 const e = React.createElement;
 
+// Middle dot (·) is U+00B7. Avoid em/en dashes anywhere in the document.
 const LOCATIONS = 'Commercial Drive  ·  Main Street  ·  Davie Street  ·  Sula Cafe';
-const CONTACT_LINE = 'events.sula@gmail.com  ·  sulaindianrestaurant.com';
+const CONTACT_LINE_LEFT = 'events.sula@gmail.com';
+const CONTACT_LINE_RIGHT = 'sulaindianrestaurant.com';
 const STANDARD_INCLUDES = 'Tandoori Naan, Garlic Naan, Basmati Rice, Mango Chutney, Hot Sauce & Lentil Wafers';
 
 function formatEventDate(s: string | undefined): string {
@@ -38,9 +47,6 @@ function eventTypeLabel(order: InvoiceOrder): string {
 	return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
-// Group menu items by kind so we can render them as Veg Curry #1, Veg Curry #2,
-// Vegan Curry #1, Non-Veg Curry #1 etc. Returns the list of label/value pairs
-// to slot into the field grid.
 function menuItemRows(items: MenuLine[] | undefined): { label: string; value: string; diet?: string }[] {
 	if (!items || items.length === 0) return [];
 	const groups: Record<MenuLine['kind'], MenuLine[]> = { veg: [], vegan: [], nonveg: [], appetizer: [] };
@@ -63,11 +69,12 @@ function menuItemRows(items: MenuLine[] | undefined): { label: string; value: st
 	return rows;
 }
 
-function fieldRow(label: string, value: string | undefined, opts: { bold?: boolean; diet?: string } = {}) {
+function fieldRow(label: string, value: string | undefined, opts: { bold?: boolean; diet?: string; index: number } = { index: 0 }) {
 	if (!value) return null;
+	const baseStyle = opts.index % 2 === 1 ? { ...styles.fieldRow, ...styles.fieldRowAlt } : styles.fieldRow;
 	return e(
 		View,
-		{ style: styles.fieldRow, key: label },
+		{ style: baseStyle, key: `${label}-${opts.index}` },
 		e(Text, { style: styles.fieldLabel }, label),
 		e(
 			Text,
@@ -78,11 +85,37 @@ function fieldRow(label: string, value: string | undefined, opts: { bold?: boole
 	);
 }
 
+function brandBand(logoBuffer: Buffer | null | undefined) {
+	return e(
+		React.Fragment,
+		null,
+		e(
+			View,
+			{ style: styles.brandBand },
+			e(View, { style: styles.brandBandShade }),
+			logoBuffer && e(
+				Image as unknown as React.ComponentType<Record<string, unknown>>,
+				{ src: logoBuffer, style: styles.brandLogo }
+			),
+			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
+			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.'),
+			e(Text, { style: styles.brandEst }, 'Est. 2010')
+		),
+		e(View, { style: styles.brandBandRule })
+	);
+}
+
 function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footer, fixed: true },
-		e(Text, { style: styles.footerText }, 'Sula Indian Catering  ·  Vancouver since 2010'),
+		e(
+			Text,
+			{ style: styles.footerText },
+			'Sula Indian Catering ',
+			e(Text, { style: styles.footerDot }, ' · '),
+			' Vancouver since 2010'
+		),
 		e(
 			Text,
 			{
@@ -106,72 +139,95 @@ export function renderPage1(
 
 	const curryRows = menuItemRows(order.menuItems);
 
-	const rows: React.ReactNode[] = [];
-	rows.push(fieldRow('Name', order.contact?.name, { bold: true }));
-	if (order.contact?.phone) rows.push(fieldRow('Phone', order.contact.phone));
-	if (order.contact?.email) rows.push(fieldRow('Email', order.contact.email));
-	rows.push(fieldRow('Event Date (dd/mm/yyyy)', eventDateText, { bold: true }));
-	rows.push(fieldRow('Delivery Time', deliveryTimeText));
-	rows.push(fieldRow('Event Address', addressText));
-	rows.push(fieldRow('Event Type', eventTypeText));
-	if (guestStr) rows.push(fieldRow('Number of Guests', guestStr));
+	// Build the field rows. Pass an `index` into fieldRow so we can zebra-stripe
+	// the visible (non-null) ones. We push in render order then re-index after
+	// filtering nulls so the alternation reads cleanly.
+	const rawRows: { label: string; value: string | undefined; bold?: boolean; diet?: string }[] = [];
+	rawRows.push({ label: 'Name', value: order.contact?.name, bold: true });
+	if (order.contact?.phone) rawRows.push({ label: 'Phone', value: order.contact.phone });
+	if (order.contact?.email) rawRows.push({ label: 'Email', value: order.contact.email });
+	rawRows.push({ label: 'Event Date (dd/mm/yyyy)', value: eventDateText, bold: true });
+	rawRows.push({ label: 'Delivery Time', value: deliveryTimeText });
+	rawRows.push({ label: 'Event Address', value: addressText });
+	rawRows.push({ label: 'Event Type', value: eventTypeText });
+	if (guestStr) rawRows.push({ label: 'Number of Guests', value: guestStr });
 	for (const r of curryRows) {
-		rows.push(fieldRow(r.label, r.value, { diet: r.diet }));
+		rawRows.push({ label: r.label, value: r.value, diet: r.diet });
 	}
 	if (curryRows.length === 0 && order.menuTier) {
-		rows.push(fieldRow('Menu', order.menuTier));
+		rawRows.push({ label: 'Menu', value: order.menuTier });
 	}
-	if (order.spiceLevel) rows.push(fieldRow('Spice Level', order.spiceLevel));
-	rows.push(fieldRow('Includes', STANDARD_INCLUDES));
+	if (order.spiceLevel) rawRows.push({ label: 'Spice Level', value: order.spiceLevel });
+	rawRows.push({ label: 'Includes', value: STANDARD_INCLUDES });
 	if (order.additionalMenuItems) {
-		rows.push(fieldRow('Additional Menu Items', order.additionalMenuItems));
+		rawRows.push({ label: 'Additional Menu Items', value: order.additionalMenuItems });
 	} else if (order.addOns && order.addOns.length) {
-		rows.push(fieldRow('Additional Menu Items', order.addOns.join(', ')));
+		rawRows.push({ label: 'Additional Menu Items', value: order.addOns.join(', ') });
 	}
-	if (order.paymentMethod) rows.push(fieldRow('Method of Payment', order.paymentMethod));
+	if (order.paymentMethod) rawRows.push({ label: 'Method of Payment', value: order.paymentMethod });
 
-	const filteredRows = rows.filter(Boolean);
+	const visible = rawRows.filter((r) => r.value);
+	const fieldRows = visible.map((r, i) =>
+		fieldRow(r.label, r.value, { bold: r.bold, diet: r.diet, index: i })
+	);
+
+	const docTitle = opts.forCustomer ? 'CATERING SUBMISSION RECORD' : 'CATERING INVOICE';
 
 	return e(
 		Page,
 		{ size: 'LETTER', style: styles.page },
 
-		// Brand block
+		brandBand(opts.logoBuffer),
+
+		// Inner padded content
 		e(
 			View,
-			{ style: styles.brandBlock },
-			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.brandLogo }),
-			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
-			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.'),
-			e(Text, { style: styles.brandEst }, 'Est. 2010')
-		),
+			{ style: styles.contentInner },
 
-		e(Text, { style: styles.docTitle }, 'CATERING INVOICE'),
+			// Document title block
+			e(
+				View,
+				{ style: styles.docTitleWrap },
+				e(Text, { style: styles.docTitle }, docTitle),
+				e(View, { style: styles.docTitleRule })
+			),
 
-		e(Text, { style: styles.locationsLine }, LOCATIONS),
-		e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
-		e(Text, { style: styles.contactLine }, CONTACT_LINE),
+			e(Text, { style: styles.locationsLine }, LOCATIONS),
+			e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
+			e(
+				Text,
+				{ style: styles.contactLine },
+				CONTACT_LINE_LEFT,
+				e(Text, { style: { color: COLORS.gold } }, '  ·  '),
+				CONTACT_LINE_RIGHT
+			),
 
-		e(View, { style: styles.headerRule }),
+			e(View, { style: styles.headerRule }),
 
-		// Section: Catering Details
-		e(Text, { style: styles.section }, 'Catering Details'),
+			// Section: Catering Details
+			e(
+				View,
+				{ style: styles.section },
+				e(View, { style: styles.sectionAccent }),
+				e(Text, { style: styles.sectionText }, 'Catering Details')
+			),
 
-		// Field grid
-		e(View, null, ...filteredRows),
+			// Field grid
+			e(View, null, ...fieldRows),
 
-		// Reference number (small, end of page 1)
-		e(
-			Text,
-			{ style: { ...styles.contactLine, marginTop: 14, fontSize: 8.5 } },
-			`Reference: ${order.reference}`
-		),
+			// Reference number (small, end of page 1)
+			e(
+				Text,
+				{ style: { ...styles.contactLine, marginTop: 14, fontSize: 8.5 } },
+				`Reference: ${order.reference}`
+			),
 
-		// Closing italic line
-		e(
-			Text,
-			{ style: styles.page1Footer },
-			'Visit Sula Cafe for Breakfast, Brunch & Finger Food Catering'
+			// Closing italic line
+			e(
+				Text,
+				{ style: styles.page1Footer },
+				'Visit Sula Cafe for Breakfast, Brunch & Finger Food Catering'
+			)
 		),
 
 		// Optional sample watermark

@@ -1,12 +1,13 @@
 // Page 3, Kitchen Order Sheet (internal).
-// Stripped-down operational sheet for the line cooks: customer + event header
-// fields, portioning table, setup + delivery details, pre-delivery checklist.
-// Black-on-white. Plum accent on the "INTERNAL USE ONLY" subhead so it can't
-// be mistaken for a customer-facing page.
+// Operational sheet for the line cooks: customer + event header fields,
+// portioning table, setup + delivery details, pre-delivery checklist.
+// Same brand band as the other pages so the kitchen copy reads as part of the
+// document set, with a gold INTERNAL USE ONLY subhead inside the band so it
+// can't be mistaken for a customer-facing page.
 
 import React from 'react';
-import { Page, View, Text } from '@react-pdf/renderer';
-import { styles } from './styles.js';
+import { Page, View, Text, Image } from '@react-pdf/renderer';
+import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 import type { KitchenSheet } from '../portioning.js';
 
@@ -16,7 +17,15 @@ function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footer, fixed: true },
-		e(Text, { style: styles.footerTextConfidential }, 'Sula Indian Restaurant  ·  Kitchen Order Sheet  ·  CONFIDENTIAL'),
+		e(
+			Text,
+			{ style: styles.footerTextConfidential },
+			'Sula Indian Restaurant ',
+			e(Text, { style: { color: COLORS.gold } }, ' · '),
+			' Kitchen Order Sheet ',
+			e(Text, { style: { color: COLORS.gold } }, ' · '),
+			' CONFIDENTIAL'
+		),
 		e(
 			Text,
 			{
@@ -74,6 +83,35 @@ function deliveryZoneNote(km: number | undefined | null): string {
 	return `${km.toFixed(1)} KM  ·  Manual review (30+ KM)`;
 }
 
+function kitchenBand(logoBuffer: Buffer | null | undefined) {
+	return e(
+		React.Fragment,
+		null,
+		e(
+			View,
+			{ style: styles.brandBand },
+			e(View, { style: styles.brandBandShade }),
+			logoBuffer && e(
+				Image as unknown as React.ComponentType<Record<string, unknown>>,
+				{ src: logoBuffer, style: styles.brandLogoSmall }
+			),
+			e(Text, { style: styles.kitchenHeader }, 'KITCHEN ORDER SHEET'),
+			e(Text, { style: styles.kitchenSubhead }, 'INTERNAL USE ONLY  ·  DO NOT SHARE WITH CUSTOMER')
+		),
+		e(View, { style: styles.brandBandRule })
+	);
+}
+
+// Helper: render a plum-accented section header (with leading gold tab).
+function sectionHeader(label: string) {
+	return e(
+		View,
+		{ style: styles.sectionGold },
+		e(View, { style: styles.sectionGoldAccent }),
+		e(Text, { style: styles.sectionGoldText }, label)
+	);
+}
+
 export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { logoBuffer?: Buffer | null } = {}) {
 	const guests = typeof order.guestCount === 'number' ? order.guestCount : parseInt(String(order.guestCount || '0'), 10) || sheet.guestCount;
 	const address = locationLine(order) || 'To be confirmed with customer';
@@ -111,108 +149,118 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 		Page,
 		{ size: 'LETTER', style: styles.page },
 
-		e(Text, { style: styles.kitchenHeader }, 'KITCHEN ORDER SHEET'),
-		e(Text, { style: styles.kitchenSubhead }, 'INTERNAL USE ONLY  ·  DO NOT SHARE WITH CUSTOMER'),
-		e(View, { style: styles.headerRule }),
+		kitchenBand(opts.logoBuffer),
 
-		// Header field block (2-col)
-		e(
-			View,
-			{ style: styles.twoColRow },
-			e(View, { style: styles.twoColCell }, ...left.filter(Boolean)),
-			e(View, { style: styles.twoColCell }, ...right.filter(Boolean))
+		// Faint elephant watermark behind the body
+		opts.logoBuffer && e(
+			Image as unknown as React.ComponentType<Record<string, unknown>>,
+			{ src: opts.logoBuffer, style: styles.pageWatermark, fixed: true }
 		),
 
-		// Portioning section
-		e(Text, { style: styles.sectionGold }, `PORTIONING (${guests || sheet.guestCount} Guests)`),
-
-		// Portioning table header
+		// Inner padded content
 		e(
 			View,
-			{ style: styles.portTableHeaderRow },
-			e(Text, { style: styles.portHeaderItem }, '   Item'),
-			e(Text, { style: styles.portHeaderPortions }, 'Portions'),
-			e(Text, { style: styles.portHeaderNotes }, 'Notes')
-		),
+			{ style: styles.contentInner },
 
-		// Portioning rows
-		...sheet.lines.map((line, i) =>
+			// Header field block (2-col)
 			e(
 				View,
-				{ style: i % 2 === 1 ? { ...styles.portRow, ...styles.portRowAlt } : styles.portRow, key: `port-${i}` },
+				{ style: { ...styles.twoColRow, marginTop: 6 } },
+				e(View, { style: styles.twoColCell }, ...left.filter(Boolean)),
+				e(View, { style: styles.twoColCell }, ...right.filter(Boolean))
+			),
+
+			// Portioning section
+			sectionHeader(`PORTIONING (${guests || sheet.guestCount} Guests)`),
+
+			// Portioning table header
+			e(
+				View,
+				{ style: styles.portTableHeaderRow },
+				e(Text, { style: styles.portHeaderItem }, '   Item'),
+				e(Text, { style: styles.portHeaderPortions }, 'Portions'),
+				e(Text, { style: styles.portHeaderNotes }, 'Notes')
+			),
+
+			// Portioning rows
+			...sheet.lines.map((line, i) =>
 				e(
 					View,
-					{ style: styles.portCellItem },
-					e(Text, { style: styles.portBullet }, '■'),
-					e(Text, { style: styles.portCellItemText }, line.item)
-				),
-				e(Text, { style: styles.portCellPortions }, line.portions),
-				e(Text, { style: styles.portCellNotes }, line.notes)
-			)
-		),
+					{ style: i % 2 === 1 ? { ...styles.portRow, ...styles.portRowAlt } : styles.portRow, key: `port-${i}` },
+					e(
+						View,
+						{ style: styles.portCellItem },
+						e(Text, { style: styles.portBullet }, '■'),
+						e(Text, { style: styles.portCellItemText }, line.item)
+					),
+					e(Text, { style: styles.portCellPortions }, line.portions),
+					e(Text, { style: styles.portCellNotes }, line.notes)
+				)
+			),
 
-		// Footnote — chef confirms specific dishes
-		e(
-			Text,
-			{ style: styles.portFootnote },
-			'Specific dishes confirmed by chef based on tier and dietary requirements.'
-		),
+			// Footnote
+			e(
+				Text,
+				{ style: styles.portFootnote },
+				'Specific dishes confirmed by chef based on tier and dietary requirements.'
+			),
 
-		// Setup & Equipment
-		e(Text, { style: styles.sectionGold }, 'SETUP & EQUIPMENT'),
-		e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Aluminium Trays'),
-			e(Text, { style: styles.threeColCellValue }, setupIsAlumi ? 'Yes' : 'No'),
-			e(Text, { style: styles.threeColCellNote }, setupIsAlumi ? 'Free' : setupLabel)
-		),
-		order.platesAndCutlery === 'required' && e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Dinnerware'),
-			e(Text, { style: styles.threeColCellValue }, `${guests || sheet.guestCount} sets`),
-			e(Text, { style: styles.threeColCellNote }, `$${dinnerwarePerGuest.toFixed(2)}/person`)
-		),
-		order.servingSpoons && e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Serving Spoons'),
-			e(Text, { style: styles.threeColCellValue }, order.servingSpoons === 'required' ? 'Required' : 'Not required'),
-			e(Text, { style: styles.threeColCellNote }, '')
-		),
-
-		// Delivery
-		e(Text, { style: styles.sectionGold }, 'DELIVERY'),
-		e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Address'),
-			e(Text, { style: { ...styles.threeColCellValue, flex: 3.5 } }, address)
-		),
-		e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Distance'),
-			e(Text, { style: styles.threeColCellValue }, deliveryZoneNote(order.deliveryKm)),
-			e(Text, { style: styles.threeColCellNote }, order.deliveryTime || order.timeWindow || '')
-		),
-		payment && e(
-			View,
-			{ style: styles.threeColRow },
-			e(Text, { style: styles.threeColCellLabel }, 'Payment'),
-			e(Text, { style: styles.threeColCellValue }, payment),
-			e(Text, { style: styles.threeColCellNote }, paymentNote)
-		),
-
-		// Pre-delivery checklist
-		e(Text, { style: styles.sectionGold }, 'PRE-DELIVERY CHECKLIST'),
-		...checklist.map((item, i) =>
+			// Setup & Equipment
+			sectionHeader('SETUP & EQUIPMENT'),
 			e(
 				View,
-				{ style: styles.checklistItem, key: `chk-${i}` },
-				e(View, { style: styles.checkbox }),
-				e(Text, { style: styles.checklistText }, item)
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Aluminium Trays'),
+				e(Text, { style: styles.threeColCellValue }, setupIsAlumi ? 'Yes' : 'No'),
+				e(Text, { style: styles.threeColCellNote }, setupIsAlumi ? 'Free' : setupLabel)
+			),
+			order.platesAndCutlery === 'required' && e(
+				View,
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Dinnerware'),
+				e(Text, { style: styles.threeColCellValue }, `${guests || sheet.guestCount} sets`),
+				e(Text, { style: styles.threeColCellNote }, `$${dinnerwarePerGuest.toFixed(2)}/person`)
+			),
+			order.servingSpoons && e(
+				View,
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Serving Spoons'),
+				e(Text, { style: styles.threeColCellValue }, order.servingSpoons === 'required' ? 'Required' : 'Not required'),
+				e(Text, { style: styles.threeColCellNote }, '')
+			),
+
+			// Delivery
+			sectionHeader('DELIVERY'),
+			e(
+				View,
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Address'),
+				e(Text, { style: { ...styles.threeColCellValue, flex: 3.5 } }, address)
+			),
+			e(
+				View,
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Distance'),
+				e(Text, { style: styles.threeColCellValue }, deliveryZoneNote(order.deliveryKm)),
+				e(Text, { style: styles.threeColCellNote }, order.deliveryTime || order.timeWindow || '')
+			),
+			payment && e(
+				View,
+				{ style: styles.threeColRow },
+				e(Text, { style: styles.threeColCellLabel }, 'Payment'),
+				e(Text, { style: styles.threeColCellValue }, payment),
+				e(Text, { style: styles.threeColCellNote }, paymentNote)
+			),
+
+			// Pre-delivery checklist
+			sectionHeader('PRE-DELIVERY CHECKLIST'),
+			...checklist.map((item, i) =>
+				e(
+					View,
+					{ style: styles.checklistItem, key: `chk-${i}` },
+					e(View, { style: styles.checkbox }),
+					e(Text, { style: styles.checklistText }, item)
+				)
 			)
 		),
 

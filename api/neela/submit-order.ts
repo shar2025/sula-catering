@@ -818,28 +818,59 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 	}
 }
 
-// Customer-facing email body. Page-1-only Catering Details PDF attached. The
-// customer does NOT see prices in this email or the attachment, the events
-// team is reviewing and sending a formal written quote. Tone: warm, casual,
-// Vancouver-local. No prices, no itemised totals, no em dashes.
+// Customer-facing email body. Page-1-only Catering Submission Record PDF
+// attached. The customer does NOT see prices in this email or the attachment,
+// the events team is reviewing and will send a formal written quote.
+// Brand-styled (table-based for client compat, max-width 600px, midnight/navy
+// header band, gold rule, plum/cream/gold accents). No em dashes anywhere.
 function buildCustomerEmailHtml(reference: string, order: Order): string {
 	const firstName = (order.contact.name || '').split(/\s+/)[0] || 'there';
-	const body = `Hi ${firstName}, thanks for the request. The events team is reviewing the quote and will send the formal one shortly. Your details are attached for reference. Reply if anything's off.`;
+	const intro = `Hi ${firstName}, thanks for the request.`;
+	const reviewing = 'The events team is reviewing the quote and will send the formal one shortly.';
+	const attachment = "Your submission record is attached for reference, reply if anything's off.";
 	return `<!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#ffffff;font-family:'Helvetica Neue',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff">
-	<tr><td align="center" style="padding:32px 16px">
-		<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px">
-			<tr><td style="padding:0 8px 18px">
-				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:14px;color:#25042d">Sula Indian Catering</p>
-				<p style="margin:2px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-style:italic;font-size:12px;color:#6b6b6b">Bold spices. Warm hospitality.</p>
+<html><body style="margin:0;padding:0;background:#f5ede0;font-family:'Helvetica Neue',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5ede0">
+	<tr><td align="center" style="padding:28px 16px">
+		<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid rgba(184,149,106,0.30);border-collapse:separate">
+
+			<!-- Brand band -->
+			<tr><td style="padding:28px 32px 22px;background:linear-gradient(180deg,#0a1628 0%,#142442 100%);background-color:#0a1628">
+				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#b8956a;text-transform:uppercase;font-weight:700">Sula Indian Catering</p>
+				<p style="margin:6px 0 2px;font-family:Georgia,serif;font-size:24px;color:#f5ede0;font-weight:600;line-height:1.2">Submission received</p>
+				<p style="margin:0;font-family:Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.78);line-height:1.4">Bold spices. Warm hospitality.</p>
 			</td></tr>
-			<tr><td style="padding:0 8px">
-				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6">${escapeHtml(body)}</p>
-				<p style="margin:0 0 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#6b6b6b;line-height:1.55">Reference: <strong style="color:#1a1a1a">${escapeHtml(reference)}</strong></p>
+
+			<!-- Gold rule -->
+			<tr><td style="padding:0;background:#b8956a;line-height:2px;height:2px;font-size:0">&nbsp;</td></tr>
+
+			<!-- Body -->
+			<tr><td style="padding:24px 32px 8px;background:#ffffff">
+				<p style="margin:0 0 12px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6">${escapeHtml(intro)}</p>
+				<p style="margin:0 0 12px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6">${escapeHtml(reviewing)}</p>
+				<p style="margin:0 0 18px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:15px;color:#1a1a1a;line-height:1.6">${escapeHtml(attachment)}</p>
+			</td></tr>
+
+			<!-- Reference chip -->
+			<tr><td style="padding:0 32px 18px;background:#ffffff">
+				<table cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+					<tr>
+						<td style="padding:8px 14px;background:#fbf6ec;border-left:3px solid #b8956a;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#6b6b6b;letter-spacing:1.4px;text-transform:uppercase;font-weight:700">Reference</td>
+						<td style="padding:8px 14px;background:#fbf6ec;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#25042d;font-weight:700;letter-spacing:0.4px">${escapeHtml(reference)}</td>
+					</tr>
+				</table>
+			</td></tr>
+
+			<!-- Sign-off -->
+			<tr><td style="padding:8px 32px 20px;background:#ffffff">
 				<p style="margin:0 0 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">Talk soon,</p>
-				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">Sula events team</p>
-				<p style="margin:2px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#6b6b6b">events.sula@gmail.com  ·  604-215-1130</p>
+				<p style="margin:0;font-family:Georgia,serif;font-size:16px;color:#25042d;font-weight:600;line-height:1.4">The Sula events team</p>
+			</td></tr>
+
+			<!-- Footer band -->
+			<tr><td style="padding:16px 32px;background:#25042d;border-top:2px solid #b8956a">
+				<p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#f5ede0;line-height:1.5">events.sula@gmail.com <span style="color:#b8956a;font-weight:700">&nbsp;&middot;&nbsp;</span> 604-215-1130 <span style="color:#b8956a;font-weight:700">&nbsp;&middot;&nbsp;</span> sulaindianrestaurant.com</p>
+				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(245,237,224,0.65);letter-spacing:0.3px">Vancouver since 2010 <span style="color:#b8956a">&nbsp;&middot;&nbsp;</span> Commercial Drive <span style="color:#b8956a">&nbsp;&middot;&nbsp;</span> Main Street <span style="color:#b8956a">&nbsp;&middot;&nbsp;</span> Davie Street <span style="color:#b8956a">&nbsp;&middot;&nbsp;</span> Sula Cafe</p>
 			</td></tr>
 		</table>
 	</td></tr>
