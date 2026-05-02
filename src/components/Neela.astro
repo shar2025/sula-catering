@@ -272,6 +272,35 @@
 	.neela-quote-total span:last-child{font-variant-numeric:tabular-nums;font-size:18px}
 	.neela-quote-disclaimer{margin:10px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12px;color:rgba(245,237,224,0.6);line-height:1.5;letter-spacing:0.2px}
 
+	/* QUICK-REPLY OPTIONS, inline tappable buttons under a Neela message.
+	   Vertical stack so each label has its own clear tap target on mobile. */
+	.neela-quick-replies{display:flex;flex-direction:column;gap:8px;align-self:stretch;margin:2px 4px 8px;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-quick-reply{min-height:48px;padding:12px 16px;background:linear-gradient(135deg,rgba(184,149,106,0.18),rgba(232,201,135,0.06));border:1px solid rgba(232,201,135,0.55);border-radius:12px;color:var(--cream);font-family:'Cormorant Garamond',Georgia,serif;font-size:15.5px;font-weight:600;letter-spacing:0.3px;cursor:pointer;text-align:left;line-height:1.4;transition:transform 0.25s ease,background 0.25s ease,border-color 0.25s ease,box-shadow 0.25s ease}
+	.neela-quick-reply:hover,.neela-quick-reply:focus-visible{background:linear-gradient(135deg,rgba(232,201,135,0.32),rgba(184,149,106,0.18));border-color:var(--gold-shimmer);transform:translateY(-1px);box-shadow:0 6px 14px rgba(184,149,106,0.28);outline:none}
+	.neela-quick-reply:active{transform:translateY(0)}
+	.neela-quick-reply:disabled{cursor:not-allowed;transform:none;box-shadow:none}
+
+	/* TIER CARDS, heavier card variant for menu-tier selection. Title + price
+	   row, italic summary, optional small badges along the bottom. */
+	.neela-tier-cards{display:flex;flex-direction:column;gap:10px;align-self:stretch;margin:6px 4px 10px;animation:neela-fade-up 0.35s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-tier-card{min-height:72px;padding:14px 16px;background:linear-gradient(135deg,rgba(20,36,66,0.65),rgba(37,4,45,0.4));border:1px solid var(--gold);border-radius:12px;color:var(--cream);font-family:'Montserrat',sans-serif;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:6px;box-shadow:0 0 0 1px rgba(232,201,135,0.08),0 4px 12px rgba(10,22,40,0.22);transition:transform 0.25s ease,background 0.25s ease,border-color 0.25s ease,box-shadow 0.25s ease}
+	.neela-tier-card:hover,.neela-tier-card:focus-visible{background:linear-gradient(135deg,rgba(20,36,66,0.85),rgba(37,4,45,0.55));border-color:var(--gold-shimmer);transform:translateY(-1px);box-shadow:0 0 0 1px rgba(232,201,135,0.16),0 8px 18px rgba(184,149,106,0.32);outline:none}
+	.neela-tier-card:active{transform:translateY(0)}
+	.neela-tier-card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+	.neela-tier-card-title{font-family:'Libre Baskerville',Georgia,serif;font-size:15.5px;font-weight:700;color:var(--cream);letter-spacing:0.2px;line-height:1.2}
+	.neela-tier-card-price{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--gold-shimmer);letter-spacing:0.2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+	.neela-tier-card-summary{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.85);line-height:1.45;letter-spacing:0.2px}
+	.neela-tier-card-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+	.neela-tier-card-badge{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(184,149,106,0.16);color:var(--gold-light);border:1px solid rgba(184,149,106,0.4)}
+
+	/* SUGGESTION CHIPS, lighter pill set after info / browsing replies */
+	.neela-suggestions-inline{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;margin:2px 4px 6px;max-width:88%;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-suggestion-chip{font-size:13px;padding:6px 12px}
+
+	/* DISABLED: any quick-reply container the user has already answered past */
+	.neela-quick-disabled{opacity:0.45;pointer-events:none;filter:saturate(0.7)}
+	.neela-quick-disabled button{cursor:not-allowed}
+
 	/* MOBILE, full-screen modal slide-up */
 	@media (max-width:600px){
 		.neela-fab{right:18px;bottom:18px;height:56px;font-size:14px;padding-right:16px}
@@ -337,24 +366,36 @@
 			.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
 	}
 
-	// Order-marker parser. Neela emits <<<NEELA_ORDER_READY>>>{json}<<<END_NEELA_ORDER_READY>>>
-	// at the end of her reply when she's gathered enough fields. We strip the
-	// markers from the displayed text and render an order summary card below
-	// the bubble. If the JSON fails to parse, we just strip the markers and
-	// show plain text (Neela's prose above the markers usually summarizes the
-	// same details, so the customer isn't lost).
+	// Marker parsers. Neela's reply may include any of four structured blocks at
+	// the tail of her prose:
+	//   <<<NEELA_ORDER_READY>>>   , final order JSON, renders as the order card
+	//   <<<NEELA_OPTIONS>>>       , inline tappable answer buttons
+	//   <<<NEELA_TIERS>>>         , menu-tier cards
+	//   <<<NEELA_SUGGESTIONS>>>   , lightweight follow-up chips
+	// We strip every marker from the displayed text and render the structured
+	// element below the bubble. If a JSON block fails to parse, we still strip
+	// the markers and just show prose (Neela's prose almost always names the
+	// same options inline, so the customer isn't lost).
 	const ORDER_MARKER_RE = /<<<NEELA_ORDER_READY>>>([\s\S]*?)<<<END_NEELA_ORDER_READY>>>/;
-	function extractOrder(text) {
-		const m = text.match(ORDER_MARKER_RE);
-		if (!m) return { displayText: text, order: null };
-		const stripped = text.replace(ORDER_MARKER_RE, '').trim();
-		try {
-			const order = JSON.parse(m[1].trim());
-			return { displayText: stripped, order };
-		} catch (e) {
-			console.warn('[neela] order JSON parse failed', e);
-			return { displayText: stripped, order: null };
-		}
+	const OPTIONS_MARKER_RE = /<<<NEELA_OPTIONS>>>([\s\S]*?)<<<END_NEELA_OPTIONS>>>/;
+	const TIERS_MARKER_RE = /<<<NEELA_TIERS>>>([\s\S]*?)<<<END_NEELA_TIERS>>>/;
+	const SUGGESTIONS_MARKER_RE = /<<<NEELA_SUGGESTIONS>>>([\s\S]*?)<<<END_NEELA_SUGGESTIONS>>>/;
+	function tryParseJson(raw, label) {
+		try { return JSON.parse(raw.trim()); }
+		catch (e) { console.warn('[neela] ' + label + ' JSON parse failed', e); return null; }
+	}
+	function extractMarkers(text) {
+		let display = String(text);
+		let order = null, options = null, tiers = null, suggestions = null;
+		const om = display.match(ORDER_MARKER_RE);
+		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
+		const opm = display.match(OPTIONS_MARKER_RE);
+		if (opm) { display = display.replace(OPTIONS_MARKER_RE, '').trim(); options = tryParseJson(opm[1], 'options'); }
+		const tm = display.match(TIERS_MARKER_RE);
+		if (tm) { display = display.replace(TIERS_MARKER_RE, '').trim(); tiers = tryParseJson(tm[1], 'tiers'); }
+		const sm = display.match(SUGGESTIONS_MARKER_RE);
+		if (sm) { display = display.replace(SUGGESTIONS_MARKER_RE, '').trim(); suggestions = tryParseJson(sm[1], 'suggestions'); }
+		return { displayText: display, order, options, tiers, suggestions };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -364,16 +405,20 @@
 			.join('\n\n');
 	}
 
-	function renderMessage(role, text) {
+	function renderMessage(role, text, opts) {
+		opts = opts || {};
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null;
+		let order = null, options = null, tiers = null, suggestions = null;
 		let displayText = String(text);
 		if (role !== 'user') {
-			const extracted = extractOrder(displayText);
-			displayText = extracted.displayText;
-			order = extracted.order;
+			const ex = extractMarkers(displayText);
+			displayText = ex.displayText;
+			order = ex.order;
+			options = ex.options;
+			tiers = ex.tiers;
+			suggestions = ex.suggestions;
 		}
 
 		const paragraphs = displayText
@@ -383,12 +428,105 @@
 		div.innerHTML = paragraphs;
 		messagesEl.appendChild(div);
 
+		// Order marker is exclusive: the card replaces inline quick-replies.
 		if (order) {
 			const card = renderOrderCard(order);
 			if (card) messagesEl.appendChild(card);
+		} else if (opts.allowInteractive !== false) {
+			if (tiers && Array.isArray(tiers.tiers) && tiers.tiers.length) {
+				const el = renderTierCards(tiers.tiers);
+				if (el) messagesEl.appendChild(el);
+			}
+			if (options && Array.isArray(options.options) && options.options.length) {
+				const el = renderQuickReplyOptions(options.options);
+				if (el) messagesEl.appendChild(el);
+			}
+			if (suggestions && Array.isArray(suggestions.chips) && suggestions.chips.length) {
+				const el = renderSuggestionChips(suggestions.chips);
+				if (el) messagesEl.appendChild(el);
+			}
 		}
 
 		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
+	// Disable any currently-active quick-reply containers (OPTIONS / TIERS /
+	// SUGGESTIONS attached to past Neela turns). Called whenever the user sends
+	// a new message via any path , typed, tapped chip, tapped tier card. Past
+	// elements stay visible but fade and stop firing.
+	function disableActiveQuickReplies() {
+		const containers = messagesEl.querySelectorAll('.neela-quick-active');
+		containers.forEach((c) => {
+			c.classList.remove('neela-quick-active');
+			c.classList.add('neela-quick-disabled');
+			c.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+		});
+	}
+
+	// Tap path for any inline quick-reply element. Sets the input field to the
+	// tapped value and fires submitMessage(), so the rest of the flow (history
+	// push, API call, render) is identical to a typed reply.
+	function quickReplyTap(value) {
+		disableActiveQuickReplies();
+		inputEl.value = String(value);
+		submitMessage();
+	}
+
+	function renderQuickReplyOptions(items) {
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-quick-replies neela-quick-active';
+		items.forEach((it) => {
+			if (!it || typeof it.label !== 'string' || typeof it.value !== 'string') return;
+			if (!it.label.trim() || !it.value.trim()) return;
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'neela-quick-reply';
+			btn.textContent = it.label;
+			btn.addEventListener('click', () => quickReplyTap(it.value));
+			wrap.appendChild(btn);
+		});
+		return wrap.children.length ? wrap : null;
+	}
+
+	function renderTierCards(tiers) {
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-tier-cards neela-quick-active';
+		tiers.forEach((t) => {
+			if (!t || typeof t.title !== 'string' || !t.title.trim()) return;
+			const card = document.createElement('button');
+			card.type = 'button';
+			card.className = 'neela-tier-card';
+			const badges = Array.isArray(t.badges) ? t.badges.filter((b) => typeof b === 'string' && b.trim()) : [];
+			card.innerHTML =
+				'<div class="neela-tier-card-head">' +
+					'<span class="neela-tier-card-title">' + escapeHtml(String(t.title)) + '</span>' +
+					(t.price ? '<span class="neela-tier-card-price">' + escapeHtml(String(t.price)) + '</span>' : '') +
+				'</div>' +
+				(t.summary ? '<p class="neela-tier-card-summary">' + escapeHtml(String(t.summary)) + '</p>' : '') +
+				(badges.length
+					? '<div class="neela-tier-card-badges">' +
+						badges.map((b) => '<span class="neela-tier-card-badge">' + escapeHtml(b) + '</span>').join('') +
+					  '</div>'
+					: '');
+			card.addEventListener('click', () => quickReplyTap(String(t.title)));
+			wrap.appendChild(card);
+		});
+		return wrap.children.length ? wrap : null;
+	}
+
+	function renderSuggestionChips(chips) {
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-suggestions-inline neela-quick-active';
+		chips.forEach((c) => {
+			if (typeof c !== 'string' || !c.trim()) return;
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'neela-chip neela-suggestion-chip';
+			btn.textContent = c;
+			btn.addEventListener('click', () => quickReplyTap(c));
+			wrap.appendChild(btn);
+		});
+		return wrap.children.length ? wrap : null;
 	}
 
 	function renderOrderCard(order) {
@@ -596,11 +734,19 @@
 		// Drop the static placeholder greeting if we have stored messages.
 		if (conversation.length > 0) {
 			messagesEl.innerHTML = '';
-			conversation.forEach(m => {
+			// Only the LAST assistant message gets interactive quick-replies on rehydrate.
+			// Older OPTIONS / TIERS / SUGGESTIONS represent questions the customer has
+			// already answered; their structured elements are stripped to keep history clean.
+			let lastAssistantIdx = -1;
+			for (let i = conversation.length - 1; i >= 0; i--) {
+				if (conversation[i] && conversation[i].role === 'assistant') { lastAssistantIdx = i; break; }
+			}
+			conversation.forEach((m, idx) => {
 				const display = m.role === 'user' && typeof m.content === 'string'
 					? m.content.replace(/^\[spoken\]\s+/, '')
 					: m.content;
-				renderMessage(m.role === 'assistant' ? 'bot' : 'user', display);
+				const allowInteractive = m.role === 'assistant' && idx === lastAssistantIdx;
+				renderMessage(m.role === 'assistant' ? 'bot' : 'user', display, { allowInteractive });
 			});
 			suggestedEl.classList.add('hidden');
 		}
@@ -790,6 +936,9 @@
 	function stripForSpeech(text) {
 		return String(text)
 			.replace(/<<<NEELA_ORDER_READY>>>[\s\S]*?<<<END_NEELA_ORDER_READY>>>/g, '')
+			.replace(/<<<NEELA_OPTIONS>>>[\s\S]*?<<<END_NEELA_OPTIONS>>>/g, '')
+			.replace(/<<<NEELA_TIERS>>>[\s\S]*?<<<END_NEELA_TIERS>>>/g, '')
+			.replace(/<<<NEELA_SUGGESTIONS>>>[\s\S]*?<<<END_NEELA_SUGGESTIONS>>>/g, '')
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
 			.replace(/https?:\/\/\S+/g, '')
@@ -1244,6 +1393,9 @@
 	async function submitMessage() {
 		const text = (inputEl.value || '').trim();
 		if (!text) return;
+		// Any send path (typed, mic auto-submit, tapped chip / button / tier card)
+		// retires prior quick-reply elements so stale options can't fire mid-flow.
+		disableActiveQuickReplies();
 		const userMessageCount = conversation.filter(m => m.role === 'user').length;
 		if (userMessageCount >= MAX_USER_MESSAGES) {
 			renderMessage('bot', "We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/ or book a call at calendly.com/sula-catering/30min.");
