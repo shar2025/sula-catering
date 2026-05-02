@@ -18,6 +18,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
+import { createHash } from 'node:crypto';
+import { neon } from '@neondatabase/serverless';
 import {
 	SITE_CONTENT_KNOWLEDGE_BASE,
 	KNOWLEDGE_PAGE_COUNT,
@@ -122,6 +124,68 @@ function checkRateLimit(ip: string): { ok: boolean; remaining: number } {
 	return { ok: true, remaining: RATE_LIMIT_MAX - entry.count };
 }
 
+// SHA-256 hash of the IP so we can dedupe users without storing PII.
+function hashIp(ip: string): string {
+	return createHash('sha256').update(ip).digest('hex').slice(0, 32);
+}
+
+// Persistence — best-effort. Skips silently if POSTGRES_URL isn't set or any
+// step fails. Never blocks Neela's reply for more than a couple hundred ms.
+let tableEnsured = false;
+
+interface PersistArgs {
+	sessionId: string;
+	ipHash: string;
+	userMessage: string;
+	neelaReply: string;
+	inputTokens: number | null;
+	outputTokens: number | null;
+	cacheReadTokens: number | null;
+	messageIndex: number;
+	conversationLength: number;
+}
+async function persistChatTurn(args: PersistArgs): Promise<void> {
+	const url = process.env.POSTGRES_URL;
+	if (!url) return;
+	try {
+		const sql = neon(url);
+		if (!tableEnsured) {
+			await sql`
+				CREATE TABLE IF NOT EXISTS neela_chats (
+					id BIGSERIAL PRIMARY KEY,
+					created_at TIMESTAMPTZ DEFAULT NOW(),
+					session_id TEXT NOT NULL,
+					ip_hash TEXT,
+					user_message TEXT NOT NULL,
+					neela_reply TEXT NOT NULL,
+					input_tokens INT,
+					output_tokens INT,
+					cache_read_tokens INT,
+					message_index INT,
+					conversation_length INT
+				)
+			`;
+			await sql`CREATE INDEX IF NOT EXISTS neela_chats_created_at_idx ON neela_chats (created_at DESC)`;
+			await sql`CREATE INDEX IF NOT EXISTS neela_chats_session_idx ON neela_chats (session_id)`;
+			tableEnsured = true;
+		}
+		await sql`
+			INSERT INTO neela_chats (
+				session_id, ip_hash, user_message, neela_reply,
+				input_tokens, output_tokens, cache_read_tokens,
+				message_index, conversation_length
+			) VALUES (
+				${args.sessionId}, ${args.ipHash}, ${args.userMessage}, ${args.neelaReply},
+				${args.inputTokens}, ${args.outputTokens}, ${args.cacheReadTokens},
+				${args.messageIndex}, ${args.conversationLength}
+			)
+		`;
+		console.log('[neela] persisted turn', { messageIndex: args.messageIndex });
+	} catch (err) {
+		console.warn('[neela] persist failed', err instanceof Error ? err.message : err);
+	}
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
 	console.log('[neela] hit', req.method);
 
@@ -224,7 +288,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cacheCreation: response.usage?.cache_creation_input_tokens
 		});
 
-		return res.status(200).json({ reply: reply || FALLBACK_MSG, remaining: rate.remaining });
+		const finalReply = reply || FALLBACK_MSG;
+		const lastUserMessage = userMessages[userMessages.length - 1];
+		const sessionId = (typeof body.sessionId === 'string' ? body.sessionId : '').slice(0, 200) || 'unknown';
+		await persistChatTurn({
+			sessionId,
+			ipHash: hashIp(ip),
+			userMessage: (lastUserMessage?.content ?? '').slice(0, 4000),
+			neelaReply: finalReply.slice(0, 4000),
+			inputTokens: response.usage?.input_tokens ?? null,
+			outputTokens: response.usage?.output_tokens ?? null,
+			cacheReadTokens: response.usage?.cache_read_input_tokens ?? null,
+			messageIndex: userMessages.length,
+			conversationLength: cleanedMessages.length
+		});
+
+		return res.status(200).json({ reply: finalReply, remaining: rate.remaining });
 	} catch (err: unknown) {
 		const isAbort =
 			abortController.signal.aborted ||

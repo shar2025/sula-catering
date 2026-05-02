@@ -14,9 +14,10 @@ Set these in **Vercel → Project → Settings → Environment Variables**, then
 
 | Name | Required for | How to get it |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Chat replies | Generate at [console.anthropic.com](https://console.anthropic.com/) → API Keys. Paste the `sk-ant-…` value. |
+| `ANTHROPIC_API_KEY` | Chat replies | Generate at [console.anthropic.com](https://console.anthropic.com/) → API Keys. Paste the `sk-ant-…` value. The variable can also be named `Neela` (the code accepts either). |
 | `ELEVENLABS_API_KEY` | Voice replies | Sign up at [elevenlabs.io](https://elevenlabs.io/), then Profile → API Key. Paste the value. |
 | `ELEVENLABS_VOICE_ID` | Voice replies (optional) | Default is **Rachel** (`21m00Tcm4TlvDq8ikWAM`), a warm refined female voice from the ElevenLabs library. To pick a different voice, browse [elevenlabs.io/app/voice-library](https://elevenlabs.io/app/voice-library), open a voice, and copy its ID into this var. |
+| `POSTGRES_URL` | Chat persistence (optional) | Vercel → Storage → Create → Postgres (Neon-backed). When you create the DB, Vercel auto-injects `POSTGRES_URL` (and a few siblings) into every project linked to it. The `neela_chats` table auto-creates on first insert. If unset, Neela still replies — persistence just silently no-ops. |
 
 After saving env vars, trigger a redeploy (Vercel does this automatically on the next push, or hit "Redeploy" on the latest deployment).
 
