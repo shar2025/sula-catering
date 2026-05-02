@@ -730,10 +730,11 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
 			: undefined;
 		// TEMP: Resend free tier requires sending to the team-owner inbox until
-		// sulacatering.com domain is verified at resend.com/domains. After
-		// verification, switch FROM to neela@sulacatering.com and revert this back
-		// to events@sulaindianrestaurant.com.
-		const teamTo = process.env.NEELA_TEST_EMAIL || 'sulaindianrestaurant@gmail.com';
+		// sulacatering.com domain is verified at resend.com/domains. Hardcoded
+		// (no NEELA_TEST_EMAIL override) because Resend rejects any other
+		// recipient with 403. After verification, switch FROM to
+		// neela@sulacatering.com and revert this back to events@sulaindianrestaurant.com.
+		const teamTo = 'sulaindianrestaurant@gmail.com';
 		const teamResult = await resend.emails.send({
 			from: fromAddr,
 			to: [teamTo],
