@@ -112,14 +112,14 @@ export const styles = StyleSheet.create({
 		fontSize: 10,
 		paddingTop: 0,
 		paddingHorizontal: 0,
-		paddingBottom: 56
+		paddingBottom: 44
 	},
 
 	// Inner content wrapper, applies the body horizontal padding so brand bands
 	// can break out to the page edge.
 	contentInner: {
 		paddingHorizontal: HORIZONTAL_PADDING,
-		paddingTop: 18
+		paddingTop: 10
 	},
 
 	// ---------- Brand band (top of every page) ----------
@@ -127,8 +127,8 @@ export const styles = StyleSheet.create({
 	// Two stacked Views (midnight then navy) approximate a soft gradient.
 	brandBand: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 24,
-		paddingBottom: 18,
+		paddingTop: 18,
+		paddingBottom: 14,
 		paddingHorizontal: HORIZONTAL_PADDING,
 		alignItems: 'center'
 	},
@@ -138,7 +138,7 @@ export const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		bottom: 0,
-		height: 28,
+		height: 24,
 		backgroundColor: COLORS.navy,
 		opacity: 0.85
 	},
@@ -146,19 +146,19 @@ export const styles = StyleSheet.create({
 		height: 2,
 		backgroundColor: COLORS.gold
 	},
-	brandLogo: { width: 52, height: 52, marginBottom: 8 },
-	brandLogoSmall: { width: 36, height: 36, marginBottom: 6 },
+	brandLogo: { width: 44, height: 44, marginBottom: 6 },
+	brandLogoSmall: { width: 30, height: 30, marginBottom: 4 },
 	brandName: {
 		fontFamily: FONTS.bold,
-		fontSize: 19,
+		fontSize: 17,
 		color: COLORS.cream,
-		marginBottom: 3
+		marginBottom: 2
 	},
 	brandTagline: {
 		fontFamily: FONTS.italic,
-		fontSize: 10.5,
+		fontSize: 10,
 		color: COLORS.gold,
-		marginBottom: 2
+		marginBottom: 1
 	},
 	brandEst: {
 		fontSize: 8.5,
@@ -168,18 +168,18 @@ export const styles = StyleSheet.create({
 	// ---------- Document title block (below brand band) ----------
 	docTitleWrap: {
 		alignItems: 'center',
-		marginTop: 14,
-		marginBottom: 4
+		marginTop: 8,
+		marginBottom: 2
 	},
 	docTitle: {
 		fontFamily: FONTS.bold,
-		fontSize: 18,
+		fontSize: 17,
 		color: COLORS.plum,
 		textAlign: 'center'
 	},
 	docTitleRule: {
-		marginTop: 8,
-		width: 64,
+		marginTop: 6,
+		width: 60,
 		height: 1.4,
 		backgroundColor: COLORS.gold
 	},
@@ -187,7 +187,7 @@ export const styles = StyleSheet.create({
 		fontSize: 9.5,
 		color: COLORS.textSoft,
 		textAlign: 'center',
-		marginTop: 10,
+		marginTop: 6,
 		marginBottom: 2
 	},
 	cityLine: {
@@ -206,8 +206,8 @@ export const styles = StyleSheet.create({
 		borderTopWidth: 0.6,
 		borderTopColor: COLORS.gold,
 		borderTopStyle: 'solid',
-		marginTop: 6,
-		marginBottom: 12
+		marginTop: 4,
+		marginBottom: 8
 	},
 
 	// ---------- Section header (across all pages) ----------
@@ -216,9 +216,9 @@ export const styles = StyleSheet.create({
 	section: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginTop: 10,
-		marginBottom: 8,
-		paddingBottom: 4,
+		marginTop: 6,
+		marginBottom: 6,
+		paddingBottom: 3,
 		borderBottomWidth: 0.8,
 		borderBottomColor: COLORS.gold,
 		borderBottomStyle: 'solid'
@@ -239,8 +239,8 @@ export const styles = StyleSheet.create({
 	sectionGold: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginTop: 12,
-		marginBottom: 4,
+		marginTop: 8,
+		marginBottom: 3,
 		paddingBottom: 2,
 		borderBottomWidth: 0.6,
 		borderBottomColor: COLORS.gold,
@@ -262,7 +262,7 @@ export const styles = StyleSheet.create({
 	fieldRow: {
 		flexDirection: 'row',
 		alignItems: 'flex-start',
-		paddingVertical: 4,
+		paddingVertical: 3,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.ruleSoft,
 		borderBottomStyle: 'solid'
@@ -302,8 +302,8 @@ export const styles = StyleSheet.create({
 
 	// ---------- Page 1 footer block ----------
 	page1Footer: {
-		marginTop: 18,
-		paddingTop: 10,
+		marginTop: 12,
+		paddingTop: 8,
 		borderTopWidth: 0.4,
 		borderTopColor: COLORS.gold,
 		borderTopStyle: 'solid',
@@ -393,14 +393,14 @@ export const styles = StyleSheet.create({
 
 	// ---------- Page 2 footer block ----------
 	thankYou: {
-		marginTop: 22,
+		marginTop: 14,
 		fontFamily: FONTS.italic,
 		fontSize: 12,
 		color: COLORS.plum,
 		textAlign: 'center'
 	},
 	revisionsLine: {
-		marginTop: 8,
+		marginTop: 6,
 		fontSize: 9,
 		color: COLORS.muted,
 		textAlign: 'center'
@@ -434,7 +434,7 @@ export const styles = StyleSheet.create({
 	twoColCell: { flex: 1 },
 	kitchenFieldRow: {
 		flexDirection: 'row',
-		paddingVertical: 2.5,
+		paddingVertical: 2,
 		alignItems: 'flex-start'
 	},
 	kitchenFieldLabel: {
@@ -481,7 +481,7 @@ export const styles = StyleSheet.create({
 	},
 	portRow: {
 		flexDirection: 'row',
-		paddingVertical: 4,
+		paddingVertical: 3,
 		paddingHorizontal: 10,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.ruleSoft,
@@ -533,7 +533,7 @@ export const styles = StyleSheet.create({
 	// Setup / Delivery 3-col rows
 	threeColRow: {
 		flexDirection: 'row',
-		paddingVertical: 3.5,
+		paddingVertical: 2.5,
 		paddingHorizontal: 4,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.ruleSoft,
@@ -578,7 +578,7 @@ export const styles = StyleSheet.create({
 	checklistItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		paddingVertical: 2.5,
+		paddingVertical: 2,
 		gap: 8
 	},
 	checkbox: {
