@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@vercel/node": "^5.7.15",
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "mailparser": "^3.9.8"
   }
 }

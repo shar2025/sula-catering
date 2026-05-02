@@ -1,0 +1,206 @@
+[
+	{
+		"thread_id": "syn-001-wedding-aug",
+		"subject": "Wedding for 250 in August - need quote",
+		"messages": [
+			{
+				"from": "Priya Khanna <priya.k.test@example.com>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-08T14:22:00Z",
+				"body": "Hi there! My partner and I are getting married on August 15, 2026 at the UBC Boathouse and we'd love to talk about catering. We're expecting around 250 guests. Mostly halal, around 30% vegetarian, a few Jain guests on my side. Could we set up a tasting? My number is 604-555-0142. Looking forward to hearing back.\n\nThanks,\nPriya"
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Priya Khanna <priya.k.test@example.com>",
+				"date": "2026-04-08T17:10:00Z",
+				"body": "Hi Priya, congratulations! 250 at UBC Boathouse in August sounds wonderful, we've catered several weddings there. For a guest count and dietary mix like yours, I'd suggest looking at our Family Style 3 menu ($60/guest) or one of the upper wedding tiers. Halal is standard for us, all our chicken and lamb is halal-certified. We have dedicated Jain prep so cross-contamination is handled.\n\nFor 250, our typical setup is heated stainless or hammered copper. We can do a tasting at one of our restaurants, weddings get one tasting included with booking. Do you have flexibility on the date or is August 15 firm? August fills fast.\n\nCould you tell me your budget per guest, or a total budget you're working with? That helps us shape the right tier. Also, is the venue providing rentals (linens, glassware) or do we need to coordinate?\n\nTalk soon,\nSula Events"
+			},
+			{
+				"from": "Priya Khanna <priya.k.test@example.com>",
+				"to": "Sula Events <events@sulaindianrestaurant.com>",
+				"date": "2026-04-09T10:05:00Z",
+				"body": "Date is firm, August 15. Budget is around $90-100/guest all in for food. UBC is providing tables and chairs but we need to bring our own bar service, plates, and serving setup. What's the deposit to lock the date?"
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Priya Khanna <priya.k.test@example.com>",
+				"date": "2026-04-09T13:40:00Z",
+				"body": "$90-100/guest is workable, that puts you at the Family Style 3 tier ($60/guest food) plus dinnerware ($6.90/person), heated copper setup ($495 flat), and a bit of room for tandoori grill upgrades or extra appetizers.\n\nFor weddings of this size we typically take a 40% deposit on signing to lock the date, with the balance due one week prior. We don't run bars but I can recommend a couple of licensed bartenders we've worked with at the Boathouse.\n\nWant to come in for the tasting? I have openings on April 22 (Wednesday evening) or April 26 (Sunday afternoon) at our Commercial Drive location.\n\nSula Events"
+			}
+		]
+	},
+	{
+		"thread_id": "syn-002-office-tomorrow",
+		"subject": "Office lunch tomorrow possible??",
+		"messages": [
+			{
+				"from": "Devon Park <dpark.test@bigco.example>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-12T16:48:00Z",
+				"body": "Hi - really sorry for short notice but our usual caterer just bailed on us for tomorrow, Tuesday April 13, 12:30pm delivery. We have 35 people in our Burrard St office, 1010 Burrard St 14th floor, downtown. Half veg, half not, no nut allergies. Budget around $30/head. Please let me know if anything can be done. 778-555-0993."
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Devon Park <dpark.test@bigco.example>",
+				"date": "2026-04-12T17:15:00Z",
+				"body": "Hey Devon, we can absolutely make tomorrow work for 35 at 12:30. I'd recommend Option 2 ($25.95/guest) which is 2 veg + 2 non-veg curries with naan, basmati rice, chutneys. Veg sides are clearly labeled. Total food before tax for 35 is around $908. Add $5 delivery (you're 0-10km from us) and $0.50/person disposable cutlery, you're at roughly $930 + tax.\n\nNeed to confirm in next couple hours so the kitchen can prep. Reply with menu choice (or trust us to pick the crowd-pleasers, butter chicken + dal makhani + paneer) and I'll send a confirmation. Payment can be card on delivery."
+			},
+			{
+				"from": "Devon Park <dpark.test@bigco.example>",
+				"to": "Sula Events <events@sulaindianrestaurant.com>",
+				"date": "2026-04-12T17:31:00Z",
+				"body": "Trust your picks. Confirmed."
+			}
+		]
+	},
+	{
+		"thread_id": "syn-003-halal-sangeet",
+		"subject": "Halal-only menu for sangeet next month",
+		"messages": [
+			{
+				"from": "Aliyah Hassan <aliyah.h@example.org>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-03T19:14:00Z",
+				"body": "Asalam alaikum, I'm planning a sangeet for my brother on May 10 at our home in Surrey (16280 88 Ave). Approx 80 guests, all halal please, no alcohol on premises. Can you confirm everything is halal-certified, not just the meat? I want to be sure about the kitchen too. Number: 604-555-0334."
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Aliyah Hassan <aliyah.h@example.org>",
+				"date": "2026-04-04T09:00:00Z",
+				"body": "Walaikum asalam Aliyah, congratulations to your brother. Yes, Sula has been a halal-certified kitchen since we opened in 2010, all chicken and lamb is sourced from halal-certified BC suppliers and we don't keep pork or alcohol on the premises in our kitchens. For the home sangeet, May 10 is open. 80 guests we'd typically recommend Option 4 ($28.95) or our Meat Lovers tier ($31.95) given the celebration nature.\n\nWe also offer dedicated vegetarian prep areas if any of your guests are pure-veg. Spice levels can be dialed for the room, we usually run weddings at Med-hot.\n\nWant to walk through the menu options on a quick call?"
+			},
+			{
+				"from": "Aliyah Hassan <aliyah.h@example.org>",
+				"to": "Sula Events <events@sulaindianrestaurant.com>",
+				"date": "2026-04-04T10:20:00Z",
+				"body": "Perfect, that puts my mind at ease. Let's go with Option 4. Can we set up a 15-min call this week to confirm menu picks and timing?"
+			}
+		]
+	},
+	{
+		"thread_id": "syn-004-cancel-flood",
+		"subject": "Need to cancel May 22 booking - basement flood",
+		"messages": [
+			{
+				"from": "Marc Tessier <marc.t@example.net>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-05-15T08:11:00Z",
+				"body": "Hi, this is Marc, I had a 60-person dinner booked for May 22 (next Friday), reference SULA-2026-0419-MT. Our basement flooded yesterday and we have to cancel the whole event, contractors will be in for weeks. What's the situation with the deposit? I know we're inside the cancellation window. Anything we can do?"
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Marc Tessier <marc.t@example.net>",
+				"date": "2026-05-15T11:30:00Z",
+				"body": "Hi Marc, sorry to hear about the flood, that's stressful. Let me pull your file. You're right that May 22 is inside the standard cancellation window (we ask for 14 days notice for full refund), but given the circumstances we can hold your deposit as credit toward a future booking within 12 months. That way you don't lose it and can reschedule once the basement is sorted. We've done this for clients in similar emergencies.\n\nWant me to mark the deposit as held credit and we touch base in a few weeks once you have a sense of timing?"
+			},
+			{
+				"from": "Marc Tessier <marc.t@example.net>",
+				"to": "Sula Events <events@sulaindianrestaurant.com>",
+				"date": "2026-05-15T11:45:00Z",
+				"body": "That's incredibly kind of you, thank you. Yes please hold as credit, we'll be in touch in June probably."
+			}
+		]
+	},
+	{
+		"thread_id": "syn-005-recurring-corp",
+		"subject": "Pricing for repeat corporate booking - monthly?",
+		"messages": [
+			{
+				"from": "Jasmine Wu <jwu@techfirm.example>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-03-28T15:33:00Z",
+				"body": "Hi, we've ordered from you 3 times in the past 6 months for our team lunches, always great. We're planning to set up a recurring monthly Indian lunch (12:30, around 45 people, our office at 555 W Hastings). Any chance of a small discount for committing to 12 months? Happy to lock in the same menu rotation. Card on file is 4532-XXXX-XXXX-1234, but we'd want to set up invoicing if recurring."
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Jasmine Wu <jwu@techfirm.example>",
+				"date": "2026-03-28T17:00:00Z",
+				"body": "Hi Jasmine, we love repeat corporate clients, thanks for the consistent business. For 12-month commitments at 45 guests/month, we can absolutely set up an invoiced arrangement and offer a small loyalty discount, typically 5-8% off the per-guest rate depending on tier locked in. Net-15 invoicing standard, monthly billing.\n\nFor the menu rotation, we usually suggest 4 menus on a rotating monthly cycle so it doesn't get repetitive. If your team has favorites we'll work those in.\n\nWant to set up a quick 30-min call to lock the agreement and pick your rotation? I have time Wednesday afternoon or Thursday morning."
+			}
+		]
+	},
+	{
+		"thread_id": "syn-006-jain-question",
+		"subject": "Question about Jain menu",
+		"messages": [
+			{
+				"from": "Rakesh Shah <rakesh.shah@example.com>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-18T09:00:00Z",
+				"body": "Hello, do you do Jain catering? I'm planning a small lunch for 25 (April 30) where about 8 of the guests are strict Jain. Can you handle separate prep, no onion/garlic/root vegetables for them?"
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Rakesh Shah <rakesh.shah@example.com>",
+				"date": "2026-04-18T11:20:00Z",
+				"body": "Hi Rakesh, yes we do. We have dedicated prep areas for Jain (no onion, no garlic, no root vegetables, no honey). For 8 Jain guests within a 25-person lunch we'd prepare a small parallel menu in separate trays so they're not pulling from the shared dishes. April 30 is open.\n\nQuick question, are the 8 Jain guests strict or moderate? Some Jain families also avoid eggplant and certain seeds, others don't. The events team can walk through the specifics with you, want me to set that up?"
+			}
+		]
+	},
+	{
+		"thread_id": "syn-007-out-of-region",
+		"subject": "Catering for Whistler retreat",
+		"messages": [
+			{
+				"from": "Sam Mitchell <sam.mitchell@example.co>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-25T13:00:00Z",
+				"body": "Hi, do you cater corporate retreats up in Whistler? We have one planned for July 18-19 at the Fairmont, around 60 people, both nights are dinners. Open to either cocktail-style appetizer service or full sit-down."
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Sam Mitchell <sam.mitchell@example.co>",
+				"date": "2026-04-25T15:30:00Z",
+				"body": "Hi Sam, thanks for thinking of us. Whistler is just outside our standard service area (we cover GVRD: Vancouver, Burnaby, Richmond, Surrey, North Van, West Van). For a Fairmont retreat we'd recommend a Whistler-based caterer who can do regular kitchen access, the logistics of a 2-day, 60-guest event 2 hours up the highway are tough for us to do well.\n\nWe can recommend a couple of Whistler partners if helpful. Or if you ever do a Vancouver-based version we'd love to be considered."
+			}
+		]
+	},
+	{
+		"thread_id": "syn-008-thank-you-only",
+		"subject": "Thanks!",
+		"messages": [
+			{
+				"from": "Helen Park <hpark.test@example.com>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-20T18:00:00Z",
+				"body": "Just wanted to say thank you, the food at Saturday's event was incredible. Will book again."
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Helen Park <hpark.test@example.com>",
+				"date": "2026-04-20T18:30:00Z",
+				"body": "Thanks Helen, glad you and your guests enjoyed it!"
+			}
+		]
+	},
+	{
+		"thread_id": "syn-009-allergy-detail",
+		"subject": "Severe nut allergy - corporate lunch question",
+		"messages": [
+			{
+				"from": "Diana Chen <diana.c@example.com>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-22T08:45:00Z",
+				"body": "Hi, planning a 25-person lunch on May 7. One of our team members has a severe peanut and tree nut allergy (anaphylaxis-grade, carries an EpiPen). Can you guarantee a nut-free meal for her? Even cross-contamination?"
+			},
+			{
+				"from": "Sula Events <events@sulaindianrestaurant.com>",
+				"to": "Diana Chen <diana.c@example.com>",
+				"date": "2026-04-22T10:30:00Z",
+				"body": "Hi Diana, I want to be straight with you because anaphylaxis is serious. We can absolutely prepare a nut-free meal in a separate prep area with separate utensils, BUT our kitchen does handle cashews (in some korma recipes) and almonds (in some desserts) for other dishes. For an anaphylaxis-grade allergy I always tell clients we can't guarantee zero cross-contamination at the molecular level, even with our best practices.\n\nWhat I'd recommend: we plate her meal first in our most isolated prep area, double-check ingredient lists with the chef, and have her bring her EpiPen as standard. If you and she are comfortable with that level of caution, we're in. If she or you need a guaranteed nut-free kitchen, I'd point you to a dedicated allergen-free caterer instead. Better to be honest now than risk it.\n\nCan also do a quick call if you want to talk it through."
+			}
+		]
+	},
+	{
+		"thread_id": "syn-010-auto-reply",
+		"subject": "Out of office reply",
+		"messages": [
+			{
+				"from": "Vacation Bot <noreply@example.com>",
+				"to": "events@sulaindianrestaurant.com",
+				"date": "2026-04-15T08:00:00Z",
+				"body": "I'm out of the office until April 25, will respond when I'm back."
+			}
+		]
+	}
+]
