@@ -187,6 +187,55 @@
 	.neela-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 	.neela-privacy{margin:0;padding:6px 16px 12px;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:var(--gold-light);opacity:0.6;letter-spacing:0.3px;background:rgba(10,22,40,0.4)}
 
+	/* ORDER SUMMARY CARD — renders below Neela's bubble when she emits the order marker */
+	.neela-order-card{align-self:stretch;margin:4px 4px 8px;padding:18px 20px;background:linear-gradient(135deg,rgba(20,36,66,0.55),rgba(37,4,45,0.35));border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 0 1px rgba(232,201,135,0.08),0 8px 22px rgba(10,22,40,0.32);animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both;position:relative}
+	.neela-order-card-dismissed{opacity:0;transform:translateY(-6px);transition:opacity 0.25s ease,transform 0.25s ease}
+	.neela-order-card-head{margin-bottom:14px}
+	.neela-order-card-title{margin:0 0 4px;font-family:'Libre Baskerville',Georgia,serif;font-size:18px;font-weight:700;color:var(--cream);letter-spacing:0.2px}
+	.neela-order-card-sub{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.78);letter-spacing:0.2px;line-height:1.5}
+	.neela-order-rows{display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:rgba(10,22,40,0.42);border:1px solid rgba(184,149,106,0.18);border-radius:8px;margin-bottom:14px}
+	.neela-order-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-family:'Montserrat',sans-serif;font-size:13px;line-height:1.6}
+	.neela-order-row-label{flex-shrink:0;color:var(--gold);opacity:0.85;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;font-weight:600;min-width:74px}
+	.neela-order-row-value{color:var(--cream);text-align:right;letter-spacing:0.2px;flex:1;word-break:break-word}
+	.neela-order-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+	.neela-order-confirm{flex:1;min-width:200px;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));background-size:200% 100%;color:var(--midnight);border:none;border-radius:999px;padding:13px 22px;font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:transform 0.3s ease,box-shadow 0.3s ease,background-position 0.5s ease;box-shadow:0 4px 14px rgba(184,149,106,0.32)}
+	.neela-order-confirm:hover{transform:translateY(-1px);background-position:100% 0;box-shadow:0 10px 24px rgba(184,149,106,0.5)}
+	.neela-order-confirm:disabled{opacity:0.6;cursor:wait;transform:none}
+	.neela-order-edit{background:transparent;border:none;color:rgba(245,237,224,0.65);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;cursor:pointer;padding:6px 8px;letter-spacing:0.3px;transition:color 0.3s ease}
+	.neela-order-edit:hover{color:var(--gold-light)}
+	.neela-order-card-submitting{opacity:0.85}
+	.neela-order-card-sent{border-color:var(--gold-shimmer);text-align:center;padding:22px 20px}
+	.neela-order-sent-icon{margin:0 auto 6px;font-family:'Cormorant Garamond',Georgia,serif;font-size:34px;color:var(--gold-light);line-height:1}
+	.neela-order-sent-title{margin:0 0 6px;font-family:'Libre Baskerville',Georgia,serif;font-size:18px;font-weight:700;color:var(--cream);letter-spacing:0.4px}
+	.neela-order-sent-body{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;font-style:italic;color:rgba(245,237,224,0.85);line-height:1.55;letter-spacing:0.2px}
+	.neela-order-sent-body strong{font-style:normal;font-family:'Montserrat',sans-serif;font-size:13px;letter-spacing:1.2px;color:var(--gold-shimmer);background:rgba(184,149,106,0.14);padding:2px 8px;border-radius:4px}
+	.neela-order-sent-body a{color:var(--gold-shimmer);text-decoration:underline;text-decoration-color:rgba(232,201,135,0.4)}
+	.neela-order-card-errored{border-color:rgba(232,123,90,0.55)}
+	.neela-order-card-errored .neela-order-sent-title{color:#f0c1a8}
+
+	/* Consultation variant — Calendly-prominent, no confirm card */
+	.neela-order-card-consultation{text-align:center;padding:22px 22px}
+	.neela-order-card-consultation .neela-order-card-title{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:600;font-size:21px;color:var(--gold-light);letter-spacing:0.3px}
+	.neela-order-card-consultation .neela-order-card-sub{margin:4px 0 16px;font-size:15px}
+	.neela-order-calendly{display:inline-block;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));background-size:200% 100%;color:var(--midnight);border-radius:999px;padding:13px 26px;font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;text-decoration:none;transition:transform 0.3s ease,box-shadow 0.3s ease,background-position 0.5s ease;box-shadow:0 4px 14px rgba(184,149,106,0.32)}
+	.neela-order-calendly:hover{transform:translateY(-1px);background-position:100% 0;box-shadow:0 10px 24px rgba(184,149,106,0.5)}
+	.neela-order-noted{margin:14px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;color:rgba(245,237,224,0.65);letter-spacing:0.2px}
+
+	/* QUOTE SECTION inside the order card — itemized estimate with gold dotted leaders */
+	.neela-quote{margin:0 0 14px;padding:14px 16px;background:linear-gradient(180deg,rgba(10,22,40,0.55),rgba(37,4,45,0.32));border:1px solid rgba(184,149,106,0.32);border-radius:8px}
+	.neela-quote-title{margin:0 0 10px;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:var(--gold);letter-spacing:0.5px;font-weight:500}
+	.neela-quote-title em{font-style:italic}
+	.neela-quote-items{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+	.neela-quote-line{display:flex;align-items:baseline;font-family:'Montserrat',sans-serif;font-size:13px;color:rgba(245,237,224,0.92);line-height:1.5;letter-spacing:0.15px}
+	.neela-quote-label{flex-shrink:1;min-width:0}
+	.neela-quote-leader{flex:1;border-bottom:1px dotted rgba(184,149,106,0.35);margin:0 8px;align-self:flex-end;height:1px;transform:translateY(-3px)}
+	.neela-quote-amount{flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--cream)}
+	.neela-quote-sum{display:flex;justify-content:space-between;font-family:'Montserrat',sans-serif;font-size:13px;color:rgba(245,237,224,0.85);padding:3px 0;letter-spacing:0.2px}
+	.neela-quote-sum span:last-child{font-variant-numeric:tabular-nums;color:var(--cream)}
+	.neela-quote-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding:10px 0 4px;border-top:1px solid rgba(184,149,106,0.4);font-family:'Libre Baskerville',Georgia,serif;font-size:17px;font-weight:700;color:var(--gold-light);letter-spacing:0.3px}
+	.neela-quote-total span:last-child{font-variant-numeric:tabular-nums;font-size:18px}
+	.neela-quote-disclaimer{margin:10px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12px;color:rgba(245,237,224,0.6);line-height:1.5;letter-spacing:0.2px}
+
 	/* MOBILE — full-screen modal slide-up */
 	@media (max-width:600px){
 		.neela-fab{right:18px;bottom:18px;height:56px;font-size:14px;padding-right:16px}
@@ -256,13 +305,229 @@
 			.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
 	}
 
+	// Order-marker parser. Neela emits <<<NEELA_ORDER_READY>>>{json}<<<END_NEELA_ORDER_READY>>>
+	// at the end of her reply when she's gathered enough fields. We strip the
+	// markers from the displayed text and render an order summary card below
+	// the bubble. If the JSON fails to parse, we just strip the markers and
+	// show plain text (Neela's prose above the markers usually summarizes the
+	// same details, so the customer isn't lost).
+	const ORDER_MARKER_RE = /<<<NEELA_ORDER_READY>>>([\s\S]*?)<<<END_NEELA_ORDER_READY>>>/;
+	function extractOrder(text) {
+		const m = text.match(ORDER_MARKER_RE);
+		if (!m) return { displayText: text, order: null };
+		const stripped = text.replace(ORDER_MARKER_RE, '').trim();
+		try {
+			const order = JSON.parse(m[1].trim());
+			return { displayText: stripped, order };
+		} catch (e) {
+			console.warn('[neela] order JSON parse failed', e);
+			return { displayText: stripped, order: null };
+		}
+	}
+
+	function lastTranscriptSnippet(n) {
+		const slice = conversation.slice(-n);
+		return slice
+			.map((m) => '[' + (m.role === 'assistant' ? 'NEELA' : 'USER') + '] ' + String(m.content).replace(/\s+/g, ' ').slice(0, 600))
+			.join('\n\n');
+	}
+
 	function renderMessage(role, text) {
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
-		const paragraphs = String(text).split(/\n\n+/).map(p => '<p>' + linkify(p).replace(/\n/g, '<br/>') + '</p>').join('');
+
+		let order = null;
+		let displayText = String(text);
+		if (role !== 'user') {
+			const extracted = extractOrder(displayText);
+			displayText = extracted.displayText;
+			order = extracted.order;
+		}
+
+		const paragraphs = displayText
+			.split(/\n\n+/)
+			.map((p) => '<p>' + linkify(p).replace(/\n/g, '<br/>') + '</p>')
+			.join('');
 		div.innerHTML = paragraphs;
 		messagesEl.appendChild(div);
+
+		if (order) {
+			const card = renderOrderCard(order);
+			if (card) messagesEl.appendChild(card);
+		}
+
 		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
+	function renderOrderCard(order) {
+		const mode = order && order.mode ? String(order.mode) : 'full';
+		// Consultation: no confirm card, just render a Calendly-prominent action block.
+		if (mode === 'consultation') {
+			return renderConsultationCard(order);
+		}
+		const card = document.createElement('div');
+		card.className = 'neela-order-card neela-order-card-' + mode;
+		card.innerHTML = buildOrderCardInnerHtml(order, mode);
+
+		const confirmBtn = card.querySelector('.neela-order-confirm');
+		const editBtn = card.querySelector('.neela-order-edit');
+		if (confirmBtn) {
+			confirmBtn.addEventListener('click', () => submitOrder(order, card, confirmBtn));
+		}
+		if (editBtn) {
+			editBtn.addEventListener('click', () => {
+				card.classList.add('neela-order-card-dismissed');
+				setTimeout(() => { try { card.remove(); } catch (e) {} }, 280);
+			});
+		}
+		return card;
+	}
+
+	function renderConsultationCard(order) {
+		const card = document.createElement('div');
+		card.className = 'neela-order-card neela-order-card-consultation';
+		const name = order && order.contact && order.contact.name ? String(order.contact.name) : '';
+		const noted = order && order.contact && order.contact.email
+			? '<p class="neela-order-noted">Your details are noted for the events team' + (name ? ' (' + escapeHtml(name) + ')' : '') + '.</p>'
+			: '';
+		card.innerHTML =
+			'<p class="neela-order-card-title">Easiest path: a 30-min call.</p>' +
+			'<p class="neela-order-card-sub">Pick any time that works.</p>' +
+			'<a class="neela-order-calendly" href="https://calendly.com/sula-catering/30min" target="_blank" rel="noopener noreferrer">Book a call →</a>' +
+			noted;
+		// Best-effort persistence of the consultation context (name + email + notes).
+		// Fire-and-forget; success/failure doesn't change what the user sees.
+		if (order && order.contact && order.contact.name && order.contact.email) {
+			fetch('/api/neela/submit-order', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ sessionId, order: { ...order, mode: 'consultation', transcriptSnippet: lastTranscriptSnippet(15) } })
+			}).catch(() => {});
+		}
+		return card;
+	}
+
+	function fmtField(label, value) {
+		if (value === undefined || value === null || value === '') return '';
+		return '<div class="neela-order-row"><span class="neela-order-row-label">' + escapeHtml(label) + '</span><span class="neela-order-row-value">' + escapeHtml(String(value)) + '</span></div>';
+	}
+	function fmtDietary(d) {
+		if (!d) return '';
+		const lines = [];
+		if (typeof d.vegetarianPct === 'number') lines.push('Vegetarian mix ~' + d.vegetarianPct + '%');
+		if (d.hasJain) lines.push('Jain prep');
+		if (d.hasVegan) lines.push('Vegan options');
+		if (d.hasGlutenFree) lines.push('Gluten-free');
+		if (d.hasNutAllergy) lines.push('⚠ Nut allergy');
+		if (d.halal) lines.push('Halal');
+		if (d.notes) lines.push(String(d.notes));
+		if (!lines.length) return '';
+		return '<div class="neela-order-row"><span class="neela-order-row-label">Dietary</span><span class="neela-order-row-value">' + lines.map(escapeHtml).join(', ') + '</span></div>';
+	}
+
+	function buildOrderCardInnerHtml(order, mode) {
+		const title = mode === 'quick' ? "Here's what I've got so far" : "Here's your order";
+		const sub = mode === 'quick'
+			? "Send this off and the events team comes back with menu ideas + tailored pricing."
+			: "Confirm and the events team gets all this with your contact info.";
+		const confirmLabel = mode === 'quick' ? 'Send for Menu Ideas' : 'Confirm & Send to Events Team';
+
+		const loc = order.location && (order.location.venueOrAddress || order.location.city)
+			? [order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')
+			: '';
+		const guestStr = typeof order.guestCount === 'number' ? String(order.guestCount) : (order.guestCount || '');
+		const fields = [
+			fmtField('Event type', order.eventType),
+			fmtField('Date', order.eventDate),
+			fmtField('Guests', guestStr),
+			fmtField('Service', order.serviceType),
+			fmtField('Location', loc),
+			fmtField('Time', order.timeWindow),
+			fmtField('Menu tier', order.menuTier),
+			fmtField('Add-ons', Array.isArray(order.addOns) && order.addOns.length ? order.addOns.join(', ') : ''),
+			fmtField('Setup', order.setupStyle),
+			fmtDietary(order.dietary),
+			fmtField('Notes', order.notes),
+			fmtField('Name', order.contact && order.contact.name),
+			fmtField('Email', order.contact && order.contact.email),
+			fmtField('Phone', order.contact && order.contact.phone)
+		].filter(Boolean).join('');
+
+		// Quote section is added in a follow-up commit; the slot is rendered when present.
+		const quoteHtml = renderQuoteSection(order.quote);
+
+		return (
+			'<div class="neela-order-card-head">' +
+				'<p class="neela-order-card-title">' + escapeHtml(title) + '</p>' +
+				'<p class="neela-order-card-sub">' + escapeHtml(sub) + '</p>' +
+			'</div>' +
+			'<div class="neela-order-rows">' + fields + '</div>' +
+			quoteHtml +
+			'<div class="neela-order-actions">' +
+				'<button type="button" class="neela-order-confirm">' + escapeHtml(confirmLabel) + '</button>' +
+				'<button type="button" class="neela-order-edit">Edit</button>' +
+			'</div>'
+		);
+	}
+
+	// Quote slot — populated by a later commit when Neela emits a `quote` object.
+	function renderQuoteSection(quote) {
+		if (!quote || !Array.isArray(quote.line_items) || !quote.line_items.length) return '';
+		const items = quote.line_items.map((it) => {
+			const amt = typeof it.amount === 'number' ? it.amount.toFixed(2) : String(it.amount || '');
+			return '<div class="neela-quote-line"><span class="neela-quote-label">' + escapeHtml(it.label || '') + '</span><span class="neela-quote-leader" aria-hidden="true"></span><span class="neela-quote-amount">$' + escapeHtml(amt) + '</span></div>';
+		}).join('');
+		const subtotalAmt = typeof quote.subtotal === 'number' ? quote.subtotal.toFixed(2) : '';
+		const taxAmt = typeof quote.tax_amount === 'number' ? quote.tax_amount.toFixed(2) : '';
+		const totalAmt = typeof quote.total === 'number' ? quote.total.toFixed(2) : '';
+		const taxLabel = quote.tax_label || 'Tax';
+		const disclaimer = quote.disclaimer || 'Preliminary estimate. Final quote in writing from the events team.';
+		return (
+			'<div class="neela-quote">' +
+				'<p class="neela-quote-title"><em>Preliminary estimate</em></p>' +
+				'<div class="neela-quote-items">' + items + '</div>' +
+				(subtotalAmt ? '<div class="neela-quote-sum"><span>Subtotal</span><span>$' + escapeHtml(subtotalAmt) + '</span></div>' : '') +
+				(taxAmt ? '<div class="neela-quote-sum"><span>' + escapeHtml(taxLabel) + '</span><span>$' + escapeHtml(taxAmt) + '</span></div>' : '') +
+				(totalAmt ? '<div class="neela-quote-total"><span>Total</span><span>$' + escapeHtml(totalAmt) + '</span></div>' : '') +
+				'<p class="neela-quote-disclaimer"><em>' + escapeHtml(disclaimer) + '</em></p>' +
+			'</div>'
+		);
+	}
+
+	async function submitOrder(order, card, confirmBtn) {
+		card.classList.add('neela-order-card-submitting');
+		confirmBtn.disabled = true;
+		const originalLabel = confirmBtn.textContent;
+		confirmBtn.textContent = 'Sending…';
+		try {
+			const resp = await fetch('/api/neela/submit-order', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					sessionId,
+					order: { ...order, transcriptSnippet: lastTranscriptSnippet(15) }
+				})
+			});
+			const data = await resp.json().catch(() => ({}));
+			if (resp.ok && data.ok && data.reference) {
+				card.classList.remove('neela-order-card-submitting');
+				card.classList.add('neela-order-card-sent');
+				card.innerHTML =
+					'<p class="neela-order-sent-icon">✓</p>' +
+					'<p class="neela-order-sent-title">Sent</p>' +
+					'<p class="neela-order-sent-body">Your reference is <strong>' + escapeHtml(String(data.reference)) + '</strong>. The events team will reach out within a business day.</p>';
+			} else {
+				throw new Error((data && data.error) || ('http ' + resp.status));
+			}
+		} catch (err) {
+			card.classList.remove('neela-order-card-submitting');
+			card.classList.add('neela-order-card-errored');
+			card.innerHTML =
+				'<p class="neela-order-sent-title">That didn\'t go through.</p>' +
+				'<p class="neela-order-sent-body">Easiest path: call <a href="tel:+16042151130">604-215-1130</a> or email <a href="mailto:events@sulaindianrestaurant.com">events@sulaindianrestaurant.com</a>. We\'ll handle it from there.</p>';
+			confirmBtn.disabled = false;
+			confirmBtn.textContent = originalLabel;
+		}
 	}
 
 	function rehydrate() {
