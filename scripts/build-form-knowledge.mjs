@@ -140,6 +140,13 @@ Neela uses this section to walk visitors through the same logic Sula's quote and
 
 If a visitor wants to actually submit a quote, point them at the live form on the WordPress site (Catering Inquiry, Custom Order, Group Reservations, etc.) or offer the Calendly call.
 
+## HARD RULE: 15-guest minimum for off-site catering
+
+Every setup option in the Catering Inquiry form (Form 27) starts at 15 guests — Aluminum trays, Reusable Plastic Bowls (15 to 90), Non-Heated Bowl Setup (up to 30), Heated Stainless Steel, Premium Hammered Copper. There is **no off-site catering option below 15 guests**. If someone asks about a smaller off-site order, route them:
+- 7 to 30 guests → **Group Dining** (Form 8) at one of the three Sula restaurant locations
+- Under 7 → walk-in or regular reservation at any Sula restaurant
+- Smaller café-style orders → Sula Café drop-offs (lower minimums apply)
+
 ## How to choose a form path
 
 | Situation | Form to use |

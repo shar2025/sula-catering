@@ -10,6 +10,15 @@ export const POLICIES_KNOWLEDGE = `# SULA POLICIES & EDGE CASES
 
 This is the playbook for the questions that don't fit cleanly into menus or pricing tiers. Use it for lead time, tastings, deposits, cancellations, dietary edge cases, alcohol, equipment, and so on. When something here says "we'll confirm", reflect that hedge in the reply, never invent a hard number.
 
+## Order minimums
+
+- **Off-site catering (drop-off or full-service): 15 guests minimum.** This is enforced by the quote form's conditional logic — every setup option starts at 15 guests, so smaller off-site orders aren't supported.
+- **In-restaurant group dining: 7 guests minimum** (handled through Group Reservations at any of the three Sula restaurants).
+- **Below 7 guests:** regular reservation or walk-in at any Sula restaurant.
+- **Sula Café drop-offs** have their own smaller minimums for café-style orders. Refer to Sula Café for those.
+
+When someone asks about catering for fewer than 15 guests, don't apologize or refuse. Redirect them to the option that actually fits their size: group dining for 7-30, walk-in for under 7, Sula Café for smaller café-style.
+
 ## Lead time
 
 How far ahead Sula likes to be booked, by event type:
@@ -130,4 +139,4 @@ When someone is price-shopping, lean on a specific brand strength (the in-house 
 
 When in doubt, hand off to events@sulaindianrestaurant.com or the Calendly link calendly.com/sula-catering/30min.`;
 
-export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v2';
+export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v3';
