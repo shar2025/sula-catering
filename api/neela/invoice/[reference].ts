@@ -2,16 +2,18 @@
  * /api/neela/invoice/[reference], generates the Sula PDF invoice on demand.
  *
  * Reads the order from neela_orders by reference, runs the portioning
- * calculator, builds the 3-page Sula-branded PDF via @react-pdf/renderer,
- * and streams it back as application/pdf.
+ * calculator, builds the Sula-branded PDF via @react-pdf/renderer, and
+ * streams it back as application/pdf.
  *
  * Query params:
  *   ?audience=customer  → page 1 ONLY (catering details, no pricing).
  *                         The customer never sees Neela's preliminary line-items;
  *                         events team controls when the official quote goes out.
- *   ?audience=kitchen   → page 3 only (kitchen sheet)
- *   ?audience=internal  → all 3 pages (events-team copy)
- *   default             → all 3 pages (legacy 'all' alias)
+ *   ?audience=internal  → pages 1 + 2 (catering details + formal invoice).
+ *                         The events-team copy. Kitchen sheet is intentionally
+ *                         excluded; back-office discussions don't need it.
+ *   ?audience=kitchen   → page 3 only (kitchen sheet, prep workflow).
+ *   default             → all 3 pages (diagnostic / legacy alias 'all').
  *
  * Required env:
  *   POSTGRES_URL , Vercel Postgres / Neon (where neela_orders lives)

@@ -1,8 +1,13 @@
-// Page 2, formal Invoice (events-team copy only).
-// 4-column line-item table (Product | Qty | Unit Price | Price), GST as a
-// separate row, plum total stripe at the bottom. Subtotal floats above the
-// table on the right inside a gold chip. Faint elephant watermark sits behind
-// the content for brand presence.
+// Page 2, formal Invoice. Customer-facing: this is the line-items page the
+// customer keeps after the team finalizes. Mirrors Page 1's restraint: same
+// full brand band, same wide 60pt margins, same wide footer.
+//
+// 4-column line-item table (Product | Qty | Unit Price | Price). NO alt-row
+// tints, NO subtotal chip, NO plum total stripe, NO watermark. Reads like a
+// thoughtfully-typeset restaurant check: thin gold rules around the column
+// header, faint gold rule between rows, right-aligned subtotal/tax in muted
+// small-caps, and a clean Total line with gold "TOTAL" eyebrow above the
+// midnight bold amount.
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
@@ -21,17 +26,21 @@ function fmtQty(n: number | undefined): string {
 	return Number.isInteger(n) ? String(n) : n.toFixed(2);
 }
 
+// Brand band, mirroring Page 1 exactly so the two pages read as one document
+// when the customer flips between them. Same midnight->navy gradient, same
+// 70pt elephant logo, same wordmark + italic gold tagline.
 function brandBand(logoBuffer: Buffer | null | undefined) {
 	return e(
 		React.Fragment,
 		null,
 		e(
 			View,
-			{ style: styles.brandBandCompact },
+			{ style: styles.brandBand },
+			e(View, { style: styles.brandBandShadeMid }),
 			e(View, { style: styles.brandBandShade }),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
-				{ src: logoBuffer, style: styles.brandLogoSmall }
+				{ src: logoBuffer, style: styles.brandLogoLarge }
 			),
 			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
 			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.')
@@ -43,7 +52,7 @@ function brandBand(logoBuffer: Buffer | null | undefined) {
 function pageFooter() {
 	return e(
 		View,
-		{ style: styles.footer, fixed: true },
+		{ style: styles.footerWide, fixed: true },
 		e(
 			Text,
 			{ style: styles.footerText },
@@ -156,49 +165,37 @@ export function renderPage2(
 
 		brandBand(opts.logoBuffer),
 
-		// Faint elephant watermark behind the body
-		opts.logoBuffer && e(
-			Image as unknown as React.ComponentType<Record<string, unknown>>,
-			{ src: opts.logoBuffer, style: styles.pageWatermark, fixed: true }
-		),
-
-		// Inner padded content
+		// Inner padded content (wide margins matching Page 1, no watermark)
 		e(
 			View,
-			{ style: styles.contentInner },
+			{ style: styles.contentInnerWide },
 
-			// Document title (no flanking ornaments): "INVOICE" centered
-			e(Text, { style: styles.docTitleInvoice }, 'INVOICE'),
+			// Thin gold eyebrow rule + GST registration line. We drop a
+			// separate "INVOICE" title here because Page 1's title already
+			// reads "CATERING INVOICE"; repeating it on Page 2 would feel
+			// procedural. The brand band + this gold rule + the GST line
+			// make Page 2 feel like a continuation, not a new document.
+			e(View, { style: styles.docTitleEyebrowRule }),
 			e(Text, { style: styles.gstLine }, 'GST 874529506 RT0001'),
 
 			// Section eyebrow (small caps gold + thin gold underline)
 			e(Text, { style: styles.sectionEyebrow }, 'ORDER'),
-			subStr && e(
-				View,
-				{ style: styles.subtotalChip },
-				e(
-					Text,
-					null,
-					e(Text, { style: styles.subtotalChipLabel }, 'SUBTOTAL  '),
-					e(Text, { style: styles.subtotalChipText }, subStr)
-				)
-			),
 
-			// Table header
+			// Table header (small-caps gold column titles, gold rule top + bottom)
 			e(
 				View,
 				{ style: styles.tableHeaderRow },
-				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colProduct } }, 'Product'),
-				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colQty } }, 'Qty'),
-				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colUnit } }, 'Unit Price'),
-				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colPrice } }, 'Price')
+				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colProduct } }, 'PRODUCT'),
+				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colQty } }, 'QTY'),
+				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colUnit } }, 'UNIT PRICE'),
+				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colPrice } }, 'PRICE')
 			),
 
-			// Line item rows
+			// Line item rows (no alt-row tints, faint gold rule between rows)
 			...items.map((li, i) =>
 				e(
 					View,
-					{ style: i % 2 === 1 ? { ...styles.tableRow, ...styles.tableRowAlt } : styles.tableRow, key: `li-${i}` },
+					{ style: styles.tableRow, key: `li-${i}` },
 					e(Text, { style: { ...styles.cellText, ...styles.colProduct } }, li.label),
 					e(Text, { style: { ...styles.cellText, ...styles.colQty } }, fmtQty(li.qty)),
 					e(Text, { style: { ...styles.cellText, ...styles.colUnit } }, fmtMoney(li.unit_price)),
@@ -206,36 +203,43 @@ export function renderPage2(
 				)
 			),
 
-			// GST row (rendered as part of the table flow)
-			taxStr && e(
+			// Totals block: right-aligned Subtotal + GST in muted small-caps,
+			// thin gold rule, then a clean Total line with gold eyebrow above
+			// the midnight bold amount.
+			e(
 				View,
-				{ style: { ...styles.tableRow, ...(items.length % 2 === 1 ? styles.tableRowAlt : {}) } },
-				e(Text, { style: { ...styles.cellText, ...styles.colProduct } }, taxLabel),
-				e(Text, { style: { ...styles.cellText, ...styles.colQty } }, '1'),
-				e(Text, { style: { ...styles.cellText, ...styles.colUnit } }, taxStr),
-				e(Text, { style: { ...styles.priceCell, ...styles.colPrice } }, taxStr)
+				{ style: styles.totalsBlock },
+				subStr && e(
+					View,
+					{ style: styles.totalsRow },
+					e(Text, { style: styles.totalsLabel }, 'SUBTOTAL'),
+					e(Text, { style: styles.totalsAmount }, subStr)
+				),
+				taxStr && e(
+					View,
+					{ style: styles.totalsRow },
+					e(Text, { style: styles.totalsLabel }, taxLabel.toUpperCase()),
+					e(Text, { style: styles.totalsAmount }, taxStr)
+				),
+				totalStr && e(View, { style: styles.totalsRule }),
+				totalStr && e(Text, { style: styles.totalLabelMinimal }, 'TOTAL'),
+				totalStr && e(Text, { style: styles.totalAmountMinimal }, totalStr)
 			),
 
-			// Total stripe (plum bar with cream label + gold value)
-			totalStr && e(
-				View,
-				{ style: styles.totalRow },
-				e(Text, { style: styles.totalLabel }, 'Total'),
-				e(Text, { style: styles.totalValue }, totalStr)
-			),
-
-			// Closing block
+			// Closing block, warm and personal
 			e(Text, { style: styles.thankYou }, 'Thank you for choosing Sula'),
 			e(
 				Text,
 				{ style: styles.revisionsLine },
-				'Revisions accepted up to 72 hours before the event ',
-				e(Text, { style: { color: COLORS.gold } }, ' · '),
-				' 2 free revisions ',
-				e(Text, { style: { color: COLORS.gold } }, ' · '),
-				' $25 each thereafter'
+				"We're excited to cook for your event. Reply to ",
+				e(Text, { style: { color: COLORS.gold } }, 'events.sula@gmail.com'),
+				' with any changes.'
 			),
-			e(Text, { style: styles.closingEmail }, 'events.sula@gmail.com')
+			e(
+				Text,
+				{ style: styles.revisionsLine },
+				'Two complimentary revisions, then $25 each up to 72 hours before the event.'
+			)
 		),
 
 		// Optional sample watermark

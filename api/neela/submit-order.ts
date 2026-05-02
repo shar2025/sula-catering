@@ -704,13 +704,15 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 	}
 
 	// Render PDFs in parallel where possible.
-	// 'all' (events team) → all 3 pages. 'customer' → page 1 only (catering details,
-	// no pricing, events team controls when the official quote goes out). 'kitchen'
-	// → page 3 only (only when KITCHEN_EMAIL is set).
+	// 'internal' (events team)  → pages 1 + 2 (catering details + formal invoice).
+	//                             Kitchen sheet excluded; prep cooks have their
+	//                             own kitchen-only PDF below.
+	// 'customer' (customer copy) → page 1 only (catering details, no pricing).
+	// 'kitchen'  (kitchen copy)  → page 3 only, gated by KITCHEN_EMAIL.
 	const generatePdfs = shouldGeneratePdf(order);
-	const [fullBuffer, customerBuffer, kitchenBuffer] = generatePdfs
+	const [teamBuffer, customerBuffer, kitchenBuffer] = generatePdfs
 		? await Promise.all([
-			renderInvoicePdfBuffer(reference, order, 'all'),
+			renderInvoicePdfBuffer(reference, order, 'internal'),
 			renderInvoicePdfBuffer(reference, order, 'customer'),
 			process.env.KITCHEN_EMAIL ? renderInvoicePdfBuffer(reference, order, 'kitchen') : Promise.resolve(null)
 		])
@@ -725,9 +727,10 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 
-		// 1) Events team, full 3-page PDF attached. In test mode this routes to NEELA_TEST_EMAIL.
-		const teamAttachments = fullBuffer
-			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
+		// 1) Events team, 2-page PDF (details + invoice; no kitchen sheet).
+		// In test mode this routes to NEELA_TEST_EMAIL.
+		const teamAttachments = teamBuffer
+			? [{ filename: `${reference}-team.pdf`, content: teamBuffer }]
 			: undefined;
 		const teamTo = testMode ? teamRecipient : 'events@sulaindianrestaurant.com';
 		const teamResult = await resend.emails.send({
@@ -753,7 +756,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			return { sent: false, error: detail };
 		}
 		const emailId = (teamResult.data && (teamResult.data as { id?: string }).id) || undefined;
-		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer, testMode });
+		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!teamBuffer, testMode });
 		await markEmailed(reference);
 
 		// 2) Customer copy, page 1 ONLY (catering details, no pricing). The

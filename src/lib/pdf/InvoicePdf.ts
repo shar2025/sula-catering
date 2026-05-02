@@ -2,14 +2,22 @@
 // (formal Invoice with line-item table), and Page3 (Kitchen Order Sheet),
 // filtered by audience.
 //
-//   audience='customer' → page 1 ONLY (Catering Details summary).
-//                         The customer doesn't see prices in the attachment,
-//                         the events team reviews and sends the formal quote
-//                         in writing; this PDF is just the "we got it" record.
-//   audience='kitchen'  → page 3 only (Kitchen Order Sheet)
-//   audience='internal' → all 3 pages (events team copy: details + invoice + kitchen)
-//   audience='all'      → alias for 'internal' (back-compat with older callers)
-//   default             → all 3 pages
+//   audience='customer' → page 1 ONLY (Catering Submission Record).
+//                         The initial confirmation we send right after Neela
+//                         captures the order, no prices, just "we got it".
+//   audience='internal' → pages 1 + 2 ONLY (catering details + formal invoice
+//                         with prices). NO kitchen sheet. NOTE: despite the
+//                         name, this is also the CUSTOMER-FINAL invoice that
+//                         the events team sends to the customer after they
+//                         review and adjust the quote. Both team review and
+//                         customer-final use this same document because the
+//                         team's edits go straight into the order before the
+//                         customer copy is sent. Kept as 'internal' for
+//                         backwards compatibility with the email pipeline and
+//                         the chat "View Invoice" link.
+//   audience='kitchen'  → page 3 only (Kitchen Order Sheet, prep workflow).
+//   audience='all'      → all 3 pages (legacy/diagnostic only).
+//   default             → all 3 pages.
 //
 // Uses React.createElement directly (no JSX) so we don't need to touch
 // tsconfig or risk breaking Astro's compilation pipeline.
@@ -103,14 +111,24 @@ export function buildInvoicePdf(opts: {
 	const { order, sheet, audience, watermark, logoBuffer } = opts;
 
 	const children: React.ReactNode[] = [];
-	// 'customer' = Catering Details ONLY. No prices, no kitchen sheet. The
-	// formal quote follows by email from the events team.
+	// 'customer'  = Catering Details ONLY. No prices, no kitchen sheet. The
+	//                formal quote follows by email from the events team.
+	// 'kitchen'   = Kitchen sheet ONLY. Goes to the kitchen recipient (set via
+	//                KITCHEN_EMAIL) so prep cooks don't have to flip past the
+	//                customer-facing pages.
+	// 'internal'  = Customer details + formal invoice (pages 1 + 2). The events
+	//                team copy. Excludes the kitchen sheet so back-office
+	//                discussions don't accidentally surface prep notes.
+	// 'all'       = All 3 pages, legacy/diagnostic only.
 	if (audience === 'customer') {
 		children.push(renderPage1(order, { watermark, logoBuffer, forCustomer: true }));
 	} else if (audience === 'kitchen') {
 		children.push(renderPage3(order, sheet, { logoBuffer }));
+	} else if (audience === 'internal') {
+		children.push(renderPage1(order, { watermark, logoBuffer }));
+		children.push(renderPage2(order, { watermark, logoBuffer }));
 	} else {
-		// 'all' / 'internal' / default → full 3-page events-team copy
+		// 'all' / default → full 3-page diagnostic copy
 		children.push(renderPage1(order, { watermark, logoBuffer }));
 		children.push(renderPage2(order, { watermark, logoBuffer }));
 		children.push(renderPage3(order, sheet, { logoBuffer }));

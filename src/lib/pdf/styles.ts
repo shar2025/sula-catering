@@ -318,90 +318,106 @@ export const styles = StyleSheet.create({
 		marginBottom: 6,
 		textAlign: 'center'
 	},
-	subtotalChip: {
-		alignSelf: 'flex-end',
-		marginTop: 4,
-		marginBottom: 8,
-		paddingVertical: 4,
-		paddingHorizontal: 12,
-		backgroundColor: COLORS.white,
-		borderWidth: 0.8,
-		borderColor: COLORS.gold,
-		borderStyle: 'solid',
-		borderRadius: 2
-	},
-	subtotalChipLabel: {
-		fontFamily: FONTS.bold,
-		fontSize: 8.5,
-		color: COLORS.muted
-	},
-	subtotalChipText: {
-		fontFamily: FONTS.bold,
-		fontSize: 10,
-		color: COLORS.plum
-	},
 
-	// ---------- Order line-item table (Page 2) ----------
-	// Plum header row, alternating white-on-cream rows, gold-faint underline,
-	// plum prices, and a plum total stripe with gold total amount.
+	// ---------- Order line-item table (Page 2, minimal) ----------
+	// Reads like a thoughtfully-typeset restaurant check, not a procurement
+	// template. Thin gold rule above + below the column header. NO alt-row
+	// tints, NO heavy plum stripes. Faint gold rule between each line item
+	// for legibility; midnight body text; column header in small-caps gold.
 	tableHeaderRow: {
 		flexDirection: 'row',
-		paddingVertical: 8,
-		paddingHorizontal: 10,
-		backgroundColor: COLORS.plum,
-		marginBottom: 0
+		paddingTop: 8,
+		paddingBottom: 5,
+		paddingHorizontal: 4,
+		borderTopWidth: 0.6,
+		borderTopColor: COLORS.gold,
+		borderTopStyle: 'solid',
+		borderBottomWidth: 0.6,
+		borderBottomColor: COLORS.gold,
+		borderBottomStyle: 'solid'
 	},
 	tableHeaderCell: {
 		fontFamily: FONTS.bold,
-		fontSize: 9,
-		color: COLORS.cream
+		fontSize: 8.5,
+		color: COLORS.gold
 	},
 	tableRow: {
 		flexDirection: 'row',
 		paddingVertical: 6,
-		paddingHorizontal: 10,
+		paddingHorizontal: 4,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.goldFaint,
 		borderBottomStyle: 'solid',
 		alignItems: 'flex-start'
 	},
-	tableRowAlt: {
-		backgroundColor: COLORS.white
-	},
 	colProduct: { flex: 3.4, paddingRight: 8 },
 	colQty: { flex: 0.7, textAlign: 'right', paddingRight: 8 },
 	colUnit: { flex: 1, textAlign: 'right', paddingRight: 8 },
 	colPrice: { flex: 1.1, textAlign: 'right' },
-	cellText: { fontFamily: FONTS.body, fontSize: 10, color: COLORS.text },
-	cellTextBold: { fontFamily: FONTS.bold, fontSize: 10, color: COLORS.text },
-	priceCell: { fontFamily: FONTS.bold, fontSize: 10, color: COLORS.plum },
-	totalRow: {
+	cellText: { fontFamily: FONTS.body, fontSize: 10, color: COLORS.midnight },
+	cellTextBold: { fontFamily: FONTS.bold, fontSize: 10, color: COLORS.midnight },
+	priceCell: { fontFamily: FONTS.body, fontSize: 10, color: COLORS.midnight },
+
+	// ---------- Totals block (Page 2, minimal) ----------
+	// Right-aligned subtotal/tax/total. Subtotal + tax in muted small-caps
+	// labels with midnight regular amounts. Thin gold rule above the Total
+	// line. Total line: gold "TOTAL" small-caps eyebrow + midnight bold
+	// 14pt amount, right-aligned. No plum stripe.
+	totalsBlock: {
+		marginTop: 12,
+		alignItems: 'flex-end'
+	},
+	totalsRow: {
 		flexDirection: 'row',
-		paddingVertical: 12,
-		paddingHorizontal: 10,
-		backgroundColor: COLORS.plum,
-		marginTop: 4,
-		alignItems: 'center'
+		paddingVertical: 3,
+		paddingHorizontal: 4,
+		minWidth: 220,
+		justifyContent: 'flex-end'
 	},
-	totalLabel: {
+	totalsLabel: {
 		fontFamily: FONTS.bold,
-		fontSize: 12,
-		color: COLORS.cream,
-		flex: 5.1,
-		textAlign: 'right',
-		paddingRight: 8
-	},
-	totalValue: {
-		fontFamily: FONTS.bold,
-		fontSize: 14,
-		color: COLORS.gold,
-		flex: 1.1,
+		fontSize: 8.5,
+		color: COLORS.muted,
+		paddingRight: 16,
 		textAlign: 'right'
+	},
+	totalsAmount: {
+		fontFamily: FONTS.body,
+		fontSize: 10,
+		color: COLORS.midnight,
+		minWidth: 80,
+		textAlign: 'right'
+	},
+	totalsRule: {
+		alignSelf: 'flex-end',
+		width: 220,
+		height: 0.6,
+		backgroundColor: COLORS.gold,
+		marginTop: 6,
+		marginBottom: 6
+	},
+	// Total stacked vertically: gold "TOTAL" eyebrow on top, midnight bold
+	// amount below. Both right-aligned so they line up flush with the
+	// subtotal and tax rows above.
+	totalLabelMinimal: {
+		fontFamily: FONTS.bold,
+		fontSize: 9,
+		color: COLORS.gold,
+		textAlign: 'right',
+		paddingRight: 4,
+		marginBottom: 2
+	},
+	totalAmountMinimal: {
+		fontFamily: FONTS.bold,
+		fontSize: 16,
+		color: COLORS.midnight,
+		textAlign: 'right',
+		paddingRight: 4
 	},
 
 	// ---------- Page 2 footer block ----------
 	thankYou: {
-		marginTop: 16,
+		marginTop: 22,
 		fontFamily: FONTS.italic,
 		fontSize: 13,
 		color: COLORS.plum,

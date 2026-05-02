@@ -109,7 +109,9 @@ async function renderAudience(audience, filename) {
 // Bump the version suffix when iterating so prior previews are not clobbered.
 // v1 = first luxury redesign (rendered ◆ as garbage on Helvetica)
 // v2 = ornament-free, minimal customer page, gold-eyebrow internal headers
-const VERSION = process.env.PREVIEW_VERSION || 'v2';
+// v3 = audience=internal now pages 1+2 only (no kitchen); page 2 minimal redesign
+//      (no alt-row tints, no chip, no plum total stripe, no watermark)
+const VERSION = process.env.PREVIEW_VERSION || 'v3';
 
 const results = [];
 results.push(await renderAudience('customer', `Sula-PREVIEW-customer-${VERSION}.pdf`));

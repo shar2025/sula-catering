@@ -4,10 +4,10 @@
  * PDF the real endpoint produces, with a "SAMPLE" gold watermark on every
  * page so it's never confused for a real order.
  *
- *   GET /api/neela/invoice/sample                 → all 3 pages
- *   GET /api/neela/invoice/sample?audience=customer → pages 1+2 (Catering Details + Invoice)
+ *   GET /api/neela/invoice/sample                  → all 3 pages (diagnostic)
+ *   GET /api/neela/invoice/sample?audience=customer → page 1 only
+ *   GET /api/neela/invoice/sample?audience=internal → pages 1 + 2 (events-team)
  *   GET /api/neela/invoice/sample?audience=kitchen  → page 3 only
- *   GET /api/neela/invoice/sample?audience=internal → all 3 pages (events team copy)
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
