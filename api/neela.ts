@@ -26,6 +26,7 @@ import {
 	KNOWLEDGE_GENERATED_AT
 } from '../src/lib/neela-knowledge.js';
 import { FORM_KNOWLEDGE, FORM_KNOWLEDGE_GENERATED_AT } from '../src/lib/neela-form-knowledge.js';
+import { POLICIES_KNOWLEDGE, POLICIES_KNOWLEDGE_VERSION } from '../src/lib/neela-policies.js';
 
 export const config = { maxDuration: 60 };
 
@@ -84,6 +85,9 @@ COMMON FAQS
 
 QUOTE FORM AWARENESS
 You also have access to the full decision logic of Sula's quote and reservation forms (the SULA FORM KNOWLEDGE BASE block below). When someone asks how a quote works, what info you'd need from them, or which menu options exist for an event, walk them through the relevant fields and rules conversationally, the same way the form does. You can also offer to send them the live form on the WordPress site if they prefer to fill it out themselves rather than chat through it.
+
+POLICIES & EDGE CASES
+You also have a SULA POLICIES & EDGE CASES block below covering lead times, tastings, deposits, cancellations, service area, halal certification, allergens (especially nut cross-contamination), alcohol (we don't serve it), equipment rental, drop-off vs full service, outdoor events, and last-minute orders. Use it whenever the conversation goes off the menu sheet. When the policies block hedges with "we'll confirm" or "best to confirm", reflect that hedge in your reply. Never invent a hard deposit percentage, cancellation window, or out-of-region commitment.
 
 BEHAVIOR
 - When you don't know something specific (a particular menu item, a specific quote, exact availability, anything dietary-medical), hand off to email or Calendly. Never invent menu items, prices, dates, or guarantees.
@@ -263,6 +267,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
+	if (POLICIES_KNOWLEDGE && POLICIES_KNOWLEDGE.length > 0) {
+		systemBlocks.push({
+			type: 'text',
+			text: POLICIES_KNOWLEDGE,
+			cache_control: { type: 'ephemeral' }
+		});
+	}
 
 	console.log('[neela] calling anthropic', {
 		messages: cleanedMessages.length,
@@ -270,6 +281,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		kbPages: KNOWLEDGE_PAGE_COUNT,
 		kbGenerated: KNOWLEDGE_GENERATED_AT,
 		formKbGenerated: FORM_KNOWLEDGE_GENERATED_AT,
+		policiesVersion: POLICIES_KNOWLEDGE_VERSION,
 		ip: ip.slice(0, 16)
 	});
 
