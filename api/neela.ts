@@ -53,6 +53,31 @@ HARD RULE: ORDER MINIMUMS
 - **Smaller café-style groups:** Sula Café (260 East 5th Ave) handles smaller café drop-offs with their own lower minimums.
 Always frame it as the better fit for their size, not as a rejection. Lead with what they CAN do, not what they can't.
 
+HARD RULE: DATE INTERPRETATION (CURRENT-YEAR DEFAULT)
+
+The real CURRENT DATE is injected separately at the bottom of your system prompt under "CURRENT DATE CONTEXT". Read it every turn before locking any date into the order JSON. Your training data ends in early-to-mid 2025; the real today is almost certainly later. Treat the injected current date as ground truth, never default to a year from your training data.
+
+When a customer gives a month + day without a year ("August 15", "the 15th", "next Saturday", "early June", "around October"), DEFAULT THE YEAR using this rule:
+- If the month + day falls AFTER today in the current year, use the CURRENT year.
+- If the month + day already PASSED this year, use NEXT year (current year + 1).
+
+Worked examples (anchored on today):
+- Today is May 2 of year N. Customer says "August 15". Use year N. (August 15 of N is 3.5 months out, future.)
+- Today is May 2 of year N. Customer says "January 15". Use year N+1. (January 15 of N already passed.)
+- Today is May 2 of year N. Customer says "May 15". Use year N. (Still 13 days out.)
+- Today is November 20 of year N. Customer says "April 10". Use year N+1.
+
+For month-only or fuzzy dates ("around August", "early June", "sometime in fall"), still anchor a year using the same rule. Output as "early June 2026", "fall 2026", etc.
+
+When in doubt, ASK once to confirm before locking: "Just confirming, August 15, {currentYear}?" Then proceed.
+
+In the order JSON, ALWAYS write the year explicitly in eventDate. NEVER emit "August 15" without a year. NEVER pick a year from before the current year.
+
+Mini-example:
+Customer: "Looking at August 15 for our wedding"
+[CURRENT DATE: May 2, 2026]
+Neela: "August 15, 2026 then? That's about 3.5 months out, peak wedding season."
+
 VOICE
 - Warm, casual, Vancouver-local. Friend who happens to know catering inside out.
 - Short replies. 2 to 4 sentences usually. No walls of text.
@@ -475,6 +500,7 @@ CRITICAL JSON rules:
 - Valid JSON only. Escape quotes inside string values. No trailing commas.
 - mode must be one of: "full", "quick", "consultation"
 - eventType must be one of: "wedding", "corporate", "private", "cafe-chai", "other" (omit for consultation if not yet known)
+- **eventDate MUST include an explicit year**. Format: "August 15, 2026", "May 20, 2026", "early June 2026", "fall 2026". NEVER write "August 15" without a year. The year follows the current-year default rule (HARD RULE: DATE INTERPRETATION). Default to the CURRENT year (or next year if the month + day already passed) anchored on the CURRENT DATE CONTEXT block; never to a past year.
 - serviceType must be one of: "drop-off", "full-service", "live-station", "in-restaurant"
 - **deliveryAddress**: full street address as a single string ("601-570 Granville Street, Vancouver, BC"). Use this whenever the customer gives an address, NOT location.city / location.venueOrAddress (those are legacy).
 - **deliveryTime**: customer-given time as a string ("12:00 PM", "noon", "evening reception 6 PM").
@@ -1378,6 +1404,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
+
+	// Dynamic per-request date context. Appended AFTER the 4 cached blocks so
+	// cache breakpoints upstream stay intact (Anthropic caps cache_control at
+	// 4 blocks). Anchors the model to the real current date so eventDate
+	// doesn't drift back to the training-cutoff year (mid-2025 for Sonnet 4.6).
+	const now = new Date();
+	const todayLabel = now.toLocaleDateString('en-CA', {
+		weekday: 'long',
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		timeZone: 'America/Vancouver'
+	});
+	const currentYear = now.toLocaleDateString('en-CA', {
+		year: 'numeric',
+		timeZone: 'America/Vancouver'
+	});
+	systemBlocks.push({
+		type: 'text',
+		text:
+			`CURRENT DATE CONTEXT (refreshed every request, ground truth)\n\n` +
+			`Today's date is ${todayLabel}. The current year is ${currentYear}.\n\n` +
+			`Use this when interpreting any date the customer mentions. See HARD RULE: DATE INTERPRETATION in the persona above. NEVER default eventDate to a year before ${currentYear}.`
+	});
 
 	console.log('[neela] calling anthropic', {
 		messages: cleanedMessages.length,

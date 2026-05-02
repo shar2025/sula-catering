@@ -179,6 +179,43 @@ function makeReference(): string {
 	return `SC-${mm}${dd}-${suffix}`;
 }
 
+// Catches the model's tendency to default eventDate to a training-cutoff year
+// (mid-2025 for Sonnet 4.6) when the customer gave a month + day with no year.
+// Strategy: if the captured eventDate string contains an explicit YYYY and the
+// parsed date is more than 30 days BEFORE today, swap the year for the
+// earliest year that puts month+day in the future. We only auto-bump on a clear
+// "way past" signal so a legit recent retro entry isn't rewritten silently.
+function normalizeEventDate(raw: string): { value: string; bumped: boolean; original?: string } {
+	const trimmed = raw.trim();
+	if (!trimmed) return { value: trimmed, bumped: false };
+	const yearMatch = trimmed.match(/\b(19|20)\d{2}\b/);
+	if (!yearMatch) return { value: trimmed, bumped: false };
+	const stated = parseInt(yearMatch[0], 10);
+	const today = new Date();
+	const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+	const parsed = new Date(trimmed);
+	let isPast: boolean;
+	if (Number.isNaN(parsed.getTime())) {
+		// Fuzzy phrasing like "early June 2025"; rely on stated-year-vs-today-year only.
+		isPast = today.getFullYear() - stated >= 1;
+	} else {
+		const diffDays = (todayMidnight.getTime() - parsed.getTime()) / (1000 * 60 * 60 * 24);
+		isPast = diffDays > 30;
+	}
+	if (!isPast) return { value: trimmed, bumped: false };
+	const todayYear = today.getFullYear();
+	let candidateYear = todayYear;
+	if (!Number.isNaN(parsed.getTime())) {
+		const monthDay = new Date(candidateYear, parsed.getMonth(), parsed.getDate());
+		if (monthDay.getTime() < todayMidnight.getTime()) candidateYear = todayYear + 1;
+	}
+	return {
+		value: trimmed.replace(yearMatch[0], String(candidateYear)),
+		bumped: true,
+		original: trimmed
+	};
+}
+
 function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order } | { ok: false; error: string } {
 	if (!body || typeof body !== 'object') return { ok: false, error: 'invalid body' };
 	const sessionId = String(body.sessionId || '').trim();
@@ -227,10 +264,18 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 	}
 
 	// eventDate, required for full + quick, optional for consultation.
-	const eventDate = String(o.eventDate || '').trim().slice(0, 200);
-	if (mode !== 'consultation' && !eventDate) {
+	const rawEventDate = String(o.eventDate || '').trim().slice(0, 200);
+	if (mode !== 'consultation' && !rawEventDate) {
 		return { ok: false, error: 'order.eventDate required (specific date or month for ' + mode + ' mode)' };
 	}
+	const dateNorm = normalizeEventDate(rawEventDate);
+	if (dateNorm.bumped) {
+		console.warn('[neela-order] eventDate auto-bumped from past year', {
+			original: dateNorm.original,
+			bumped: dateNorm.value
+		});
+	}
+	const eventDate = dateNorm.value;
 
 	if (o.serviceType && !VALID_SERVICE_TYPES.includes(o.serviceType as ServiceType)) {
 		return { ok: false, error: 'order.serviceType must be one of: ' + VALID_SERVICE_TYPES.join(', ') };
