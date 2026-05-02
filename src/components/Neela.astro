@@ -164,6 +164,8 @@
 	.neela-input-row input::placeholder{color:rgba(245,237,224,0.4)}
 	.neela-mic{flex-shrink:0;border:1px solid rgba(184,149,106,0.4);background:rgba(20,36,66,0.4)}
 	.neela-mic.recording{color:#e87b5a;border-color:#e87b5a;background:rgba(232,123,90,0.12);animation:neela-rec 1.2s ease-in-out infinite}
+	/* Voice loop active but mic paused (Neela is speaking): dimmed gold */
+	.neela-mic.voice-loop:not(.recording){color:rgba(184,149,106,0.55);border-color:rgba(184,149,106,0.55);background:rgba(184,149,106,0.06)}
 	@keyframes neela-rec{0%,100%{box-shadow:0 0 0 0 rgba(232,123,90,0.5)}50%{box-shadow:0 0 0 6px rgba(232,123,90,0)}}
 	.neela-send{flex-shrink:0;width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));color:var(--midnight);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform 0.3s ease,box-shadow 0.3s ease}
 	.neela-send:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(184,149,106,0.4)}
@@ -554,6 +556,13 @@
 		modal.classList.remove('active');
 		modal.setAttribute('aria-hidden', 'true');
 		document.body.classList.remove('neela-open');
+		// Stop any in-flight audio + kill the voice loop on close
+		try { stopCurrentAudio(); } catch (e) {}
+		if (typeof voiceLoopActive !== 'undefined' && voiceLoopActive) {
+			voiceLoopActive = false;
+			try { stopMicRecording(); } catch (e) {}
+			try { applyMicVisualState(); } catch (e) {}
+		}
 	}
 
 	fab.addEventListener('click', openModal);
@@ -715,6 +724,7 @@
 			u.rate = 0.96; // slightly slower than default for warmth
 			u.pitch = 1.05; // slightly higher for friendliness
 			u.volume = 1.0;
+			u.onend = () => onTtsEnded();
 			window.speechSynthesis.speak(u);
 			return true;
 		} catch (e) { return false; }
@@ -742,7 +752,10 @@
 					const url = URL.createObjectURL(blob);
 					const audio = new Audio(url);
 					currentAudio = audio;
-					audio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+					audio.addEventListener('ended', () => {
+						try { URL.revokeObjectURL(url); } catch (e) {}
+						onTtsEnded();
+					});
 					audio.addEventListener('error', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
 					await audio.play().catch(() => {});
 					return;
@@ -767,6 +780,12 @@
 			unlockAudio();
 		} else {
 			stopCurrentAudio();
+			// Speaker off kills the voice loop; the user has to opt back in.
+			if (voiceLoopActive) {
+				voiceLoopActive = false;
+				stopMicRecording();
+				applyMicVisualState();
+			}
 		}
 		updateVoiceModeIndicator();
 	});
@@ -780,6 +799,29 @@
 	let recognizing = false;
 	let lastInputViaVoice = false; // true while the next submit should be flagged as spoken
 	let haveUsedMicAtLeastOnce = false;
+	// Continuous voice loop: when ON, we auto-restart the mic after Neela's TTS
+	// finishes so the user can keep speaking hands-free. Tap mic again to exit.
+	let voiceLoopActive = false;
+
+	function applyMicVisualState() {
+		if (!micBtn) return;
+		micBtn.classList.toggle('recording', recognizing);
+		micBtn.classList.toggle('voice-loop', voiceLoopActive && !recognizing);
+		// Update aria-label so screen readers know the state
+		if (voiceLoopActive && recognizing) micBtn.setAttribute('aria-label', 'Listening, tap to exit hands-free mode');
+		else if (voiceLoopActive) micBtn.setAttribute('aria-label', 'Hands-free mode on, paused while Neela speaks');
+		else micBtn.setAttribute('aria-label', 'Tap to record');
+	}
+
+	function startMicRecording() {
+		if (!recognizer || recognizing) return;
+		try { recognizer.start(); } catch (e) { /* sometimes throws on rapid restart, ignore */ }
+	}
+	function stopMicRecording() {
+		if (!recognizer || !recognizing) return;
+		try { recognizer.stop(); } catch (e) {}
+	}
+
 	if (SpeechRecognition) {
 		micBtn.hidden = false;
 		recognizer = new SpeechRecognition();
@@ -787,7 +829,7 @@
 		recognizer.interimResults = true;
 		recognizer.continuous = false;
 		let baseline = '';
-		recognizer.onstart = () => { recognizing = true; baseline = inputEl.value; micBtn.classList.add('recording'); };
+		recognizer.onstart = () => { recognizing = true; baseline = inputEl.value; applyMicVisualState(); };
 		recognizer.onresult = (e) => {
 			let transcript = '';
 			for (let i = e.resultIndex; i < e.results.length; i++) transcript += e.results[i][0].transcript;
@@ -796,13 +838,50 @@
 			haveUsedMicAtLeastOnce = true;
 			updateVoiceModeIndicator();
 		};
-		recognizer.onerror = () => { recognizing = false; micBtn.classList.remove('recording'); };
-		recognizer.onend = () => { recognizing = false; micBtn.classList.remove('recording'); };
+		recognizer.onerror = () => { recognizing = false; applyMicVisualState(); };
+		recognizer.onend = () => {
+			recognizing = false;
+			applyMicVisualState();
+			// onend fires after a transcribed utterance; submitMessage() runs separately
+			// when the form input is non-empty + submit fires. We don't auto-submit here
+			// because the user might keep talking; let the existing recognizer.continuous=false
+			// + manual submit flow handle it. Auto-restart is the responsibility of the
+			// TTS-ended hook in the voice loop.
+		};
 		micBtn.addEventListener('click', () => {
 			unlockAudio(); // mic tap is a user gesture; prime the audio pipelines too
-			if (recognizing) { try { recognizer.stop(); } catch (e) {} }
-			else { try { recognizer.start(); } catch (e) {} }
+			if (recognizing) {
+				// Currently listening: tapping cancels recording AND exits voice loop
+				voiceLoopActive = false;
+				stopMicRecording();
+				applyMicVisualState();
+			} else if (voiceLoopActive) {
+				// Loop on but mic paused (TTS playing): tap exits the loop
+				voiceLoopActive = false;
+				applyMicVisualState();
+			} else {
+				// Loop off: tap starts recording AND enables hands-free loop if speaker is on
+				if (speakerOn) voiceLoopActive = true;
+				startMicRecording();
+				applyMicVisualState();
+			}
 		});
+	}
+
+	// Hook called when TTS playback finishes (either ElevenLabs <audio>'s 'ended'
+	// or SpeechSynthesisUtterance's 'onend'). Auto-restarts the mic when the loop
+	// is active and the modal is still open.
+	function onTtsEnded() {
+		if (!voiceLoopActive) return;
+		if (!speakerOn) return;
+		if (!modal || !modal.classList.contains('active')) return;
+		// Brief pause before reopening the mic so the user knows Neela finished
+		setTimeout(() => {
+			if (voiceLoopActive && speakerOn && modal.classList.contains('active')) {
+				startMicRecording();
+				applyMicVisualState();
+			}
+		}, 280);
 	}
 
 	// Voice-mode indicator: pulsing dot next to "Neela" whenever speaker is on
@@ -904,6 +983,18 @@
 			conversation.push({ role: 'assistant', content: reply });
 			saveConversation();
 
+			// If the reply is a fallback (rate limit, API down, broken state), stop the
+			// voice loop so the user isn't stuck talking to silence/recovery messages.
+			const looksLikeFallback =
+				reply === FALLBACK_MSG ||
+				reply.indexOf("I'm taking a quick break") !== -1 ||
+				reply.indexOf("Looks like we've chatted plenty today") !== -1;
+			if (looksLikeFallback && voiceLoopActive) {
+				voiceLoopActive = false;
+				stopMicRecording();
+				applyMicVisualState();
+			}
+
 			if (speakerOn && reply) {
 				playSpokenReply(reply);
 			}
@@ -911,6 +1002,11 @@
 		} catch (err) {
 			showTyping(false);
 			renderMessage('bot', FALLBACK_MSG);
+			if (voiceLoopActive) {
+				voiceLoopActive = false;
+				stopMicRecording();
+				applyMicVisualState();
+			}
 		} finally {
 			sendBtn.disabled = false;
 			inputEl.focus();
