@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # claude code worktrees and local agent state
 .claude/
+
+# Auto-generated knowledge base for Neela (regenerated on every build)
+src/lib/neela-knowledge.ts

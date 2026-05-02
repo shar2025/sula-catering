@@ -18,6 +18,11 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
+import {
+	SITE_CONTENT_KNOWLEDGE_BASE,
+	KNOWLEDGE_PAGE_COUNT,
+	KNOWLEDGE_GENERATED_AT
+} from '../src/lib/neela-knowledge.js';
 
 export const config = { maxDuration: 60 };
 
@@ -33,7 +38,7 @@ const RATE_LIMIT_MSG =
 const CAP_MSG =
 	"I'd love to keep going. For the bigger questions, let's set up a quick call at calendly.com/sula-catering/30min, or email events@sulaindianrestaurant.com.";
 
-const SYSTEM_PROMPT = `You are Neela, Sula Catering's event-planning assistant. You help people plan weddings, corporate events, private parties, and café & chai catering across Greater Vancouver.
+const NEELA_PERSONA_AND_RULES = `You are Neela, Sula Catering's event-planning assistant. You help people plan weddings, corporate events, private parties, and café & chai catering across Greater Vancouver.
 
 VOICE
 - Warm, casual, Vancouver-local. Friend who happens to know catering inside out.
@@ -164,8 +169,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	const abortController = new AbortController();
 	const abortTimer = setTimeout(() => abortController.abort(), ANTHROPIC_TIMEOUT_MS);
 
+	const systemBlocks: Anthropic.TextBlockParam[] = [
+		{
+			type: 'text',
+			text: NEELA_PERSONA_AND_RULES,
+			cache_control: { type: 'ephemeral' }
+		}
+	];
+	if (SITE_CONTENT_KNOWLEDGE_BASE && SITE_CONTENT_KNOWLEDGE_BASE.length > 0) {
+		systemBlocks.push({
+			type: 'text',
+			text:
+				`SULA SITE KNOWLEDGE BASE (auto-generated from sulacafe.com + sulacatering.com)\n\n` +
+				`Use this content to answer specific questions about menus, blog posts, services, pricing tiers, locations, and policies. ` +
+				`If a question can't be answered from this content, hand off to email or Calendly.\n\n` +
+				SITE_CONTENT_KNOWLEDGE_BASE,
+			cache_control: { type: 'ephemeral' }
+		});
+	}
+
 	console.log('[neela] calling anthropic', {
 		messages: cleanedMessages.length,
+		systemBlocks: systemBlocks.length,
+		kbPages: KNOWLEDGE_PAGE_COUNT,
+		kbGenerated: KNOWLEDGE_GENERATED_AT,
 		ip: ip.slice(0, 16)
 	});
 
@@ -174,13 +201,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			{
 				model: 'claude-sonnet-4-6',
 				max_tokens: 1024,
-				system: [
-					{
-						type: 'text',
-						text: SYSTEM_PROMPT,
-						cache_control: { type: 'ephemeral' }
-					}
-				],
+				system: systemBlocks,
 				messages: cleanedMessages
 			},
 			{

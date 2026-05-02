@@ -7,6 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "scrape:neela": "node scripts/scrape-sula.mjs",
+    "prebuild": "npm run scrape:neela",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -17,6 +19,7 @@
     "astro": "^6.1.9"
   },
   "devDependencies": {
-    "@vercel/node": "^5.7.15"
+    "@vercel/node": "^5.7.15",
+    "cheerio": "^1.2.0"
   }
 }
