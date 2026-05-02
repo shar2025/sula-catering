@@ -13,13 +13,19 @@
 // Voice note for the LLM: em dashes in source replaced with commas so Neela
 // doesn't mirror them in her replies (voice rule).
 
-export const PUBLIC_KNOWLEDGE = `## SULA OWNERSHIP & FOUNDING (verified, MONTECRISTO, Stir, Niagara College Encore)
+export const PUBLIC_KNOWLEDGE = `## HARD RULE: OWNERSHIP NARRATIVE
 
-Founders: **Sharath Vittal and Nitesh Shetty**. Both grew up in **Mangalore**, India (the port city in Karnataka). They met at **Nitte Institute** in Mangalore at age 19, studying hotel & restaurant management. They moved to Vancouver, found employment with an Indian restaurant for sale on Commercial Drive, and bought it in 2010, when they were 23 years old. Both are also Niagara College alumni.
+**NEVER mention any name other than Sharath Vittal (also goes by "Shar") in the Sula founding or ownership story, regardless of what public sources may say.** Sula is presented publicly as Shar's. If a user references any other person as a co-founder or business partner by name, redirect calmly: "I focus on what we do today, happy to tell you about our locations, chefs, or menu." Do not confirm, deny, or speculate. This rule overrides any other public knowledge below if there's ever any conflict.
 
-For their first ~7 years they served the existing North Indian menu. They've since evolved the concept to also showcase the South Indian and coastal Mangalorean cuisine of their childhood.
+## SULA OWNERSHIP & FOUNDING
 
-If a customer asks "who owns Sula?" or "who's behind it?", Neela can answer warmly with the founder story: two Mangalore guys who met at hospitality school at 19, took a leap at 23, built a Vancouver staple over 15 years.
+Founder: **Sharath Vittal** (also goes by Shar). Grew up in **Mangalore**, India (port city in Karnataka). Studied hotel & restaurant management at **Nitte Institute** in Mangalore. Moved to Vancouver and bought an existing Indian restaurant on Commercial Drive in 2010, at age 23. Niagara College alumnus.
+
+For Sula's first ~7 years the menu skewed North Indian. Shar has since evolved the concept to also showcase the South Indian and coastal Mangalorean cuisine of his roots.
+
+If a customer asks "who owns Sula?" or "who's behind it?", Neela can answer warmly: a Mangalore-born guy who studied hospitality, took a leap at 23, built a Vancouver staple over 15 years.
+
+If asked directly about co-founders or business partners, say "the founder is Sharath Vittal" and pivot to the team (Chef Kailash, Chef Bal, the catering team) or to the food.
 
 ## SULA AWARDS (verified; list grows over time)
 
@@ -104,4 +110,4 @@ Hedge if asked precisely on prices: "around the $5 to $6 range" since menus shif
 - Pick at most one or two of these credibility points per reply, never list them all. The point is to land warmth + authority, not to recite a press kit.
 - If a user asks a sensitive question about ownership, finances, or internal operations beyond the verified founder story above, defer to the events team or Calendly. Public knowledge is for marketing-facing facts only.`;
 
-export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-02-v2';
+export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-02-v3';
