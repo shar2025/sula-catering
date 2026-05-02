@@ -302,12 +302,39 @@
 		submitMessage();
 	});
 
-	// Speaker toggle
+	// Speaker toggle (TTS via /api/neela-voice → ElevenLabs). Hidden if upstream is unavailable.
+	let voiceUnavailable = false;
+	let currentAudio = null;
 	speakerBtn.addEventListener('click', () => {
 		speakerOn = !speakerOn;
 		speakerBtn.setAttribute('aria-pressed', speakerOn ? 'true' : 'false');
 		speakerBtn.setAttribute('aria-label', 'Voice replies, currently ' + (speakerOn ? 'on' : 'off'));
+		if (!speakerOn && currentAudio) {
+			try { currentAudio.pause(); } catch (e) {}
+		}
 	});
+	async function playSpokenReply(text) {
+		if (voiceUnavailable) return;
+		try {
+			const resp = await fetch('/api/neela-voice', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ text })
+			});
+			if (resp.status === 503) {
+				voiceUnavailable = true;
+				speakerBtn.hidden = true;
+				return;
+			}
+			if (!resp.ok) return;
+			const blob = await resp.blob();
+			const url = URL.createObjectURL(blob);
+			if (currentAudio) { try { currentAudio.pause(); } catch (e) {} }
+			currentAudio = new Audio(url);
+			currentAudio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+			currentAudio.play().catch(() => {});
+		} catch (e) { /* silent */ }
+	}
 
 	// Mic — Web Speech API (browser-native). Hidden if unsupported.
 	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -399,8 +426,8 @@
 			showTyping(false);
 			renderMessage('bot', reply);
 
-			if (speakerOn && data && data.audioUrl) {
-				try { new Audio(data.audioUrl).play().catch(() => {}); } catch (err) {}
+			if (speakerOn && reply) {
+				playSpokenReply(reply);
 			}
 
 			const newUserCount = conversation.filter(m => m.role === 'user').length;
