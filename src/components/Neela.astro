@@ -245,8 +245,12 @@
 		return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 	}
 	function linkify(s) {
-		// turn raw urls and emails into anchors
+		// Order matters: escape user-typed HTML first, then inject our own (bold/italic
+		// regex, then URL/email anchors). Bold runs before italic so a bare ** isn't
+		// captured by the single-asterisk italic regex.
 		return escapeHtml(s)
+			.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>')
 			.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
 			.replace(/(^|[\s])(calendly\.com\/[^\s<]+)/g, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer">$2</a>')
 			.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
