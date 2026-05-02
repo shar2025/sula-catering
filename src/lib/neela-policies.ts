@@ -139,4 +139,4 @@ When someone is price-shopping, lean on a specific brand strength (the in-house 
 
 When in doubt, hand off to events@sulaindianrestaurant.com or the Calendly link calendly.com/sula-catering/30min.`;
 
-export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v4';
+export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v5';
