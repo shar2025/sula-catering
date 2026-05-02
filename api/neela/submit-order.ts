@@ -105,6 +105,20 @@ type SetupType =
 	| string;
 type RequirementChoice = 'required' | 'not_required';
 
+// One curry / appetizer slot on the customer's chosen tier. `kind` decides which
+// row label the PDF prints (Veg Curry #N, Non-Veg Curry #N, Vegan Curry #N,
+// Appetizer). `name` is the dish name as the customer picked it, OR the literal
+// string "Chef's choice" when they deferred to the kitchen. `diet` is the
+// optional dietary badge ("Gluten Free", "Dairy & Gluten Free") drawn from the
+// verified Form 27 dish list, rendered in muted gray after the dish name.
+type MenuKind = 'veg' | 'vegan' | 'nonveg' | 'appetizer';
+const VALID_MENU_KINDS: MenuKind[] = ['veg', 'vegan', 'nonveg', 'appetizer'];
+interface MenuLineInput {
+	kind: MenuKind;
+	name: string;
+	diet?: string;
+}
+
 interface Order {
 	mode: Mode;
 	eventType?: EventType;
@@ -118,6 +132,8 @@ interface Order {
 	dietary?: Dietary;
 	menuTier?: string;
 	addOns?: string[];
+	menuItems?: MenuLineInput[];   // structured curry / appetizer / vegan / non-veg picks (drives PDF Page 1 dish rows)
+	additionalMenuItems?: string;  // free-text extras beyond the tier slots ("plus an extra naan, mango chutney")
 	setupStyle?: string;      // legacy free-text version of setupType
 	setupType?: SetupType;
 	rentalsRequired?: boolean;
@@ -247,6 +263,8 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		} : undefined,
 		menuTier: o.menuTier ? String(o.menuTier).slice(0, 200) : undefined,
 		addOns: Array.isArray(o.addOns) ? o.addOns.map((s) => String(s).slice(0, 200)).slice(0, 30) : undefined,
+		menuItems: cleanMenuItems(oo.menuItems),
+		additionalMenuItems: oo.additionalMenuItems ? String(oo.additionalMenuItems).slice(0, 600) : undefined,
 		setupStyle: o.setupStyle ? String(o.setupStyle).slice(0, 200) : undefined,
 		setupType: oo.setupType ? String(oo.setupType).slice(0, 60) : undefined,
 		rentalsRequired: typeof oo.rentalsRequired === 'boolean' ? oo.rentalsRequired : undefined,
@@ -263,6 +281,26 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		transcriptSnippet: o.transcriptSnippet ? String(o.transcriptSnippet).slice(0, 16000) : undefined
 	};
 	return { ok: true, sessionId, order };
+}
+
+// Validate + normalize the menuItems array. Drops entries with missing kind /
+// name; clamps every string field; caps the total at 12 items so a malformed
+// payload can't bloat the JSON column. Each entry's name preserves "Chef's
+// choice" verbatim (used as a placeholder when the customer defers).
+function cleanMenuItems(raw: unknown): MenuLineInput[] | undefined {
+	if (!Array.isArray(raw) || raw.length === 0) return undefined;
+	const out: MenuLineInput[] = [];
+	for (const item of raw.slice(0, 12)) {
+		if (!item || typeof item !== 'object') continue;
+		const r = item as Partial<MenuLineInput>;
+		const kind = String(r.kind || '').trim().toLowerCase() as MenuKind;
+		if (!VALID_MENU_KINDS.includes(kind)) continue;
+		const name = String(r.name || '').trim().slice(0, 120);
+		if (!name) continue;
+		const diet = r.diet ? String(r.diet).trim().slice(0, 60) : undefined;
+		out.push(diet ? { kind, name, diet } : { kind, name });
+	}
+	return out.length > 0 ? out : undefined;
 }
 
 function cleanQuote(q: unknown): Quote | undefined {
@@ -593,9 +631,27 @@ function buildOrderEmailText(reference: string, order: Order): string {
 
 // Best-effort menu inference (mirrors the route's heuristic so kitchen-sheet
 // portioning matches what /api/neela/invoice/[ref] would produce).
+//
+// When order.menuItems is populated (the new structured dish-pick capture),
+// we use it directly so the kitchen sheet shows real dish names instead of
+// "Veg Curry #1" placeholders. We fall back to tier-based generic names only
+// for legacy orders that pre-date dish-pick capture.
 function inferMenuForOrder(order: Order): { appetizers: MenuItem[]; curries: MenuItem[] } {
 	const appetizers: MenuItem[] = [];
 	const curries: MenuItem[] = [];
+
+	if (order.menuItems && order.menuItems.length > 0) {
+		for (const m of order.menuItems) {
+			if (m.kind === 'appetizer') {
+				const isNonVeg = /chicken|wing|lamb|tandoori/i.test(m.name) && !/veg|paneer|onion|samosa|pakora/i.test(m.name);
+				appetizers.push({ name: m.name, isNonVeg });
+			} else {
+				curries.push({ name: m.name, isNonVeg: m.kind === 'nonveg' });
+			}
+		}
+		return { appetizers, curries };
+	}
+
 	const tier = String(order.menuTier || '').toLowerCase();
 
 	if (tier.includes('vegetarian') || tier.includes('vegan')) {
@@ -649,6 +705,8 @@ function orderToInvoiceOrder(reference: string, order: Order, createdAt: string)
 		dietary: order.dietary,
 		menuTier: order.menuTier,
 		addOns: order.addOns,
+		menuItems: order.menuItems,
+		additionalMenuItems: order.additionalMenuItems,
 		setupStyle: setupLabel,
 		setupType: order.setupType,
 		rentalsRequired: order.rentalsRequired,
