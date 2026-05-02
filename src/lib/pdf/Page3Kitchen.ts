@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS } from './styles.js';
+import { styles, COLORS, LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_COMPACT, FOOTER_BAND_HEIGHT } from './styles.js';
+import { brandBackdrop } from './brandBackdrop.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 import type { KitchenSheet } from '../portioning.js';
 
@@ -17,13 +18,14 @@ function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footer, fixed: true },
+		brandBackdrop(LETTER_PAGE_WIDTH, FOOTER_BAND_HEIGHT, 'p3FooterGrad'),
 		e(
 			Text,
 			{ style: styles.footerTextConfidential },
 			'Sula Indian Restaurant ',
-			e(Text, { style: { color: COLORS.gold } }, ' · '),
+			e(Text, { style: { color: COLORS.cream } }, ' · '),
 			' Kitchen Order Sheet ',
-			e(Text, { style: { color: COLORS.gold } }, ' · '),
+			e(Text, { style: { color: COLORS.cream } }, ' · '),
 			' CONFIDENTIAL'
 		),
 		e(
@@ -90,7 +92,7 @@ function kitchenBand(logoBuffer: Buffer | null | undefined) {
 		e(
 			View,
 			{ style: styles.brandBandCompact },
-			e(View, { style: styles.brandBandShade }),
+			brandBackdrop(LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_COMPACT, 'p3HeaderGrad'),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
 				{ src: logoBuffer, style: styles.brandLogoSmall }

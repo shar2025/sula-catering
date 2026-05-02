@@ -27,7 +27,7 @@ import { neon } from '@neondatabase/serverless';
 import { Resend } from 'resend';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type InvoiceOrder, type Audience } from '../../src/lib/pdf/InvoicePdf.js';
-import { loadLogo } from '../../src/lib/pdf/styles.js';
+import { loadLogo, loadCormorant } from '../../src/lib/pdf/styles.js';
 import { calculatePortions, type MenuItem } from '../../src/lib/portioning.js';
 
 export const config = { maxDuration: 30 };
@@ -673,8 +673,14 @@ async function renderInvoicePdfBuffer(
 			? order.guestCount
 			: parseInt(String(order.guestCount || '0'), 10) || 0;
 		const sheet = calculatePortions({ guestCount, appetizers, curries });
-		const logoBuffer = await loadLogo();
-		const doc = buildInvoicePdf({ order: invoiceOrder, sheet, audience, logoBuffer });
+		const [logoBuffer, cormorantBuffer] = await Promise.all([loadLogo(), loadCormorant()]);
+		const doc = buildInvoicePdf({
+			order: invoiceOrder,
+			sheet,
+			audience,
+			logoBuffer,
+			cormorantRegistered: !!cormorantBuffer
+		});
 		const buf = await renderToBuffer(doc as unknown as Parameters<typeof renderToBuffer>[0]);
 		return buf;
 	} catch (err) {

@@ -14,7 +14,8 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS } from './styles.js';
+import { styles, COLORS, LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_FULL, FOOTER_BAND_HEIGHT } from './styles.js';
+import { brandBackdrop } from './brandBackdrop.js';
 import type { InvoiceOrder, MenuLine } from './InvoicePdf.js';
 
 const e = React.createElement;
@@ -83,33 +84,39 @@ function fieldRow(label: string, value: string | undefined, opts: { bold?: boole
 	);
 }
 
-// Brand band: midnight->navy panel with logo, wordmark, italic gold tagline.
-// No "Est. 2010", no ornament glyphs (those substitute as garbage in
-// Helvetica/WinAnsi).
-function brandBand(logoBuffer: Buffer | null | undefined) {
+// Brand band: full-bleed midnight->navy gradient + low-opacity gold diamond
+// pattern (rendered via SVG backdrop), with logo + serif italic wordmark +
+// italic gold tagline floated on top.
+function brandBand(logoBuffer: Buffer | null | undefined, cormorantRegistered: boolean) {
 	return e(
 		React.Fragment,
 		null,
 		e(
 			View,
 			{ style: styles.brandBand },
-			e(View, { style: styles.brandBandShadeMid }),
-			e(View, { style: styles.brandBandShade }),
+			brandBackdrop(LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_FULL, 'p1HeaderGrad'),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
 				{ src: logoBuffer, style: styles.brandLogoLarge }
 			),
-			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
+			e(
+				Text,
+				{ style: cormorantRegistered ? styles.brandName : styles.brandNameFallback },
+				'Sula Indian Restaurant'
+			),
 			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.')
 		),
 		e(View, { style: styles.brandBandRule })
 	);
 }
 
+// Footer band: same gradient + diamond pattern as the header, cream text,
+// gold middle-dot separator, page number on the right.
 function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footerWide, fixed: true },
+		brandBackdrop(LETTER_PAGE_WIDTH, FOOTER_BAND_HEIGHT, 'p1FooterGrad'),
 		e(
 			Text,
 			{ style: styles.footerText },
@@ -130,8 +137,9 @@ function pageFooter() {
 
 export function renderPage1(
 	order: InvoiceOrder,
-	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean } = {}
+	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean; cormorantRegistered?: boolean } = {}
 ) {
+	const cormorant = opts.cormorantRegistered === true;
 	const guestStr = order.guestCount === undefined ? '' : String(order.guestCount);
 	const eventTypeText = eventTypeLabel(order);
 	const addressText = locationLine(order) || (opts.forCustomer ? 'To be confirmed with the events team' : '');
@@ -169,13 +177,20 @@ export function renderPage1(
 		fieldRow(r.label, r.value, { bold: r.bold, diet: r.diet, index: i })
 	);
 
-	const docTitle = opts.forCustomer ? 'CATERING SUBMISSION RECORD' : 'CATERING INVOICE';
+	// Document title with italic gold accent on the closing word, mirroring
+	// the website's "Plan Something Beautiful" treatment where the noun
+	// phrase ends in a gilded italic. Two leading words stay plum bold
+	// tracked, the trailing word picks up gold italic for the lift.
+	//   customer:  "CATERING SUBMISSION " (plum) + "RECORD" (gold italic)
+	//   internal:  "CATERING " (plum) + "INVOICE" (gold italic)
+	const docTitleLead = opts.forCustomer ? 'CATERING SUBMISSION ' : 'CATERING ';
+	const docTitleAccent = opts.forCustomer ? 'RECORD' : 'INVOICE';
 
 	return e(
 		Page,
 		{ size: 'LETTER', style: styles.page },
 
-		brandBand(opts.logoBuffer),
+		brandBand(opts.logoBuffer, cormorant),
 
 		// Inner padded content (wide margins, generous whitespace)
 		e(
@@ -184,7 +199,12 @@ export function renderPage1(
 
 			// Single thin gold rule (eyebrow), then the title centered with whitespace
 			e(View, { style: styles.docTitleEyebrowRule }),
-			e(Text, { style: styles.docTitleSerif }, docTitle),
+			e(
+				Text,
+				{ style: styles.docTitleSerif },
+				docTitleLead,
+				e(Text, { style: styles.docTitleAccent }, docTitleAccent)
+			),
 
 			// Field grid: clean two-column, no borders, no tints
 			e(View, null, ...fieldRows),

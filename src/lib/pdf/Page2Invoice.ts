@@ -11,7 +11,8 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS } from './styles.js';
+import { styles, COLORS, LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_FULL, FOOTER_BAND_HEIGHT } from './styles.js';
+import { brandBackdrop } from './brandBackdrop.js';
 import type { InvoiceOrder, InvoiceLineItem } from './InvoicePdf.js';
 
 const e = React.createElement;
@@ -27,22 +28,24 @@ function fmtQty(n: number | undefined): string {
 }
 
 // Brand band, mirroring Page 1 exactly so the two pages read as one document
-// when the customer flips between them. Same midnight->navy gradient, same
-// 70pt elephant logo, same wordmark + italic gold tagline.
-function brandBand(logoBuffer: Buffer | null | undefined) {
+// when the customer flips between them. Same gradient + diamond pattern.
+function brandBand(logoBuffer: Buffer | null | undefined, cormorantRegistered: boolean) {
 	return e(
 		React.Fragment,
 		null,
 		e(
 			View,
 			{ style: styles.brandBand },
-			e(View, { style: styles.brandBandShadeMid }),
-			e(View, { style: styles.brandBandShade }),
+			brandBackdrop(LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_FULL, 'p2HeaderGrad'),
 			logoBuffer && e(
 				Image as unknown as React.ComponentType<Record<string, unknown>>,
 				{ src: logoBuffer, style: styles.brandLogoLarge }
 			),
-			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
+			e(
+				Text,
+				{ style: cormorantRegistered ? styles.brandName : styles.brandNameFallback },
+				'Sula Indian Restaurant'
+			),
 			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.')
 		),
 		e(View, { style: styles.brandBandRule })
@@ -53,6 +56,7 @@ function pageFooter() {
 	return e(
 		View,
 		{ style: styles.footerWide, fixed: true },
+		brandBackdrop(LETTER_PAGE_WIDTH, FOOTER_BAND_HEIGHT, 'p2FooterGrad'),
 		e(
 			Text,
 			{ style: styles.footerText },
@@ -147,8 +151,9 @@ function computeDelivery(km: number | null): InvoiceLineItem | null {
 
 export function renderPage2(
 	order: InvoiceOrder,
-	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean } = {}
+	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean; cormorantRegistered?: boolean } = {}
 ) {
+	const cormorant = opts.cormorantRegistered === true;
 	const quote = (order.quote && order.quote.line_items && order.quote.line_items.length)
 		? order.quote
 		: deriveQuote(order);
@@ -163,7 +168,7 @@ export function renderPage2(
 		Page,
 		{ size: 'LETTER', style: styles.page },
 
-		brandBand(opts.logoBuffer),
+		brandBand(opts.logoBuffer, cormorant),
 
 		// Inner padded content (wide margins matching Page 1, no watermark)
 		e(

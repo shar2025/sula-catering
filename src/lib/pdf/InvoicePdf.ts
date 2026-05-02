@@ -105,10 +105,15 @@ export function buildInvoicePdf(opts: {
 	audience: Audience;
 	watermark?: string;
 	logoBuffer?: Buffer | null;
+	// Set true after `await loadCormorant()` succeeds, so the wordmark in the
+	// brand band uses Cormorant Garamond italic. When false / absent, Pages 1
+	// and 2 fall back to Helvetica-Oblique with tracking.
+	cormorantRegistered?: boolean;
 }) {
 	ensureFonts();
 	const e = React.createElement;
-	const { order, sheet, audience, watermark, logoBuffer } = opts;
+	const { order, sheet, audience, watermark, logoBuffer, cormorantRegistered } = opts;
+	const pageOpts = { watermark, logoBuffer, cormorantRegistered };
 
 	const children: React.ReactNode[] = [];
 	// 'customer'  = Catering Details ONLY. No prices, no kitchen sheet. The
@@ -121,16 +126,16 @@ export function buildInvoicePdf(opts: {
 	//                discussions don't accidentally surface prep notes.
 	// 'all'       = All 3 pages, legacy/diagnostic only.
 	if (audience === 'customer') {
-		children.push(renderPage1(order, { watermark, logoBuffer, forCustomer: true }));
+		children.push(renderPage1(order, { ...pageOpts, forCustomer: true }));
 	} else if (audience === 'kitchen') {
 		children.push(renderPage3(order, sheet, { logoBuffer }));
 	} else if (audience === 'internal') {
-		children.push(renderPage1(order, { watermark, logoBuffer }));
-		children.push(renderPage2(order, { watermark, logoBuffer }));
+		children.push(renderPage1(order, pageOpts));
+		children.push(renderPage2(order, pageOpts));
 	} else {
 		// 'all' / default → full 3-page diagnostic copy
-		children.push(renderPage1(order, { watermark, logoBuffer }));
-		children.push(renderPage2(order, { watermark, logoBuffer }));
+		children.push(renderPage1(order, pageOpts));
+		children.push(renderPage2(order, pageOpts));
 		children.push(renderPage3(order, sheet, { logoBuffer }));
 	}
 

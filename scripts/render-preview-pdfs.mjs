@@ -6,11 +6,11 @@
 // Run: npx tsx scripts/render-preview-pdfs.mjs
 
 import { renderToBuffer } from '@react-pdf/renderer';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const { buildInvoicePdf } = await import('../src/lib/pdf/InvoicePdf.ts');
-const { loadLogo } = await import('../src/lib/pdf/styles.ts');
+const { loadLogo, loadCormorant } = await import('../src/lib/pdf/styles.ts');
 const { calculatePortions } = await import('../src/lib/portioning.ts');
 
 const SAMPLE_ORDER = {
@@ -78,19 +78,36 @@ const sheet = calculatePortions({
 });
 
 let logoBuffer = null;
+let cormorantBuffer = null;
 try {
-	logoBuffer = await loadLogo();
+	[logoBuffer, cormorantBuffer] = await Promise.all([loadLogo(), loadCormorant()]);
 	console.log('[preview] logo loaded:', logoBuffer ? `${logoBuffer.length} bytes` : 'null');
+	console.log('[preview] cormorant loaded:', cormorantBuffer ? `${cormorantBuffer.length} bytes` : 'null (using Helvetica italic fallback)');
 } catch (err) {
-	console.warn('[preview] logo load failed (rendering without logo):', err?.message || err);
+	console.warn('[preview] asset load failed (rendering with fallbacks):', err?.message || err);
 }
+
+// Local-network logo fallback: sulacatering.com's Vercel deployment now
+// challenges non-browser fetches (returns 403 with a Vercel challenge
+// token), which kills loadLogo() for local previews. The repo ships a
+// copy of the icon at public/apple-touch-icon.png; use that when the
+// network fetch failed. Production (running inside Vercel) still hits
+// the live URL successfully, so styles.ts loadLogo() stays unchanged.
+if (!logoBuffer) {
+	const localLogoPath = resolve('public/apple-touch-icon.png');
+	if (existsSync(localLogoPath)) {
+		logoBuffer = readFileSync(localLogoPath);
+		console.log('[preview] using local logo fallback:', `${logoBuffer.length} bytes from ${localLogoPath}`);
+	}
+}
+const cormorantRegistered = !!cormorantBuffer;
 
 const outDir = resolve('outputs');
 mkdirSync(outDir, { recursive: true });
 
 async function renderAudience(audience, filename) {
 	const t0 = Date.now();
-	const doc = buildInvoicePdf({ order: SAMPLE_ORDER, sheet, audience, logoBuffer });
+	const doc = buildInvoicePdf({ order: SAMPLE_ORDER, sheet, audience, logoBuffer, cormorantRegistered });
 	const buf = await renderToBuffer(doc);
 	const t1 = Date.now();
 	const path = join(outDir, filename);
@@ -110,8 +127,9 @@ async function renderAudience(audience, filename) {
 // v1 = first luxury redesign (rendered ◆ as garbage on Helvetica)
 // v2 = ornament-free, minimal customer page, gold-eyebrow internal headers
 // v3 = audience=internal now pages 1+2 only (no kitchen); page 2 minimal redesign
-//      (no alt-row tints, no chip, no plum total stripe, no watermark)
-const VERSION = process.env.PREVIEW_VERSION || 'v3';
+// v4 = SVG smooth gradient + diamond pattern bookend (header + footer);
+//      Cormorant Garamond serif italic wordmark; italic gold accent in title
+const VERSION = process.env.PREVIEW_VERSION || 'v4';
 
 const results = [];
 results.push(await renderAudience('customer', `Sula-PREVIEW-customer-${VERSION}.pdf`));

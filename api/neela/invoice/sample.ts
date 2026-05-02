@@ -13,7 +13,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type Audience, type InvoiceOrder } from '../../../src/lib/pdf/InvoicePdf.js';
-import { loadLogo } from '../../../src/lib/pdf/styles.js';
+import { loadLogo, loadCormorant } from '../../../src/lib/pdf/styles.js';
 import { calculatePortions } from '../../../src/lib/portioning.js';
 
 export const config = { maxDuration: 60 };
@@ -96,13 +96,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	});
 
 	try {
-		const logoBuffer = await loadLogo();
+		const [logoBuffer, cormorantBuffer] = await Promise.all([loadLogo(), loadCormorant()]);
 		const doc = buildInvoicePdf({
 			order: SAMPLE_ORDER,
 			sheet,
 			audience,
 			watermark: 'SAMPLE',
-			logoBuffer
+			logoBuffer,
+			cormorantRegistered: !!cormorantBuffer
 		});
 		const buffer = await renderToBuffer(doc as unknown as Parameters<typeof renderToBuffer>[0]);
 

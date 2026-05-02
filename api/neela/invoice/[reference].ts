@@ -25,7 +25,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type Audience, type InvoiceOrder } from '../../../src/lib/pdf/InvoicePdf.js';
-import { loadLogo } from '../../../src/lib/pdf/styles.js';
+import { loadLogo, loadCormorant } from '../../../src/lib/pdf/styles.js';
 import { calculatePortions, type MenuItem } from '../../../src/lib/portioning.js';
 
 export const config = { maxDuration: 60 };
@@ -175,8 +175,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	});
 
 	try {
-		const logoBuffer = await loadLogo();
-		const pdfDoc = buildInvoicePdf({ order, sheet, audience, logoBuffer });
+		const [logoBuffer, cormorantBuffer] = await Promise.all([loadLogo(), loadCormorant()]);
+		const pdfDoc = buildInvoicePdf({ order, sheet, audience, logoBuffer, cormorantRegistered: !!cormorantBuffer });
 		// renderToBuffer wants ReactElement<DocumentProps>; the typed createElement
 		// chain produces a structural match but TypeScript can't narrow without help.
 		const buffer = await renderToBuffer(pdfDoc as unknown as Parameters<typeof renderToBuffer>[0]);

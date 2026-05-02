@@ -12,9 +12,11 @@
 // Run: npx tsx scripts/smoke-test-team-attachments.mjs
 
 import { renderToBuffer } from '@react-pdf/renderer';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 const { buildInvoicePdf } = await import('../src/lib/pdf/InvoicePdf.ts');
-const { loadLogo } = await import('../src/lib/pdf/styles.ts');
+const { loadLogo, loadCormorant } = await import('../src/lib/pdf/styles.ts');
 const { calculatePortions } = await import('../src/lib/portioning.ts');
 
 const REFERENCE = 'SC-SMOKE-TEAM';
@@ -64,10 +66,16 @@ const sheet = calculatePortions({
 	]
 });
 
-const logoBuffer = await loadLogo();
+let [logoBuffer, cormorantBuffer] = await Promise.all([loadLogo(), loadCormorant()]);
+// Local-network fallback for the logo (see render-preview-pdfs.mjs).
+if (!logoBuffer) {
+	const localLogoPath = resolve('public/apple-touch-icon.png');
+	if (existsSync(localLogoPath)) logoBuffer = readFileSync(localLogoPath);
+}
+const cormorantRegistered = !!cormorantBuffer;
 
 async function render(audience) {
-	const doc = buildInvoicePdf({ order, sheet, audience, logoBuffer });
+	const doc = buildInvoicePdf({ order, sheet, audience, logoBuffer, cormorantRegistered });
 	return await renderToBuffer(doc);
 }
 

@@ -93,19 +93,76 @@ export async function loadLogo(): Promise<Buffer | null> {
 }
 
 // ---------- Fonts ----------
-// Built-in Helvetica only. Cormorant Garamond registration was considered but
-// rejected: external font fetch at render time hangs the renderer on Vercel
-// cold-start. To enable a serif title later, uncomment the block below and
-// verify cold-start times in production:
+// Cormorant Garamond Bold Italic for the "Sula Indian Restaurant" wordmark in
+// the brand band, mirroring the live site's serif italic feel. We pre-fetch
+// the TTF buffer (with a 5s abort) BEFORE renderToBuffer is called, which
+// avoids the "external font fetch hangs the renderer cold-start" failure
+// mode that plagued the earlier attempt to register a remote URL string.
 //
-//   try {
-//     Font.register({
-//       family: 'Cormorant Garamond',
-//       src: 'https://...your-stable-cdn.../CormorantGaramond-Bold.ttf'
-//     });
-//   } catch (err) { console.warn('[pdf] cormorant register failed', err); }
+// If the fetch fails or times out, registration is skipped and react-pdf
+// falls back to whatever font the family resolves to (we point the wordmark
+// style at Helvetica-Oblique as a safety net via fallback in render).
 //
-// Until then docTitleSerif uses Helvetica Bold + tracking 4pt for poise.
+// All callers (route handlers, smoke scripts) MUST: await loadCormorant()
+// once before calling renderToBuffer. Idempotent + cached.
+// fontsource is the most stable CDN that ships static-style WOFF for
+// Cormorant Garamond. The Google Fonts repo recently consolidated to
+// variable fonts only (CormorantGaramond-Italic[wght].ttf), which @react-pdf
+// 4.x does not always handle correctly. We use the @fontsource/.../woff
+// static slice instead. @react-pdf supports WOFF via fontkit.
+const CORMORANT_URL =
+	'https://cdn.jsdelivr.net/npm/@fontsource/cormorant-garamond@5/files/cormorant-garamond-latin-700-italic.woff';
+const CORMORANT_FETCH_TIMEOUT_MS = 5000;
+export const CORMORANT_FAMILY = 'Cormorant Garamond';
+
+let cachedCormorant: Buffer | null = null;
+let cormorantLoadPromise: Promise<Buffer | null> | null = null;
+let cormorantRegistered = false;
+
+export async function loadCormorant(): Promise<Buffer | null> {
+	if (cachedCormorant) return cachedCormorant;
+	if (cormorantLoadPromise) return cormorantLoadPromise;
+	cormorantLoadPromise = (async () => {
+		try {
+			const ctrl = new AbortController();
+			const t = setTimeout(() => ctrl.abort(), CORMORANT_FETCH_TIMEOUT_MS);
+			const resp = await fetch(CORMORANT_URL, { signal: ctrl.signal });
+			clearTimeout(t);
+			if (!resp.ok) {
+				console.warn('[pdf] cormorant fetch non-ok, falling back to Helvetica italic', resp.status);
+				return null;
+			}
+			const buf = Buffer.from(await resp.arrayBuffer());
+			cachedCormorant = buf;
+			if (!cormorantRegistered) {
+				try {
+					// @react-pdf/font expects src as a string (URL, path, or
+					// data URL). It does NOT accept Buffer/ArrayBuffer in 4.x.
+					// We encode the pre-fetched WOFF as a data URL so the
+					// renderer reads it inline without making a second HTTP
+					// request at render time (which is the cold-start hazard
+					// we're trying to avoid).
+					const dataUrl = `data:font/woff;base64,${buf.toString('base64')}`;
+					Font.register({
+						family: CORMORANT_FAMILY,
+						src: dataUrl,
+						fontStyle: 'italic',
+						fontWeight: 700
+					});
+					cormorantRegistered = true;
+				} catch (err) {
+					console.warn('[pdf] cormorant Font.register failed, falling back to Helvetica italic', err instanceof Error ? err.message : err);
+				}
+			}
+			return buf;
+		} catch (err) {
+			console.warn('[pdf] cormorant fetch failed, falling back to Helvetica italic', err instanceof Error ? err.message : err);
+			return null;
+		}
+	})();
+	return cormorantLoadPromise;
+}
+
 let fontsRegistered = false;
 export function ensureFonts(): void {
 	if (fontsRegistered) return;
@@ -122,6 +179,15 @@ export const FONTS = {
 const HORIZONTAL_PADDING_DENSE = 44;   // page 2/3
 const HORIZONTAL_PADDING_WIDE = 60;    // page 1, generous margins
 
+// Letter page width (used by SVG backdrop sizing).
+export const LETTER_PAGE_WIDTH = 612;
+
+// Fixed band heights so the SVG backdrop can be sized to match exactly. These
+// must agree with the View's height in the corresponding style below.
+export const BRAND_BAND_HEIGHT_FULL = 170;     // page 1 + page 2 (customer-facing)
+export const BRAND_BAND_HEIGHT_COMPACT = 90;   // page 3 (kitchen, internal)
+export const FOOTER_BAND_HEIGHT = 40;          // dark gradient footer band, every page
+
 // ---------- Shared styles ----------
 export const styles = StyleSheet.create({
 	page: {
@@ -131,7 +197,10 @@ export const styles = StyleSheet.create({
 		fontSize: 10,
 		paddingTop: 0,
 		paddingHorizontal: 0,
-		paddingBottom: 50
+		// Reserve exactly the footer band height so body content stops where
+		// the dark gradient footer begins. No cream gap between content and
+		// footer, the page reads as a continuous bookended canvas.
+		paddingBottom: FOOTER_BAND_HEIGHT
 	},
 
 	// Dense inner wrapper, used by Page 2 (Invoice) and Page 3 (Kitchen) where
@@ -148,56 +217,60 @@ export const styles = StyleSheet.create({
 		paddingTop: 16
 	},
 
-	// ---------- Brand panel (top of page 1) ----------
-	// Full-bleed midnight panel with a navy gradient shade at the bottom.
-	// Logo, wordmark, italic gold tagline. No "Est. 2010", no ornament row.
+	// ---------- Brand panel (top of every page) ----------
+	// Full-bleed dark band rendered as: SVG backdrop (midnight->navy linear
+	// gradient + low-opacity gold diamond pattern) overlaid by the wordmark
+	// stack (logo, "Sula Indian Restaurant" serif italic, tagline). Fallback
+	// midnight backgroundColor stays so the band still reads dark even if
+	// SVG rendering misbehaves.
 	brandBand: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 26,
-		paddingBottom: 24,
+		height: BRAND_BAND_HEIGHT_FULL,
+		paddingTop: 24,
+		paddingBottom: 18,
 		paddingHorizontal: HORIZONTAL_PADDING_WIDE,
 		alignItems: 'center',
+		justifyContent: 'center',
 		position: 'relative'
 	},
-	// Compact brand panel for Page 2 (Invoice) and Page 3 (Kitchen).
+	// Compact brand panel for Page 3 (Kitchen). Same dark gradient backdrop,
+	// just shorter so the operational page has more body real estate.
 	brandBandCompact: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 9,
-		paddingBottom: 9,
+		height: BRAND_BAND_HEIGHT_COMPACT,
+		paddingTop: 8,
+		paddingBottom: 8,
 		paddingHorizontal: HORIZONTAL_PADDING_DENSE,
 		alignItems: 'center',
+		justifyContent: 'center',
 		position: 'relative'
-	},
-	brandBandShade: {
-		position: 'absolute',
-		left: 0,
-		right: 0,
-		bottom: 0,
-		height: 50,
-		backgroundColor: COLORS.navy,
-		opacity: 0.55
-	},
-	brandBandShadeMid: {
-		position: 'absolute',
-		left: 0,
-		right: 0,
-		bottom: 14,
-		height: 32,
-		backgroundColor: COLORS.navySoft,
-		opacity: 0.30
 	},
 	brandBandRule: {
 		height: 2,
 		backgroundColor: COLORS.gold
 	},
 	brandLogo: { width: 56, height: 56, marginBottom: 6 },
-	brandLogoLarge: { width: 72, height: 72, marginBottom: 10 },
-	brandLogoSmall: { width: 38, height: 38, marginBottom: 4 },
+	brandLogoLarge: { width: 70, height: 70, marginBottom: 8 },
+	brandLogoSmall: { width: 36, height: 36, marginBottom: 3 },
+	// Wordmark, serif italic via Cormorant Garamond when registered, else
+	// Helvetica-Oblique with tracking. The brand-band code probes whether
+	// Cormorant is registered and picks `brandName` or `brandNameFallback`.
+	// fontStyle/fontWeight here MUST match the variant registered in
+	// loadCormorant() (italic 700) so @react-pdf can resolve the variant.
 	brandName: {
-		fontFamily: FONTS.bold,
-		fontSize: 20,
+		fontFamily: CORMORANT_FAMILY,
+		fontStyle: 'italic',
+		fontWeight: 700,
+		fontSize: 24,
 		color: COLORS.cream,
-		marginBottom: 4
+		marginBottom: 3
+	},
+	brandNameFallback: {
+		fontFamily: FONTS.italic,
+		fontSize: 19,
+		color: COLORS.cream,
+		marginBottom: 3,
+		letterSpacing: 1.5
 	},
 	brandTagline: {
 		fontFamily: FONTS.italic,
@@ -225,6 +298,15 @@ export const styles = StyleSheet.create({
 		letterSpacing: 4,
 		marginTop: 4,
 		marginBottom: 18
+	},
+	// Italic gold accent inline span used inside docTitleSerif to gild the
+	// closing word ("RECORD" / "INVOICE"), mirroring the website's
+	// "Plan Something Beautiful" treatment.
+	docTitleAccent: {
+		fontFamily: FONTS.boldItalic,
+		fontSize: 18,
+		color: COLORS.gold,
+		letterSpacing: 4
 	},
 
 	// ---------- Document title block (Page 2 INVOICE, smaller, no flanking) ----------
@@ -607,49 +689,60 @@ export const styles = StyleSheet.create({
 		color: COLORS.text
 	},
 
-	// ---------- Footer (page-number row, all pages) ----------
-	// One thin gold top rule, "Sula Indian Catering · Vancouver since 2010"
-	// centered-left in muted text, page number right. No plum band, no ornaments.
+	// ---------- Footer band (every page) ----------
+	// Full-bleed dark gradient + diamond pattern, mirroring the header band so
+	// the page is "bookended" by midnight->navy. Cream text + gold middle dots
+	// inside; thin gold top rule above the band separates it from the cream
+	// body. The View carries a fallback midnight backgroundColor in case the
+	// SVG backdrop fails to render.
 	footer: {
 		position: 'absolute',
-		bottom: 22,
-		left: HORIZONTAL_PADDING_DENSE,
-		right: HORIZONTAL_PADDING_DENSE,
+		bottom: 0,
+		left: 0,
+		right: 0,
+		height: FOOTER_BAND_HEIGHT,
+		paddingHorizontal: HORIZONTAL_PADDING_DENSE,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingTop: 6,
-		borderTopWidth: 0.4,
+		backgroundColor: COLORS.midnight,
+		borderTopWidth: 2,
 		borderTopColor: COLORS.gold,
 		borderTopStyle: 'solid'
 	},
-	// Wider footer for Page 1 to match the wider content margins.
+	// Wider footer for Page 1 / Page 2 (customer-facing) to match the wider
+	// content margins. The band itself is full-bleed; only the inner padding
+	// changes.
 	footerWide: {
 		position: 'absolute',
-		bottom: 22,
-		left: HORIZONTAL_PADDING_WIDE,
-		right: HORIZONTAL_PADDING_WIDE,
+		bottom: 0,
+		left: 0,
+		right: 0,
+		height: FOOTER_BAND_HEIGHT,
+		paddingHorizontal: HORIZONTAL_PADDING_WIDE,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		paddingTop: 6,
-		borderTopWidth: 0.4,
+		backgroundColor: COLORS.midnight,
+		borderTopWidth: 2,
 		borderTopColor: COLORS.gold,
 		borderTopStyle: 'solid'
 	},
 	footerText: {
-		fontSize: 8.5,
-		color: COLORS.muted
+		fontSize: 9,
+		color: COLORS.cream
 	},
 	footerDot: {
-		fontSize: 8.5,
+		fontSize: 9,
 		color: COLORS.gold,
 		fontFamily: FONTS.bold
 	},
+	// Kitchen page footer text, gold for the "CONFIDENTIAL" line so it stands
+	// out from the cream of the regular footer.
 	footerTextConfidential: {
 		fontFamily: FONTS.bold,
-		fontSize: 8.5,
-		color: COLORS.plum
+		fontSize: 9,
+		color: COLORS.gold
 	},
 
 	// Faint elephant watermark on internal pages
