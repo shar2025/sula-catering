@@ -20,8 +20,23 @@ import { calculatePortions, type MenuItem } from '../../src/lib/portioning.js';
 
 export const config = { maxDuration: 30 };
 
-const EMAIL_TO = 'events@sulaindianrestaurant.com';
-const EMAIL_FROM = 'Neela <neela@sulacatering.com>';
+// Recipient + sender resolution.
+//   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject prefixed [TEST MODE])
+//   NEELA_FROM_EMAIL → custom sender; falls back to Resend's onboarding@resend.dev
+//                       (the only sender that works without verified domain DNS)
+const EMAIL_TO_PROD = 'events@sulaindianrestaurant.com';
+function recipient(): string {
+	return process.env.NEELA_TEST_EMAIL || EMAIL_TO_PROD;
+}
+function emailFrom(): string {
+	return process.env.NEELA_FROM_EMAIL || 'Neela <onboarding@resend.dev>';
+}
+function isTestMode(): boolean {
+	return !!process.env.NEELA_TEST_EMAIL;
+}
+function withTestPrefix(subject: string): string {
+	return isTestMode() ? `[TEST MODE] ${subject}` : subject;
+}
 const REFERENCE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // I, O, 0, 1 excluded for readability
 
 type EventType = 'wedding' | 'corporate' | 'private' | 'cafe-chai' | 'other';
@@ -606,17 +621,20 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 
 	try {
 		const resend = new Resend(apiKey);
-		const subject = modeSubject(reference, order);
+		const fromAddr = emailFrom();
+		const teamRecipient = recipient();
+		const testMode = isTestMode();
+		const subject = withTestPrefix(modeSubject(reference, order));
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 
-		// 1) Events team — full 3-page PDF attached
+		// 1) Events team — full 3-page PDF attached. In test mode this routes to NEELA_TEST_EMAIL.
 		const teamAttachments = fullBuffer
 			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
 			: undefined;
 		const teamResult = await resend.emails.send({
-			from: EMAIL_FROM,
-			to: [EMAIL_TO],
+			from: fromAddr,
+			to: [teamRecipient],
 			replyTo: order.contact.email,
 			subject,
 			html,
@@ -624,37 +642,43 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			attachments: teamAttachments
 		});
 		const emailId = (teamResult.data && (teamResult.data as { id?: string }).id) || undefined;
-		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer });
+		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer, testMode });
 		await markEmailed(reference);
 
-		// 2) Customer copy — pages 1 + 2 only (no kitchen sheet)
+		// 2) Customer copy — pages 1 + 2 only (no kitchen sheet).
+		// In test mode, redirect this to NEELA_TEST_EMAIL too (we don't want to email
+		// real customers during testing). reply-to still points at the events team.
 		if (customerBuffer && order.contact.email) {
 			try {
-				const customerSubject = order.mode === 'quick'
+				const customerSubjectBase = order.mode === 'quick'
 					? `Sula Catering, your inquiry ${reference}`
 					: `Sula Catering, your order ${reference}`;
+				const customerSubject = withTestPrefix(customerSubjectBase);
+				const customerTo = testMode ? teamRecipient : order.contact.email;
 				const customerHtml = buildCustomerEmailHtml(reference, order);
 				await resend.emails.send({
-					from: EMAIL_FROM,
-					to: [order.contact.email],
-					replyTo: EMAIL_TO,
+					from: fromAddr,
+					to: [customerTo],
+					replyTo: EMAIL_TO_PROD,
 					subject: customerSubject,
 					html: customerHtml,
 					attachments: [{ filename: `Sula-Catering-${reference}.pdf`, content: customerBuffer }]
 				});
-				console.log('[neela-order] sent customer copy', { reference });
+				console.log('[neela-order] sent customer copy', { reference, redirected: testMode });
 			} catch (err) {
 				console.warn('[neela-order] customer email failed (non-fatal)', err);
 			}
 		}
 
-		// 3) Optional kitchen-only email (when KITCHEN_EMAIL is set)
+		// 3) Optional kitchen-only email (when KITCHEN_EMAIL is set).
+		// In test mode, redirect kitchen email to NEELA_TEST_EMAIL too.
 		if (kitchenBuffer && process.env.KITCHEN_EMAIL) {
 			try {
+				const kitchenTo = testMode ? teamRecipient : process.env.KITCHEN_EMAIL;
 				await resend.emails.send({
-					from: EMAIL_FROM,
-					to: [process.env.KITCHEN_EMAIL],
-					subject: `[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim(),
+					from: fromAddr,
+					to: [kitchenTo],
+					subject: withTestPrefix(`[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim()),
 					html: `<p style="font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">Kitchen prep sheet for reference <strong>${reference}</strong> attached. ${order.guestCount || ''} guests, ${order.eventDate || 'date TBD'}.</p>`,
 					attachments: [{ filename: `${reference}-kitchen.pdf`, content: kitchenBuffer }]
 				});

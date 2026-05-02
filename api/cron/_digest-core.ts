@@ -21,8 +21,16 @@ interface ChatRow {
 }
 
 const ANTHROPIC_TIMEOUT_MS = 25000;
-const DIGEST_TO = 'events@sulaindianrestaurant.com';
-const DIGEST_FROM = 'Neela <neela@sulacatering.com>';
+const DIGEST_TO_PROD = 'events@sulaindianrestaurant.com';
+function digestRecipient(): string {
+	return process.env.NEELA_TEST_EMAIL || DIGEST_TO_PROD;
+}
+function digestFrom(): string {
+	return process.env.NEELA_FROM_EMAIL || 'Neela <onboarding@resend.dev>';
+}
+function digestSubjectPrefix(): string {
+	return process.env.NEELA_TEST_EMAIL ? '[TEST MODE] ' : '';
+}
 
 const SUMMARY_PROMPT = `You are summarizing 24 hours of chat traffic from Neela, the AI event-planning assistant on sulacatering.com. The transcript below is grouped by session (one user's full conversation per block).
 
@@ -257,9 +265,9 @@ export async function runDigest(opts: { dryRun?: boolean } = {}): Promise<Digest
 	try {
 		const resend = new Resend(resendKey);
 		const result = await resend.emails.send({
-			from: DIGEST_FROM,
-			to: [DIGEST_TO],
-			subject,
+			from: digestFrom(),
+			to: [digestRecipient()],
+			subject: digestSubjectPrefix() + subject,
 			html,
 			text: summary
 		});
