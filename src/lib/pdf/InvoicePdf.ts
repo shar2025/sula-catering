@@ -58,18 +58,19 @@ export function buildInvoicePdf(opts: {
 	sheet: KitchenSheet;
 	audience: Audience;
 	watermark?: string; // optional rotated text behind the cream card on Page 1 (e.g. "SAMPLE")
+	logoBuffer?: Buffer | null; // pre-fetched logo PNG; if null, pages render without the elephant glyph
 }) {
 	ensureFonts();
 	const e = React.createElement;
-	const { order, sheet, audience, watermark } = opts;
+	const { order, sheet, audience, watermark, logoBuffer } = opts;
 
 	const children: React.ReactNode[] = [];
 	if (audience !== 'kitchen') {
-		children.push(renderPage1(order, { watermark }));
-		children.push(renderPage2(order, { watermark }));
+		children.push(renderPage1(order, { watermark, logoBuffer }));
+		children.push(renderPage2(order, { watermark, logoBuffer }));
 	}
 	if (audience !== 'customer') {
-		children.push(renderPage3(order, sheet));
+		children.push(renderPage3(order, sheet, { logoBuffer }));
 	}
 
 	return e(

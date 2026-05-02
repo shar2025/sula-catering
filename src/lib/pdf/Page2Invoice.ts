@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS, LOGO_URL } from './styles.js';
+import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 
 const e = React.createElement;
@@ -33,7 +33,7 @@ function pageFooter() {
 	);
 }
 
-export function renderPage2(order: InvoiceOrder, opts: { watermark?: string } = {}) {
+export function renderPage2(order: InvoiceOrder, opts: { watermark?: string; logoBuffer?: Buffer | null } = {}) {
 	const q = order.quote;
 	const lineItems = q && q.line_items ? q.line_items : [];
 	const guestStr = order.guestCount === undefined ? '' : String(order.guestCount);
@@ -55,7 +55,7 @@ export function renderPage2(order: InvoiceOrder, opts: { watermark?: string } = 
 			e(
 				View,
 				{ style: styles.hero2Left },
-				e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: LOGO_URL, style: styles.hero2Logo }),
+				opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.hero2Logo }),
 				e(Text, { style: styles.hero2BrandText }, 'Sula Indian Catering')
 			),
 			e(

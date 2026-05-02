@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS, LOGO_URL } from './styles.js';
+import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 import type { KitchenSheet } from '../portioning.js';
 
@@ -46,7 +46,7 @@ function dietaryFlags(d: InvoiceOrder['dietary']): string[] {
 	return flags;
 }
 
-export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet) {
+export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { logoBuffer?: Buffer | null } = {}) {
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const flags = dietaryFlags(order.dietary);
 	const flagsLine = flags.length ? flags.join(' · ') : 'No special dietary flags';
@@ -73,7 +73,7 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet) {
 		e(
 			View,
 			{ style: styles.kitchenHero },
-			e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: LOGO_URL, style: styles.kitchenLogo }),
+			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.kitchenLogo }),
 			e(
 				View,
 				{ style: styles.kitchenHeroText },

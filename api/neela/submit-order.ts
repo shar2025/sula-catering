@@ -16,6 +16,7 @@ import { neon } from '@neondatabase/serverless';
 import { Resend } from 'resend';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type InvoiceOrder, type Audience } from '../../src/lib/pdf/InvoicePdf.js';
+import { loadLogo } from '../../src/lib/pdf/styles.js';
 import { calculatePortions, type MenuItem } from '../../src/lib/portioning.js';
 
 export const config = { maxDuration: 30 };
@@ -587,11 +588,19 @@ async function renderInvoicePdfBuffer(
 			? order.guestCount
 			: parseInt(String(order.guestCount || '0'), 10) || 0;
 		const sheet = calculatePortions({ guestCount, appetizers, curries });
-		const doc = buildInvoicePdf({ order: invoiceOrder, sheet, audience });
+		const logoBuffer = await loadLogo();
+		const doc = buildInvoicePdf({ order: invoiceOrder, sheet, audience, logoBuffer });
 		const buf = await renderToBuffer(doc as unknown as Parameters<typeof renderToBuffer>[0]);
 		return buf;
 	} catch (err) {
-		console.error('[neela-order] pdf render failed', { reference, audience, err });
+		const e = err as { message?: string; stack?: string; name?: string };
+		console.error('[neela-order] pdf render failed', {
+			reference,
+			audience,
+			err: e?.message,
+			name: e?.name,
+			stack: e?.stack
+		});
 		return null;
 	}
 }

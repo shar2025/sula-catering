@@ -20,6 +20,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { neon } from '@neondatabase/serverless';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type Audience, type InvoiceOrder } from '../../../src/lib/pdf/InvoicePdf.js';
+import { loadLogo } from '../../../src/lib/pdf/styles.js';
 import { calculatePortions, type MenuItem } from '../../../src/lib/portioning.js';
 
 export const config = { maxDuration: 60 };
@@ -164,7 +165,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	});
 
 	try {
-		const pdfDoc = buildInvoicePdf({ order, sheet, audience });
+		const logoBuffer = await loadLogo();
+		const pdfDoc = buildInvoicePdf({ order, sheet, audience, logoBuffer });
 		// renderToBuffer wants ReactElement<DocumentProps>; the typed createElement
 		// chain produces a structural match but TypeScript can't narrow without help.
 		const buffer = await renderToBuffer(pdfDoc as unknown as Parameters<typeof renderToBuffer>[0]);
@@ -176,10 +178,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
 		res.setHeader('Cache-Control', 'private, no-cache');
-		console.log('[neela-invoice] rendered', { reference: order.reference, audience, bytes: buffer.length });
+		console.log('[neela-invoice] rendered', { reference: order.reference, audience, bytes: buffer.length, hasLogo: !!logoBuffer });
 		return res.status(200).send(buffer);
 	} catch (err) {
-		console.error('[neela-invoice] render failed', err);
-		return res.status(500).json({ error: 'pdf render failed' });
+		const e = err as { message?: string; stack?: string; name?: string };
+		console.error('[neela-invoice] render failed', {
+			reference: refStr,
+			audience,
+			err: e?.message,
+			name: e?.name,
+			stack: e?.stack
+		});
+		return res.status(500).json({
+			error: 'pdf render failed',
+			detail: e?.message || String(err),
+			name: e?.name
+		});
 	}
 }

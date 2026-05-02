@@ -14,6 +14,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type Audience, type InvoiceOrder } from '../../../src/lib/pdf/InvoicePdf.js';
+import { loadLogo } from '../../../src/lib/pdf/styles.js';
 import { calculatePortions } from '../../../src/lib/portioning.js';
 
 export const config = { maxDuration: 60 };
@@ -85,11 +86,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	});
 
 	try {
+		const logoBuffer = await loadLogo();
 		const doc = buildInvoicePdf({
 			order: SAMPLE_ORDER,
 			sheet,
 			audience,
-			watermark: 'SAMPLE'
+			watermark: 'SAMPLE',
+			logoBuffer
 		});
 		const buffer = await renderToBuffer(doc as unknown as Parameters<typeof renderToBuffer>[0]);
 
@@ -101,10 +104,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
 		res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min cache; sample is static
-		console.log('[neela-invoice-sample] rendered', { audience, bytes: buffer.length });
+		console.log('[neela-invoice-sample] rendered', { audience, bytes: buffer.length, hasLogo: !!logoBuffer });
 		return res.status(200).send(buffer);
 	} catch (err) {
-		console.error('[neela-invoice-sample] render failed', err);
-		return res.status(500).json({ error: 'pdf render failed' });
+		const e = err as { message?: string; stack?: string; name?: string };
+		console.error('[neela-invoice-sample] render failed', {
+			audience,
+			err: e?.message,
+			name: e?.name,
+			stack: e?.stack
+		});
+		return res.status(500).json({
+			error: 'pdf render failed',
+			detail: e?.message || String(err),
+			name: e?.name
+		});
 	}
 }

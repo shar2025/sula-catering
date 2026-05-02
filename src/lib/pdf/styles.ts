@@ -29,40 +29,58 @@ export const COLORS = {
 	white: '#ffffff'
 };
 
-// ---------- Logo URL ----------
+// ---------- Logo ----------
+// Logo is pre-fetched at function init via loadLogo() below and passed as a
+// Buffer to the page renderers. We avoid passing a remote URL to <Image src>
+// because react-pdf fetches at render time and any network blip throws the
+// whole render.
 export const LOGO_URL = 'https://sulacatering.com/apple-touch-icon.png';
 
-// ---------- Font registration ----------
+let cachedLogo: Buffer | null = null;
+let logoLoadPromise: Promise<Buffer | null> | null = null;
+const LOGO_FETCH_TIMEOUT_MS = 6000;
+
+export async function loadLogo(): Promise<Buffer | null> {
+	if (cachedLogo) return cachedLogo;
+	if (logoLoadPromise) return logoLoadPromise;
+	logoLoadPromise = (async () => {
+		try {
+			const ctrl = new AbortController();
+			const t = setTimeout(() => ctrl.abort(), LOGO_FETCH_TIMEOUT_MS);
+			const resp = await fetch(LOGO_URL, { signal: ctrl.signal });
+			clearTimeout(t);
+			if (!resp.ok) {
+				console.warn('[pdf] logo fetch non-ok', resp.status);
+				return null;
+			}
+			const buf = Buffer.from(await resp.arrayBuffer());
+			cachedLogo = buf;
+			return buf;
+		} catch (err) {
+			console.warn('[pdf] logo fetch failed, rendering without logo', err instanceof Error ? err.message : err);
+			return null;
+		}
+	})();
+	return logoLoadPromise;
+}
+
+// ---------- Fonts ----------
+// We previously tried to register Cormorant + Montserrat from Google's CDN at
+// render time. Vercel serverless was failing on those font fetches and
+// blowing up the entire PDF render. Until we either bundle the .ttf files
+// into the deploy or move to a more resilient font-loading strategy, fall
+// back to react-pdf's built-in Helvetica/Times fonts. Visual fidelity drops
+// slightly (Cormorant italic → Helvetica oblique) but renders are bulletproof.
 let fontsRegistered = false;
 export function ensureFonts(): void {
 	if (fontsRegistered) return;
-	try {
-		Font.register({
-			family: 'Cormorant',
-			fonts: [
-				{ src: 'https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQWJ4VsKi4.ttf', fontWeight: 400 },
-				{ src: 'https://fonts.gstatic.com/s/cormorantgaramond/v16/co3WmX5slCNuHLi8bLeY9MK7whWMhyjYrEPjuw.ttf', fontWeight: 400, fontStyle: 'italic' },
-				{ src: 'https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjQDFhvuQWJ4VsKi4.ttf', fontWeight: 600 },
-				{ src: 'https://fonts.gstatic.com/s/cormorantgaramond/v16/co3WmX5slCNuHLi8bLeY9MK7whWMhyjYNkjjuw.ttf', fontWeight: 600, fontStyle: 'italic' }
-			]
-		});
-		Font.register({
-			family: 'Montserrat',
-			fonts: [
-				{ src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm45_dJE7gnD-w.ttf', fontWeight: 400 },
-				{ src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm45_bZF3gnD-w.ttf', fontWeight: 600 },
-				{ src: 'https://fonts.gstatic.com/s/montserrat/v25/JTUSjIg1_i6t8kCHKm45_dJE3gnD-w.ttf', fontWeight: 700 }
-			]
-		});
-		fontsRegistered = true;
-	} catch (err) {
-		console.warn('[pdf] font registration failed, falling back to Helvetica', err);
-	}
+	fontsRegistered = true;
+	// no-op: built-in Helvetica/Times don't need registration.
 }
 
 export const FONTS = {
-	heading: 'Cormorant',
-	body: 'Montserrat',
+	heading: 'Helvetica',
+	body: 'Helvetica',
 	helvetica: 'Helvetica'
 };
 

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { styles, COLORS, LOGO_URL } from './styles.js';
+import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder } from './InvoicePdf.js';
 
 const e = React.createElement;
@@ -65,7 +65,7 @@ function pageFooter() {
 	);
 }
 
-export function renderPage1(order: InvoiceOrder, opts: { watermark?: string } = {}) {
+export function renderPage1(order: InvoiceOrder, opts: { watermark?: string; logoBuffer?: Buffer | null } = {}) {
 	const customerName = order.contact?.name || 'Your Order';
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const eventTypeDisplay = order.eventType
@@ -98,7 +98,7 @@ export function renderPage1(order: InvoiceOrder, opts: { watermark?: string } = 
 		e(
 			View,
 			{ style: styles.heroBand },
-			e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: LOGO_URL, style: styles.heroLogo }),
+			opts.logoBuffer && e(Image as unknown as React.ComponentType<Record<string, unknown>>, { src: opts.logoBuffer, style: styles.heroLogo }),
 			e(Text, { style: styles.heroEyebrow }, heroEyebrowText),
 			e(
 				Text,
