@@ -23,7 +23,7 @@
 			<div class="neela-header-id">
 				<span class="neela-avatar"><img src="/apple-touch-icon.png" alt="" width="36" height="36" /></span>
 				<div class="neela-header-text">
-					<h2 id="neela-title">Neela</h2>
+					<h2 id="neela-title">Neela <span class="neela-voice-mode-dot" id="neela-voice-mode-dot" aria-hidden="true" title="Voice mode on"></span></h2>
 					<p>Plans your event &middot; takes your order</p>
 				</div>
 			</div>
@@ -64,6 +64,11 @@
 			<button type="button" class="neela-chip" data-neela-prompt="Still deciding, send me ideas">Still deciding, send me ideas</button>
 			<button type="button" class="neela-chip" data-neela-prompt="Book a 30-min call">Book a 30-min call</button>
 			<button type="button" class="neela-chip" data-neela-prompt="Just browsing">Just browsing</button>
+		</div>
+
+		<div class="neela-voice-nudge" id="neela-voice-nudge" hidden role="status" aria-live="polite">
+			<span class="neela-voice-nudge-text">🎤 Want to talk instead? Tap the mic.</span>
+			<span class="neela-voice-nudge-arrow" aria-hidden="true"></span>
 		</div>
 
 		<form class="neela-input-row" id="neela-input-row" autocomplete="off">
@@ -164,6 +169,21 @@
 	.neela-send:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(184,149,106,0.4)}
 	.neela-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 	.neela-privacy{margin:0;padding:6px 16px 12px;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:var(--gold-light);opacity:0.6;letter-spacing:0.3px;background:rgba(10,22,40,0.4)}
+
+	/* Voice-mode indicator dot next to "Neela" — pulses when speaker on AND mic has been used */
+	.neela-voice-mode-dot{display:none;width:7px;height:7px;border-radius:50%;background:var(--gold-shimmer);box-shadow:0 0 0 0 rgba(232,201,135,0.7);margin-left:6px;vertical-align:middle;animation:neela-voice-pulse 2.4s ease-in-out infinite}
+	.neela-voice-mode-active .neela-voice-mode-dot{display:inline-block}
+	@keyframes neela-voice-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,201,135,0.6)}50%{box-shadow:0 0 0 6px rgba(232,201,135,0)}}
+
+	/* Voice nudge pill — appears above the mic button after Neela's 2nd reply */
+	.neela-voice-nudge{position:relative;align-self:flex-start;margin:0 16px 8px;padding:10px 16px;background:linear-gradient(135deg,rgba(184,149,106,0.92),rgba(232,201,135,0.92));color:var(--midnight);border-radius:14px;box-shadow:0 6px 18px rgba(184,149,106,0.32),0 0 0 1px rgba(232,201,135,0.4);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;letter-spacing:0.2px;line-height:1.4;animation:neela-nudge-in 0.55s cubic-bezier(0.4,0,0.2,1) both,neela-nudge-pulse 1.6s ease-in-out 0.6s 1;cursor:pointer;max-width:260px}
+	.neela-voice-nudge[hidden]{display:none}
+	.neela-voice-nudge-text{display:block;font-weight:500}
+	.neela-voice-nudge-arrow{position:absolute;left:32px;bottom:-8px;width:14px;height:14px;background:linear-gradient(135deg,rgba(184,149,106,0.92),rgba(232,201,135,0.92));transform:rotate(45deg);box-shadow:1px 1px 0 0 rgba(232,201,135,0.4)}
+	.neela-voice-nudge-dismissed{animation:neela-nudge-out 0.3s ease both}
+	@keyframes neela-nudge-in{0%{opacity:0;transform:translateY(8px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
+	@keyframes neela-nudge-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+	@keyframes neela-nudge-out{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-4px)}}
 
 	/* ORDER SUMMARY CARD — renders below Neela's bubble when she emits the order marker */
 	.neela-order-card{align-self:stretch;margin:4px 4px 8px;padding:18px 20px;background:linear-gradient(135deg,rgba(20,36,66,0.55),rgba(37,4,45,0.35));border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 0 1px rgba(232,201,135,0.08),0 8px 22px rgba(10,22,40,0.32);animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both;position:relative}
@@ -507,7 +527,12 @@
 		// Drop the static placeholder greeting if we have stored messages.
 		if (conversation.length > 0) {
 			messagesEl.innerHTML = '';
-			conversation.forEach(m => renderMessage(m.role === 'assistant' ? 'bot' : 'user', m.content));
+			conversation.forEach(m => {
+				const display = m.role === 'user' && typeof m.content === 'string'
+					? m.content.replace(/^\[spoken\]\s+/, '')
+					: m.content;
+				renderMessage(m.role === 'assistant' ? 'bot' : 'user', display);
+			});
 			suggestedEl.classList.add('hidden');
 		}
 	}
@@ -546,44 +571,175 @@
 		submitMessage();
 	});
 
-	// Speaker toggle (TTS via /api/neela-voice → ElevenLabs). Hidden if upstream is unavailable.
-	let voiceUnavailable = false;
-	let currentAudio = null;
-	speakerBtn.addEventListener('click', () => {
-		speakerOn = !speakerOn;
+	// Voice playback — dual-path TTS:
+	//   1. Try ElevenLabs via /api/neela-voice (premium voice; needs ELEVENLABS_API_KEY).
+	//   2. Fall back to browser Web Speech Synthesis (free, robotic, works immediately).
+	//   3. If both fail, hide the speaker toggle.
+	// Speaker default: ON. State persists across navigation via sessionStorage.
+	const SPEAKER_STATE_KEY = 'neela-speaker-on';
+	function readSpeakerState() {
+		try {
+			const v = sessionStorage.getItem(SPEAKER_STATE_KEY);
+			if (v === '0') return false;
+			if (v === '1') return true;
+		} catch (e) {}
+		return true; // default ON per Shar's spec — speaker should default on
+	}
+	function saveSpeakerState() {
+		try { sessionStorage.setItem(SPEAKER_STATE_KEY, speakerOn ? '1' : '0'); } catch (e) {}
+	}
+	function applySpeakerUI() {
 		speakerBtn.setAttribute('aria-pressed', speakerOn ? 'true' : 'false');
 		speakerBtn.setAttribute('aria-label', 'Voice replies, currently ' + (speakerOn ? 'on' : 'off'));
-		if (!speakerOn && currentAudio) {
-			try { currentAudio.pause(); } catch (e) {}
-		}
-	});
-	async function playSpokenReply(text) {
-		if (voiceUnavailable) return;
-		try {
-			const resp = await fetch('/api/neela-voice', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ text })
-			});
-			if (resp.status === 503) {
-				voiceUnavailable = true;
-				speakerBtn.hidden = true;
-				return;
-			}
-			if (!resp.ok) return;
-			const blob = await resp.blob();
-			const url = URL.createObjectURL(blob);
-			if (currentAudio) { try { currentAudio.pause(); } catch (e) {} }
-			currentAudio = new Audio(url);
-			currentAudio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
-			currentAudio.play().catch(() => {});
-		} catch (e) { /* silent */ }
 	}
+	speakerOn = readSpeakerState();
+	applySpeakerUI();
+
+	const speechSynthAvailable = typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+	let elevenLabsUnavailable = false; // becomes true after a 503 from /api/neela-voice
+	let currentAudio = null;
+	let audioUnlocked = false;
+
+	// Pick a warm female en voice from the browser's installed list.
+	// getVoices() can return [] before the voiceschanged event fires; cache once available.
+	let cachedVoice = null;
+	function pickVoice() {
+		if (!speechSynthAvailable) return null;
+		if (cachedVoice) return cachedVoice;
+		const voices = window.speechSynthesis.getVoices();
+		if (!voices || !voices.length) return null;
+		const en = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith('en'));
+		const namePrefs = ['samantha', 'tessa', 'karen', 'victoria', 'allison', 'kate', 'serena', 'moira', 'fiona', 'ava', 'susan', 'jenny', 'female'];
+		for (const pref of namePrefs) {
+			const match = en.find((v) => v.name.toLowerCase().includes(pref));
+			if (match) { cachedVoice = match; return cachedVoice; }
+		}
+		cachedVoice = en[0] || voices[0];
+		return cachedVoice;
+	}
+	if (speechSynthAvailable) {
+		try {
+			window.speechSynthesis.addEventListener('voiceschanged', () => { cachedVoice = null; });
+		} catch (e) {}
+	}
+
+	// iOS Safari + Chrome autoplay: the FIRST playback must follow a user gesture.
+	// Toggle tap counts. We also play a silent clip + dispatch a no-op utterance
+	// to prime both audio pipelines on the first toggle-on.
+	function unlockAudio() {
+		if (audioUnlocked) return;
+		audioUnlocked = true;
+		try {
+			const silent = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+			silent.volume = 0;
+			silent.play().catch(() => {});
+		} catch (e) {}
+		if (speechSynthAvailable) {
+			try {
+				const u = new SpeechSynthesisUtterance(' ');
+				u.volume = 0;
+				window.speechSynthesis.speak(u);
+			} catch (e) {}
+		}
+	}
+
+	function stopCurrentAudio() {
+		if (currentAudio) {
+			try { currentAudio.pause(); currentAudio.src = ''; } catch (e) {}
+			currentAudio = null;
+		}
+		if (speechSynthAvailable) {
+			try { window.speechSynthesis.cancel(); } catch (e) {}
+		}
+	}
+
+	// Strip the order-marker JSON block + URLs + markdown asterisks before TTS.
+	// Neela's prose above the marker is the human-readable part; the JSON is for
+	// the order card and shouldn't be read aloud.
+	function stripForSpeech(text) {
+		return String(text)
+			.replace(/<<<NEELA_ORDER_READY>>>[\s\S]*?<<<END_NEELA_ORDER_READY>>>/g, '')
+			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
+			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
+			.replace(/https?:\/\/\S+/g, '')
+			.replace(/\s+/g, ' ')
+			.trim();
+	}
+
+	function fallbackToSpeechSynth(text) {
+		if (!speechSynthAvailable) return false;
+		try {
+			const u = new SpeechSynthesisUtterance(text.slice(0, 1200));
+			u.lang = 'en-CA';
+			u.rate = 1.0;
+			u.pitch = 1.05;
+			const v = pickVoice();
+			if (v) u.voice = v;
+			window.speechSynthesis.speak(u);
+			return true;
+		} catch (e) { return false; }
+	}
+
+	async function playNeelaVoice(rawText) {
+		if (!speakerOn) return;
+		const text = stripForSpeech(rawText);
+		if (!text) return;
+
+		stopCurrentAudio();
+
+		// Path 1: ElevenLabs (only if not already known unavailable).
+		if (!elevenLabsUnavailable) {
+			try {
+				const resp = await fetch('/api/neela-voice', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ text })
+				});
+				if (resp.status === 503) {
+					elevenLabsUnavailable = true;
+				} else if (resp.ok) {
+					const blob = await resp.blob();
+					const url = URL.createObjectURL(blob);
+					const audio = new Audio(url);
+					currentAudio = audio;
+					audio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+					audio.addEventListener('error', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+					await audio.play().catch(() => {});
+					return;
+				}
+			} catch (e) { /* fall through to browser fallback */ }
+		}
+
+		// Path 2: browser SpeechSynthesis fallback.
+		const fellBack = fallbackToSpeechSynth(text);
+
+		// If both paths are down, hide the toggle quietly.
+		if (!fellBack && elevenLabsUnavailable) {
+			speakerBtn.hidden = true;
+		}
+	}
+
+	speakerBtn.addEventListener('click', () => {
+		speakerOn = !speakerOn;
+		applySpeakerUI();
+		saveSpeakerState();
+		if (speakerOn) {
+			unlockAudio();
+		} else {
+			stopCurrentAudio();
+		}
+		updateVoiceModeIndicator();
+	});
+
+	// Backwards-compatible alias for any older code path that still calls the old name.
+	function playSpokenReply(t) { return playNeelaVoice(t); }
 
 	// Mic — Web Speech API (browser-native). Hidden if unsupported.
 	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 	let recognizer = null;
 	let recognizing = false;
+	let lastInputViaVoice = false; // true while the next submit should be flagged as spoken
+	let haveUsedMicAtLeastOnce = false;
 	if (SpeechRecognition) {
 		micBtn.hidden = false;
 		recognizer = new SpeechRecognition();
@@ -596,13 +752,65 @@
 			let transcript = '';
 			for (let i = e.resultIndex; i < e.results.length; i++) transcript += e.results[i][0].transcript;
 			inputEl.value = (baseline ? baseline + ' ' : '') + transcript.trim();
+			lastInputViaVoice = true;
+			haveUsedMicAtLeastOnce = true;
+			updateVoiceModeIndicator();
 		};
 		recognizer.onerror = () => { recognizing = false; micBtn.classList.remove('recording'); };
 		recognizer.onend = () => { recognizing = false; micBtn.classList.remove('recording'); };
 		micBtn.addEventListener('click', () => {
+			unlockAudio(); // mic tap is a user gesture; prime the audio pipelines too
 			if (recognizing) { try { recognizer.stop(); } catch (e) {} }
 			else { try { recognizer.start(); } catch (e) {} }
 		});
+	}
+
+	// Voice-mode indicator: pulsing dot next to "Neela" whenever speaker is on
+	// AND the customer has used the mic at least once. Signals "we're in a
+	// hands-free conversation" without shouting it.
+	function updateVoiceModeIndicator() {
+		const active = speakerOn && haveUsedMicAtLeastOnce;
+		if (modal) modal.classList.toggle('neela-voice-mode-active', active);
+	}
+
+	// Voice nudge pill — shown after Neela's 2nd reply, only on Web-Speech-capable
+	// browsers, only once per session. Auto-dismisses after 6s or any tap.
+	const VOICE_NUDGE_KEY = 'neela_voice_nudged';
+	const nudgeEl = document.getElementById('neela-voice-nudge');
+	let nudgeTimer = null;
+	function dismissVoiceNudge() {
+		if (!nudgeEl || nudgeEl.hidden) return;
+		nudgeEl.classList.add('neela-voice-nudge-dismissed');
+		setTimeout(() => { try { nudgeEl.hidden = true; nudgeEl.classList.remove('neela-voice-nudge-dismissed'); } catch (e) {} }, 320);
+		try { sessionStorage.setItem(VOICE_NUDGE_KEY, '1'); } catch (e) {}
+		if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = null; }
+	}
+	function maybeShowVoiceNudge() {
+		if (!nudgeEl) return;
+		if (!SpeechRecognition) return; // silent on browsers without mic support (Firefox)
+		try { if (sessionStorage.getItem(VOICE_NUDGE_KEY) === '1') return; } catch (e) {}
+		const assistantReplyCount = conversation.filter((m) => m && m.role === 'assistant').length;
+		if (assistantReplyCount !== 2) return;
+		if (haveUsedMicAtLeastOnce) return; // already in voice mode, nudge would be redundant
+		nudgeEl.hidden = false;
+		// Auto-dismiss after 6s
+		if (nudgeTimer) clearTimeout(nudgeTimer);
+		nudgeTimer = setTimeout(dismissVoiceNudge, 6000);
+	}
+	if (nudgeEl) {
+		// Tap the nudge itself to dismiss + jump straight to mic
+		nudgeEl.addEventListener('click', () => {
+			dismissVoiceNudge();
+			try { micBtn.focus(); } catch (e) {}
+		});
+	}
+	// Tap anywhere else inside the modal also dismisses
+	if (modal) {
+		modal.addEventListener('click', (e) => {
+			if (!nudgeEl || nudgeEl.hidden) return;
+			if (nudgeEl.contains(e.target)) return;
+			dismissVoiceNudge();
+		}, true);
 	}
 
 	// (Lead form auto-trigger removed: the new ORDER CAPTURE MODE marker flow
@@ -621,8 +829,13 @@
 			return;
 		}
 
-		conversation.push({ role: 'user', content: text });
-		renderMessage('user', text);
+		// If the input came from the mic, prefix with [spoken] so Neela can adapt
+		// (shorter, more natural-cadence replies). The marker is stripped on display.
+		const wasVoice = lastInputViaVoice;
+		lastInputViaVoice = false; // consume the flag for this turn
+		const storedContent = wasVoice ? '[spoken] ' + text : text;
+		conversation.push({ role: 'user', content: storedContent });
+		renderMessage('user', text); // display the user's message without the [spoken] marker
 		saveConversation();
 		inputEl.value = '';
 		suggestedEl.classList.add('hidden');
@@ -654,6 +867,7 @@
 			if (speakerOn && reply) {
 				playSpokenReply(reply);
 			}
+			maybeShowVoiceNudge();
 		} catch (err) {
 			showTyping(false);
 			renderMessage('bot', FALLBACK_MSG);
