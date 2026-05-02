@@ -310,6 +310,13 @@
 	.neela-suggestions-pending{display:none}
 	.neela-suggestions-revealed{display:flex;animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both}
 
+	/* FLAG-FOR-TEAM-REVIEW BADGE, small pill under Neela's bubble that confirms
+	   the system has fired a [FLAG] team email. The server already sent the
+	   email by the time this renders; the badge is reassurance only. */
+	.neela-flag-badge{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin:4px 4px 8px;padding:6px 12px;background:rgba(184,149,106,0.12);border:1px solid rgba(184,149,106,0.35);border-radius:999px;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12.5px;color:var(--gold-light);letter-spacing:0.3px;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-flag-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--gold-shimmer);box-shadow:0 0 6px rgba(232,201,135,0.6);flex-shrink:0}
+	.neela-flag-badge-text{line-height:1.3}
+
 	/* "View all options" expander, slim gold-outlined pill below the lead-3 tiers.
 	   Lighter weight than a tier card so it reads as a secondary affordance. */
 	.neela-tiers-more{display:flex;justify-content:center;align-self:stretch;margin:-2px 4px 10px;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both;transition:opacity 0.28s ease,max-height 0.28s ease}
@@ -417,6 +424,11 @@
 	//   <<<NEELA_TIERS_MORE>>>    , additional tiers behind a "View all" expander
 	//   <<<NEELA_FORM>>>          , inline contact form (name / phone / email)
 	//   <<<NEELA_SUGGESTIONS>>>   , lightweight follow-up chips
+	//   <<<NEELA_FLAG>>>          , server-side trigger to email the events team
+	//                               for review (out-of-area, rush, complaint,
+	//                               discount, etc.). Renders a small "flagged
+	//                               for team review" badge under the bubble so
+	//                               the customer sees the system has committed.
 	// We strip every marker from the displayed text and render the structured
 	// element below the bubble. If a JSON block fails to parse, we still strip
 	// the markers and just show prose (Neela's prose almost always names the
@@ -427,13 +439,14 @@
 	const TIERS_MORE_MARKER_RE = /<<<NEELA_TIERS_MORE>>>([\s\S]*?)<<<END_NEELA_TIERS_MORE>>>/;
 	const FORM_MARKER_RE = /<<<NEELA_FORM>>>([\s\S]*?)<<<END_NEELA_FORM>>>/;
 	const SUGGESTIONS_MARKER_RE = /<<<NEELA_SUGGESTIONS>>>([\s\S]*?)<<<END_NEELA_SUGGESTIONS>>>/;
+	const FLAG_MARKER_RE = /<<<NEELA_FLAG>>>([\s\S]*?)<<<END_NEELA_FLAG>>>/;
 	function tryParseJson(raw, label) {
 		try { return JSON.parse(raw.trim()); }
 		catch (e) { console.warn('[neela] ' + label + ' JSON parse failed', e); return null; }
 	}
 	function extractMarkers(text) {
 		let display = String(text);
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, flag = null;
 		const om = display.match(ORDER_MARKER_RE);
 		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
 		const opm = display.match(OPTIONS_MARKER_RE);
@@ -446,7 +459,9 @@
 		if (fm) { display = display.replace(FORM_MARKER_RE, '').trim(); form = tryParseJson(fm[1], 'form'); }
 		const sm = display.match(SUGGESTIONS_MARKER_RE);
 		if (sm) { display = display.replace(SUGGESTIONS_MARKER_RE, '').trim(); suggestions = tryParseJson(sm[1], 'suggestions'); }
-		return { displayText: display, order, options, tiers, tiersMore, form, suggestions };
+		const flm = display.match(FLAG_MARKER_RE);
+		if (flm) { display = display.replace(FLAG_MARKER_RE, '').trim(); flag = tryParseJson(flm[1], 'flag'); }
+		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, flag };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -461,7 +476,7 @@
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, flag = null;
 		let displayText = String(text);
 		if (role !== 'user') {
 			const ex = extractMarkers(displayText);
@@ -472,6 +487,7 @@
 			tiersMore = ex.tiersMore;
 			form = ex.form;
 			suggestions = ex.suggestions;
+			flag = ex.flag;
 		}
 
 		const paragraphs = displayText
@@ -522,7 +538,29 @@
 			}
 		}
 
+		// FLAG badge is independent of the other markers (server-side trigger)
+		// and can render alongside SUGGESTIONS. Server already received the flag
+		// and fired the [FLAG] team email by the time this renders, so the badge
+		// is purely confirmation that the system has committed to follow-up.
+		if (flag) {
+			const badge = renderFlagBadge(flag);
+			if (badge) messagesEl.appendChild(badge);
+		}
+
 		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+
+	function renderFlagBadge(flag) {
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-flag-badge';
+		const summary = (flag && typeof flag.summary === 'string' && flag.summary.trim())
+			? flag.summary.trim()
+			: 'flagged for team review';
+		wrap.innerHTML =
+			'<span class="neela-flag-badge-dot" aria-hidden="true"></span>' +
+			'<span class="neela-flag-badge-text">Flagged for team review, response within 6 hours.</span>';
+		wrap.title = summary;
+		return wrap;
 	}
 
 	// Disable any currently-active quick-reply containers (OPTIONS / TIERS /
@@ -1203,6 +1241,7 @@
 			.replace(/<<<NEELA_TIERS>>>[\s\S]*?<<<END_NEELA_TIERS>>>/g, '')
 			.replace(/<<<NEELA_FORM>>>[\s\S]*?<<<END_NEELA_FORM>>>/g, '')
 			.replace(/<<<NEELA_SUGGESTIONS>>>[\s\S]*?<<<END_NEELA_SUGGESTIONS>>>/g, '')
+			.replace(/<<<NEELA_FLAG>>>[\s\S]*?<<<END_NEELA_FLAG>>>/g, '')
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
 			.replace(/https?:\/\/\S+/g, '')
