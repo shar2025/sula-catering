@@ -72,18 +72,27 @@
 		</div>
 
 		<form class="neela-input-row" id="neela-input-row" autocomplete="off">
-			<button type="button" class="neela-icon-btn neela-mic" id="neela-mic" aria-label="Tap to record" title="Tap to record" hidden>
+			<input type="text" id="neela-input" placeholder="Ask Neela…" maxlength="600" />
+			<button type="submit" class="neela-send" aria-label="Send">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<line x1="4" y1="12" x2="20" y2="12"/>
+					<polyline points="14 6 20 12 14 18"/>
+				</svg>
+			</button>
+			<button type="button" class="neela-icon-btn neela-mic" id="neela-mic" aria-label="Tap to talk, push-to-talk" title="Tap to talk" hidden>
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 					<rect x="9" y="3" width="6" height="12" rx="3"/>
 					<path d="M5 11a7 7 0 0 0 14 0"/>
 					<line x1="12" y1="18" x2="12" y2="22"/>
 				</svg>
 			</button>
-			<input type="text" id="neela-input" placeholder="Ask Neela…" maxlength="600" />
-			<button type="submit" class="neela-send" aria-label="Send">
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<line x1="4" y1="12" x2="20" y2="12"/>
-					<polyline points="14 6 20 12 14 18"/>
+			<button type="button" class="neela-icon-btn neela-voice-loop" id="neela-voice-loop" aria-label="Hands-free voice mode, tap to toggle" title="Hands-free voice mode" hidden>
+				<svg class="neela-voice-loop-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+					<line x1="5" y1="10" x2="5" y2="14"/>
+					<line x1="9" y1="7" x2="9" y2="17"/>
+					<line x1="13" y1="4" x2="13" y2="20"/>
+					<line x1="17" y1="8" x2="17" y2="16"/>
+					<line x1="21" y1="11" x2="21" y2="13"/>
 				</svg>
 			</button>
 		</form>
@@ -162,11 +171,27 @@
 	.neela-input-row input{flex:1;background:rgba(5,11,21,0.6);border:1px solid rgba(184,149,106,0.25);border-radius:999px;padding:11px 16px;color:var(--cream);font-family:'Montserrat',sans-serif;font-size:14.5px;letter-spacing:0.2px;outline:none;transition:border-color 0.3s ease,box-shadow 0.3s ease}
 	.neela-input-row input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,149,106,0.18),0 0 18px rgba(184,149,106,0.18)}
 	.neela-input-row input::placeholder{color:rgba(245,237,224,0.4)}
-	.neela-mic{flex-shrink:0;border:1px solid rgba(184,149,106,0.4);background:rgba(20,36,66,0.4)}
-	.neela-mic.recording{color:#e87b5a;border-color:#e87b5a;background:rgba(232,123,90,0.12);animation:neela-rec 1.2s ease-in-out infinite}
-	/* Voice loop active but mic paused (Neela is speaking): dimmed gold */
-	.neela-mic.voice-loop:not(.recording){color:rgba(184,149,106,0.55);border-color:rgba(184,149,106,0.55);background:rgba(184,149,106,0.06)}
+	.neela-mic{flex-shrink:0;border:1px solid rgba(184,149,106,0.55);background:rgba(20,36,66,0.55);color:var(--gold-light)}
+	.neela-mic:hover{background:rgba(184,149,106,0.18);color:var(--gold-shimmer);border-color:var(--gold-shimmer)}
+	.neela-mic.recording{color:#e87b5a;border-color:#e87b5a;background:rgba(232,123,90,0.16);animation:neela-rec 1.2s ease-in-out infinite}
 	@keyframes neela-rec{0%,100%{box-shadow:0 0 0 0 rgba(232,123,90,0.5)}50%{box-shadow:0 0 0 6px rgba(232,123,90,0)}}
+
+	/* Continuous voice loop button (sparkle/waveform). Active state pulses gold;
+	   while actively listening inside the loop, the mic button to its left also
+	   pulses red. Two distinct visual signals so the user knows what's hot. */
+	.neela-voice-loop{flex-shrink:0;border:1px solid rgba(184,149,106,0.55);background:rgba(20,36,66,0.55);color:var(--gold-light);position:relative}
+	.neela-voice-loop:hover{background:rgba(184,149,106,0.18);color:var(--gold-shimmer);border-color:var(--gold-shimmer)}
+	.neela-voice-loop.active{color:var(--midnight);background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));border-color:var(--gold);animation:neela-loop-pulse 1.8s ease-in-out infinite}
+	.neela-voice-loop.active .neela-voice-loop-icon line{animation:neela-loop-bars 1.2s ease-in-out infinite}
+	.neela-voice-loop.active .neela-voice-loop-icon line:nth-child(2){animation-delay:0.15s}
+	.neela-voice-loop.active .neela-voice-loop-icon line:nth-child(3){animation-delay:0.3s}
+	.neela-voice-loop.active .neela-voice-loop-icon line:nth-child(4){animation-delay:0.45s}
+	.neela-voice-loop.active .neela-voice-loop-icon line:nth-child(5){animation-delay:0.6s}
+	@keyframes neela-loop-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,201,135,0.55),0 4px 14px rgba(184,149,106,0.4)}50%{box-shadow:0 0 0 5px rgba(232,201,135,0),0 4px 14px rgba(184,149,106,0.4)}}
+	@keyframes neela-loop-bars{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.45)}}
+	.neela-voice-loop-icon{transform-origin:center;transition:transform 0.3s ease}
+	.neela-voice-loop-icon line{transform-origin:center;transform-box:fill-box}
+
 	.neela-send{flex-shrink:0;width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));color:var(--midnight);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:transform 0.3s ease,box-shadow 0.3s ease}
 	.neela-send:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(184,149,106,0.4)}
 	.neela-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
@@ -266,11 +291,12 @@
 	const sendBtn = inputForm.querySelector('.neela-send');
 	const speakerBtn = document.getElementById('neela-speaker');
 	const micBtn = document.getElementById('neela-mic');
+	const voiceLoopBtn = document.getElementById('neela-voice-loop');
 	if (!fab || !modal) return;
 
 	const SESSION_KEY = 'neela-conv-v1';
 	const SESSION_ID_KEY = 'neela-session-id';
-	const FALLBACK_MSG = "I'm taking a quick break right now. Email events@sulaindianrestaurant.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
+	const FALLBACK_MSG = "I'm taking a quick break right now. Email events.sula@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
 	const MAX_USER_MESSAGES = 25;
 
 	let conversation = [];
@@ -433,24 +459,41 @@
 		// approves that quote, and only then is the booking confirmed.
 		const title = mode === 'quick' ? "Here's what I've got so far" : "Here's your event details";
 		const sub = mode === 'quick'
-			? "Send this off and the events team comes back with menu ideas + tailored pricing. No commitment."
+			? "Sending this submits a quote request. Events team comes back with menu ideas + tailored pricing within a business day. Nothing's booked, your event confirms once you approve the written quote."
 			: "Sending this submits a quote request, nothing's booked yet. The events team sends a written quote within a business day; your event confirms once you approve that quote.";
-		const confirmLabel = mode === 'quick' ? 'Send for Menu Ideas' : 'Send Quote Request';
+		const confirmLabel = 'Send Quote Request';
 
-		const loc = order.location && (order.location.venueOrAddress || order.location.city)
-			? [order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')
-			: '';
+		const loc = order.deliveryAddress
+			|| (order.location && (order.location.venueOrAddress || order.location.city)
+				? [order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')
+				: '');
 		const guestStr = typeof order.guestCount === 'number' ? String(order.guestCount) : (order.guestCount || '');
+		const setupLabel = order.setupType
+			? ({
+				aluminium_trays: 'Aluminium trays (free)',
+				reusable_plastic_bowls: 'Reusable plastic bowls',
+				non_heated_bowl_setup: 'Non-heated bowl setup',
+				heated_stainless: 'Heated stainless steel',
+				hammered_copper: 'Premium hammered copper'
+			}[order.setupType] || order.setupType)
+			: order.setupStyle;
+		const rentalsLabel = order.rentalsRequired === true ? 'Required' : order.rentalsRequired === false ? 'Not required' : '';
+		const platesLabel = order.platesAndCutlery === 'required' ? 'Required' : order.platesAndCutlery === 'not_required' ? 'Not required' : '';
+		const spoonsLabel = order.servingSpoons === 'required' ? 'Required' : order.servingSpoons === 'not_required' ? 'Not required' : '';
 		const fields = [
 			fmtField('Event type', order.eventType),
 			fmtField('Date', order.eventDate),
+			fmtField('Delivery time', order.deliveryTime || order.timeWindow),
 			fmtField('Guests', guestStr),
 			fmtField('Service', order.serviceType),
-			fmtField('Location', loc),
-			fmtField('Time', order.timeWindow),
+			fmtField('Delivery address', loc),
 			fmtField('Menu tier', order.menuTier),
+			fmtField('Custom menu', order.customMenuDetails),
 			fmtField('Add-ons', Array.isArray(order.addOns) && order.addOns.length ? order.addOns.join(', ') : ''),
-			fmtField('Setup', order.setupStyle),
+			fmtField('Setup', setupLabel),
+			fmtField('Rentals', rentalsLabel),
+			fmtField('Plates + cutlery', platesLabel),
+			fmtField('Serving spoons', spoonsLabel),
 			fmtDietary(order.dietary),
 			fmtField('Notes', order.notes),
 			fmtField('Name', order.contact && order.contact.name),
@@ -537,7 +580,7 @@
 			card.classList.add('neela-order-card-errored');
 			card.innerHTML =
 				'<p class="neela-order-sent-title">That didn\'t go through.</p>' +
-				'<p class="neela-order-sent-body">Easiest path: call <a href="tel:+16042151130">604-215-1130</a> or email <a href="mailto:events@sulaindianrestaurant.com">events@sulaindianrestaurant.com</a>. We\'ll handle it from there.</p>';
+				'<p class="neela-order-sent-body">Easiest path: call <a href="tel:+16042151130">604-215-1130</a> or email <a href="mailto:events.sula@gmail.com">events.sula@gmail.com</a>. We\'ll handle it from there.</p>';
 			confirmBtn.disabled = false;
 			confirmBtn.textContent = originalLabel;
 		}
@@ -882,17 +925,30 @@
 
 	function applyMicVisualState() {
 		if (!micBtn) return;
+		// Mic = push-to-talk indicator. Red pulse only while a single utterance
+		// is being captured (whether triggered by mic tap OR by the voice-loop
+		// hands-free flow restarting recognition between turns).
 		micBtn.classList.toggle('recording', recognizing);
-		micBtn.classList.toggle('voice-loop', voiceLoopActive && !recognizing);
-		// Update aria-label so screen readers know the state
-		if (voiceLoopActive && recognizing) micBtn.setAttribute('aria-label', 'Listening, tap to exit hands-free mode');
-		else if (voiceLoopActive) micBtn.setAttribute('aria-label', 'Hands-free mode on, paused while Neela speaks');
-		else micBtn.setAttribute('aria-label', 'Tap to record');
-		// Red pulsing dot next to "Neela" header when actively listening in loop mode.
-		// updateVoiceModeIndicator() handles the showing/hiding of the dot itself;
-		// this just toggles the "listening-now" red variant on top of it.
+		if (recognizing && !voiceLoopActive) micBtn.setAttribute('aria-label', 'Listening, tap to cancel');
+		else if (recognizing && voiceLoopActive) micBtn.setAttribute('aria-label', 'Listening (hands-free)');
+		else micBtn.setAttribute('aria-label', 'Tap to talk');
+
+		// Continuous-loop button = sparkle/waveform that toggles hands-free mode.
+		// Active state shows the gradient + pulse; bars animate when the recognizer
+		// is actually live inside the loop.
+		if (voiceLoopBtn) {
+			voiceLoopBtn.classList.toggle('active', voiceLoopActive);
+			voiceLoopBtn.setAttribute('aria-pressed', voiceLoopActive ? 'true' : 'false');
+			if (voiceLoopActive && recognizing) voiceLoopBtn.setAttribute('aria-label', 'Hands-free mode on, listening, tap to exit');
+			else if (voiceLoopActive) voiceLoopBtn.setAttribute('aria-label', 'Hands-free mode on, paused while Neela speaks, tap to exit');
+			else voiceLoopBtn.setAttribute('aria-label', 'Hands-free voice mode, tap to enter');
+		}
+
+		// Red pulsing dot next to "Neela" header signals "actively listening".
+		// updateVoiceModeIndicator() handles base show/hide; this layers the red
+		// "listening-now" variant on top whenever the recognizer is live.
 		const dot = document.getElementById('neela-voice-mode-dot');
-		if (dot) dot.classList.toggle('listening-now', voiceLoopActive && recognizing);
+		if (dot) dot.classList.toggle('listening-now', recognizing);
 		updateVoiceModeIndicator();
 	}
 
@@ -917,6 +973,7 @@
 
 	if (SpeechRecognition) {
 		micBtn.hidden = false;
+		if (voiceLoopBtn) voiceLoopBtn.hidden = false;
 		recognizer = new SpeechRecognition();
 		recognizer.lang = 'en-CA';
 		// IMPORTANT: continuous mode keeps the recognition session open across multiple
@@ -939,19 +996,23 @@
 			if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
 			autoSubmitTimer = setTimeout(() => {
 				autoSubmitTimer = null;
-				console.log('[neela-loop] auto-submit timer fired, voiceLoopActive:', voiceLoopActive, 'neelaIsSpeaking:', neelaIsSpeaking, 'input length:', inputEl.value.trim().length);
-				if (!voiceLoopActive) return;
+				console.log('[neela-voice] auto-submit timer fired, voiceLoopActive:', voiceLoopActive, 'recognizing:', recognizing, 'neelaIsSpeaking:', neelaIsSpeaking, 'input length:', inputEl.value.trim().length);
 				if (neelaIsSpeaking) return;
 				if (inputEl.value.trim().length === 0) return;
+				if (!recognizing) return; // recognizer already stopped, the user is back to typing
 				try {
 					if (typeof inputForm.requestSubmit === 'function') {
 						inputForm.requestSubmit();
 					} else {
 						inputForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 					}
-					console.log('[neela-loop] auto-submit dispatched');
+					console.log('[neela-voice] auto-submit dispatched');
+					// Push-to-talk: stop the recognizer after a single utterance ships,
+					// otherwise the mic would stay open forever. Loop mode keeps the
+					// session alive (continuous=true) so Neela can hear the next reply.
+					if (!voiceLoopActive) stopMicRecording();
 				} catch (err) {
-					console.log('[neela-loop] auto-submit threw:', err?.message || err);
+					console.log('[neela-voice] auto-submit threw:', err?.message || err);
 				}
 			}, AUTO_SUBMIT_DELAY);
 		}
@@ -981,8 +1042,11 @@
 			lastInputViaVoice = true;
 			haveUsedMicAtLeastOnce = true;
 			updateVoiceModeIndicator();
-			console.log('[neela-loop] onresult final transcript:', transcript.length, 'chars');
-			if (voiceLoopActive) scheduleAutoSubmit();
+			console.log('[neela-voice] onresult final transcript:', transcript.length, 'chars');
+			// Schedule auto-submit on silence for BOTH push-to-talk and loop modes.
+			// Push-to-talk: submit + stop after one utterance (handled in scheduleAutoSubmit).
+			// Loop: submit + keep recognizer alive for the next turn.
+			scheduleAutoSubmit();
 		};
 		recognizer.onerror = (e) => {
 			console.log('[neela-loop] recognizer.onerror:', e?.error || e?.message || e);
@@ -1013,27 +1077,50 @@
 				}, 280);
 			}
 		};
+		// Mic = push-to-talk. Tap once → record one utterance, auto-stop on silence,
+		// auto-submit. Tap again while recording → cancel. Does NOT enable the
+		// hands-free voice loop; that's the dedicated voice-loop button's job.
 		micBtn.addEventListener('click', () => {
-			unlockAudio(); // mic tap is a user gesture; prime the audio pipelines too
+			unlockAudio(); // tap = user gesture; primes audio pipelines
 			if (recognizing) {
-				// Currently listening: tapping cancels recording AND exits voice loop
-				voiceLoopActive = false;
-				saveVoiceLoopState();
+				// Cancel in-flight recording. If we're inside the voice loop, also exit it
+				// (a mic tap during continuous mode is the universal "stop" gesture).
+				if (voiceLoopActive) {
+					voiceLoopActive = false;
+					saveVoiceLoopState();
+				}
 				stopMicRecording();
-				applyMicVisualState();
-			} else if (voiceLoopActive) {
-				// Loop on but mic paused (TTS playing): tap exits the loop
-				voiceLoopActive = false;
-				saveVoiceLoopState();
-				applyMicVisualState();
 			} else {
-				// Loop off: tap starts recording AND enables hands-free loop if speaker is on
-				if (speakerOn) voiceLoopActive = true;
-				saveVoiceLoopState();
+				// Push-to-talk: start recognition for a single utterance, no loop activation.
 				startMicRecording();
-				applyMicVisualState();
 			}
+			applyMicVisualState();
 		});
+
+		// Continuous voice loop button = explicit hands-free toggle. Tap → enter loop,
+		// auto-enable speaker if it's off (loop is meaningless without TTS feedback).
+		// Tap again → exit loop. Mic stays available for push-to-talk independently.
+		if (voiceLoopBtn) {
+			voiceLoopBtn.addEventListener('click', () => {
+				unlockAudio();
+				if (voiceLoopActive) {
+					voiceLoopActive = false;
+					saveVoiceLoopState();
+					stopMicRecording();
+				} else {
+					// Enable speaker too; hands-free without TTS doesn't make sense.
+					if (!speakerOn) {
+						speakerOn = true;
+						applySpeakerUI();
+						saveSpeakerState();
+					}
+					voiceLoopActive = true;
+					saveVoiceLoopState();
+					if (!recognizing) startMicRecording();
+				}
+				applyMicVisualState();
+			});
+		}
 
 		// Apply visual state on init in case localStorage said the loop was active
 		applyMicVisualState();
@@ -1179,7 +1266,7 @@
 			if (resp.status === 429) {
 				const data = await resp.json().catch(() => ({}));
 				showTyping(false);
-				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at events@sulaindianrestaurant.com or book a quick call: calendly.com/sula-catering/30min");
+				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at events.sula@gmail.com or book a quick call: calendly.com/sula-catering/30min");
 				return;
 			}
 			if (!resp.ok && resp.status !== 504 && resp.status !== 502 && resp.status !== 503) {
