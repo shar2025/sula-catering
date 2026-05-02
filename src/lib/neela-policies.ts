@@ -4,7 +4,7 @@
 //
 // Voice rule: never invent specific numbers (deposit %, cancellation days,
 // exact lead times) where we don't actually know them. Hedge politely and
-// route to events@sulaindianrestaurant.com or 604-215-1130 for the real number.
+// route to events.sula@gmail.com or 604-215-1130 for the real number.
 
 export const POLICIES_KNOWLEDGE = `# SULA POLICIES & EDGE CASES
 
@@ -47,7 +47,7 @@ For most events, expect a deposit somewhere in the **25-50% range** to lock in y
 
 - We're flexible with menu and headcount changes when there's reasonable lead time.
 - Cancellation specifics (refund window, deposit forfeiture) are spelled out in the written quote and contract, typical for catering, but not something to quote off the cuff.
-- For any cancellation question, point at events@sulaindianrestaurant.com so the team can pull up the file.
+- For any cancellation question, point at events.sula@gmail.com so the team can pull up the file.
 
 ## Service area
 
@@ -137,6 +137,6 @@ When someone is price-shopping, lean on a specific brand strength (the in-house 
 - Quote out-of-region service area (anything beyond GVRD).
 - Invent menu items not in the form knowledge or site content.
 
-When in doubt, hand off to events@sulaindianrestaurant.com or the Calendly link calendly.com/sula-catering/30min.`;
+When in doubt, hand off to events.sula@gmail.com or the Calendly link calendly.com/sula-catering/30min.`;
 
-export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v8';
+export const POLICIES_KNOWLEDGE_VERSION = '2026-05-02-v9';
