@@ -5,13 +5,18 @@
 // Approx tokens: 2484 (budget 25000)
 // Over-budget: false
 //
-// Phase 2 status: NOT YET WIRED into Neela's system prompt. The corpus is
-// generated and committed for inspection / future use. To enable, add an
-// import + cache_control block in api/neela.ts (note: Anthropic max is 4
-// breakpoints; one of the existing blocks would need to merge).
+// Phase 3 status: WIRED into Neela's system prompt as part of the merged
+// 4th cache block (policies + public + buyout + email corpus). See
+// api/neela.ts -> buildEmailCorpusBlock().
 //
-// Token-budget plan: when EMAIL_CORPUS_OVER_BUDGET = true, switch to a
-// vector-retrieval path (Voyage AI embed + Cloudflare Vectorize index).
+// Synthetic corpus pending: this file is currently generated from
+// data/synthetic-test-emails.mbox. Phase 3.0 (real archive ingest) re-runs
+// scripts/ingest-emails.mjs against an .mbox export of events.sula@gmail.com
+// once the OAuth grant is complete and the team can pull the export.
+//
+// Token-budget plan: when EMAIL_CORPUS_OVER_BUDGET = true, the inline-prompt
+// path drops the corpus and a future RAG path takes over (Voyage AI embed +
+// Cloudflare Vectorize index).
 
 export interface EmailKeyExchange {
 	q: string;
