@@ -703,18 +703,21 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		return { sent: false, error: 'RESEND_API_KEY not set' };
 	}
 
-	// Render PDFs in parallel where possible.
-	// 'internal' (events team)  → pages 1 + 2 (catering details + formal invoice).
-	//                             Kitchen sheet excluded; prep cooks have their
-	//                             own kitchen-only PDF below.
-	// 'customer' (customer copy) → page 1 only (catering details, no pricing).
-	// 'kitchen'  (kitchen copy)  → page 3 only, gated by KITCHEN_EMAIL.
+	// Render all 3 audience PDFs in parallel. The team email needs both the
+	// 2-page invoice AND the 1-page kitchen sheet attached as separate
+	// documents (so the team can forward each to its respective audience
+	// without further editing). The customer email gets only the 1-page
+	// submission record. KITCHEN_EMAIL, when set, also receives the kitchen
+	// PDF as a standalone email.
+	// 'internal' → pages 1 + 2 (customer-final invoice; team review + customer forward)
+	// 'customer' → page 1 only (initial submission record; no pricing)
+	// 'kitchen'  → page 3 only (separate prep sheet for the kitchen team)
 	const generatePdfs = shouldGeneratePdf(order);
 	const [teamBuffer, customerBuffer, kitchenBuffer] = generatePdfs
 		? await Promise.all([
 			renderInvoicePdfBuffer(reference, order, 'internal'),
 			renderInvoicePdfBuffer(reference, order, 'customer'),
-			process.env.KITCHEN_EMAIL ? renderInvoicePdfBuffer(reference, order, 'kitchen') : Promise.resolve(null)
+			renderInvoicePdfBuffer(reference, order, 'kitchen')
 		])
 		: [null, null, null];
 
@@ -727,11 +730,17 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 
-		// 1) Events team, 2-page PDF (details + invoice; no kitchen sheet).
-		// In test mode this routes to NEELA_TEST_EMAIL.
-		const teamAttachments = teamBuffer
-			? [{ filename: `${reference}-team.pdf`, content: teamBuffer }]
-			: undefined;
+		// 1) Events team gets BOTH attachments as separate documents so they
+		// can forward each one independently (invoice → customer once
+		// finalized; kitchen sheet → kitchen team). In test mode this routes
+		// to NEELA_TEST_EMAIL.
+		const teamAttachments: { filename: string; content: Buffer }[] = [];
+		if (teamBuffer) {
+			teamAttachments.push({ filename: `Sula-Catering-${reference}-invoice.pdf`, content: teamBuffer });
+		}
+		if (kitchenBuffer) {
+			teamAttachments.push({ filename: `Sula-Catering-${reference}-kitchen.pdf`, content: kitchenBuffer });
+		}
 		const teamTo = testMode ? teamRecipient : 'events@sulaindianrestaurant.com';
 		const teamResult = await resend.emails.send({
 			from: fromAddr,
@@ -740,7 +749,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			subject,
 			html,
 			text,
-			attachments: teamAttachments
+			attachments: teamAttachments.length ? teamAttachments : undefined
 		});
 		if (teamResult.error) {
 			const e = teamResult.error as { message?: string; statusCode?: number; name?: string };
@@ -756,7 +765,12 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			return { sent: false, error: detail };
 		}
 		const emailId = (teamResult.data && (teamResult.data as { id?: string }).id) || undefined;
-		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!teamBuffer, testMode });
+		console.log('[neela-order] sent to events team', {
+			reference,
+			emailId,
+			attachments: teamAttachments.map((a) => a.filename),
+			testMode
+		});
 		await markEmailed(reference);
 
 		// 2) Customer copy, page 1 ONLY (catering details, no pricing). The
@@ -789,7 +803,9 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			}
 		}
 
-		// 3) Optional kitchen-only email (when KITCHEN_EMAIL is set).
+		// 3) Optional kitchen-only email (when KITCHEN_EMAIL is set). The team
+		// email already includes the kitchen PDF; this is a convenience for
+		// kitchens that want a direct copy without the team forwarding step.
 		// In test mode, redirect kitchen email to NEELA_TEST_EMAIL too.
 		if (kitchenBuffer && process.env.KITCHEN_EMAIL) {
 			try {
@@ -799,7 +815,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 					to: [kitchenTo],
 					subject: withTestPrefix(`[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim()),
 					html: `<p style="font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">Kitchen prep sheet for reference <strong>${reference}</strong> attached. ${order.guestCount || ''} guests, ${order.eventDate || 'date TBD'}.</p>`,
-					attachments: [{ filename: `${reference}-kitchen.pdf`, content: kitchenBuffer }]
+					attachments: [{ filename: `Sula-Catering-${reference}-kitchen.pdf`, content: kitchenBuffer }]
 				});
 				if (kitchenResult.error) {
 					const e = kitchenResult.error as { message?: string; statusCode?: number; name?: string };
