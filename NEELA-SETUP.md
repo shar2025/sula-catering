@@ -19,6 +19,7 @@ Set these in **Vercel → Project → Settings → Environment Variables**, then
 | `ELEVENLABS_VOICE_ID` | Voice replies (optional) | Default is **Rachel** (`21m00Tcm4TlvDq8ikWAM`), a warm refined female voice from the ElevenLabs library. To pick a different voice, browse [elevenlabs.io/app/voice-library](https://elevenlabs.io/app/voice-library), open a voice, and copy its ID into this var. |
 | `POSTGRES_URL` | Chat persistence (optional) | Vercel → Storage → Create → Postgres (Neon-backed). When you create the DB, Vercel auto-injects `POSTGRES_URL` (and a few siblings) into every project linked to it. The `neela_chats` table auto-creates on first insert. If unset, Neela still replies — persistence just silently no-ops. |
 | `RESEND_API_KEY` | Daily digest email (optional) | Sign up at [resend.com](https://resend.com), verify the `sulacatering.com` domain (DNS TXT record), then create an API key under Settings → API Keys. Without this set, the daily-digest cron still runs and summarizes but skips the actual send (logs `[neela-digest] no resend key, skipping send`). |
+| `NEELA_ADMIN_KEY` | Admin stats endpoint (optional) | Any random string you pick (e.g. a UUID). Pass it as `x-admin-key: <value>` header when hitting `/api/admin/neela-stats`. If unset, the endpoint refuses all requests with 503 (so it's never accidentally world-readable). Rotate by changing the env var. |
 
 After saving env vars, trigger a redeploy (Vercel does this automatically on the next push, or hit "Redeploy" on the latest deployment).
 
