@@ -1,9 +1,15 @@
 // Top-level Sula PDF document. Composes Page1 (catering details), Page2
-// (estimate / invoice), and Page3 (kitchen sheet) — filtered by audience.
+// (estimate / invoice), and Page3 (kitchen sheet), filtered by audience.
 //
-//   audience='customer' → pages 1 + 2 only (no kitchen sheet)
-//   audience='kitchen'  → page 3 only
-//   default             → all 3
+//   audience='customer' → page 1 ONLY (catering details, no pricing).
+//                         The customer never sees Neela's preliminary line-item
+//                         math, events team reviews and sends the official
+//                         quote in writing. Page 1 ends with a "for your records"
+//                         note to set the expectation.
+//   audience='kitchen'  → page 3 only (kitchen sheet)
+//   audience='internal' → all 3 pages (events team copy: details + estimate + kitchen)
+//   audience='all'      → alias for 'internal' (back-compat with older callers)
+//   default             → all 3 pages
 //
 // Uses React.createElement directly (no JSX) so we don't need to touch
 // tsconfig or risk breaking Astro's compilation pipeline.
@@ -16,7 +22,7 @@ import { renderPage2 } from './Page2Invoice.js';
 import { renderPage3 } from './Page3Kitchen.js';
 import type { KitchenSheet } from '../portioning.js';
 
-export type Audience = 'all' | 'customer' | 'kitchen';
+export type Audience = 'all' | 'internal' | 'customer' | 'kitchen';
 
 export interface InvoiceOrder {
 	reference: string;
@@ -36,7 +42,7 @@ export interface InvoiceOrder {
 		hasNutAllergy?: boolean;
 		hasShellfishAllergy?: boolean;
 		hasDairyFree?: boolean;
-		// halal omitted by design — kitchen is halal-certified by default since 2010.
+		// halal omitted by design, kitchen is halal-certified by default since 2010.
 		notes?: string;
 	};
 	menuTier?: string;
@@ -67,11 +73,17 @@ export function buildInvoicePdf(opts: {
 	const { order, sheet, audience, watermark, logoBuffer } = opts;
 
 	const children: React.ReactNode[] = [];
-	if (audience !== 'kitchen') {
+	// 'customer' = page 1 ONLY (no pricing). Events team controls when/how the
+	// real quote goes out, so the customer's confirmation copy is just a record
+	// of what was captured.
+	if (audience === 'customer') {
+		children.push(renderPage1(order, { watermark, logoBuffer, forCustomer: true }));
+	} else if (audience === 'kitchen') {
+		children.push(renderPage3(order, sheet, { logoBuffer }));
+	} else {
+		// 'all' / 'internal' / default → full 3-page events-team copy
 		children.push(renderPage1(order, { watermark, logoBuffer }));
 		children.push(renderPage2(order, { watermark, logoBuffer }));
-	}
-	if (audience !== 'customer') {
 		children.push(renderPage3(order, sheet, { logoBuffer }));
 	}
 

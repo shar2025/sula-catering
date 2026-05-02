@@ -1,9 +1,9 @@
 /**
- * /api/neela-voice — TTS proxy to ElevenLabs for Neela's spoken replies.
+ * /api/neela-voice, TTS proxy to ElevenLabs for Neela's spoken replies.
  *
  * Required env (only when speaker toggle is on):
- *   ELEVENLABS_API_KEY    — get from elevenlabs.io
- *   ELEVENLABS_VOICE_ID   — voice ID for Neela. Default: Rachel ('21m00Tcm4TlvDq8ikWAM').
+ *   ELEVENLABS_API_KEY   , get from elevenlabs.io
+ *   ELEVENLABS_VOICE_ID  , voice ID for Neela. Default: Rachel ('21m00Tcm4TlvDq8ikWAM').
  *                           Browse the ElevenLabs voice library to pick a warmer or more
  *                           refined fit and override via env var.
  *
@@ -17,7 +17,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export const config = { maxDuration: 60 };
 
-const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — warm, refined female voice
+const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel, warm, refined female voice
 const MAX_TEXT_LENGTH = 1200;
 
 interface VoiceRequest {

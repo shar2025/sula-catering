@@ -249,7 +249,7 @@ export async function runDigest(opts: { dryRun?: boolean } = {}): Promise<Digest
 		timeZone: 'America/Vancouver'
 	});
 	const html = buildEmailHtml(summary, count, sessions, dateLabel);
-	const subject = `Neela daily digest – ${dateLabel}`;
+	const subject = `Neela daily digest, ${dateLabel}`;
 
 	if (dryRun) {
 		console.log('[neela-digest] dry-run, not sending');

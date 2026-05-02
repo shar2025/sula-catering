@@ -1,5 +1,5 @@
 /**
- * /api/admin/neela-stats — read-only verification endpoint for chat persistence.
+ * /api/admin/neela-stats, read-only verification endpoint for chat persistence.
  *
  * Auth: send `x-admin-key: <NEELA_ADMIN_KEY>` header. If the env var isn't set,
  * the endpoint refuses everything (so it's never accidentally world-readable).

@@ -1,4 +1,4 @@
-// Page 3 — Kitchen Order Sheet (back of house drama).
+// Page 3, Kitchen Order Sheet (back of house drama).
 // Full plum #25042d background with cream type. Inverted cream card for
 // customer info, navy-band table headers with gold portion column in giant
 // Cormorant italic, gold-outlined cards for setup + delivery, gold checkbox
@@ -37,7 +37,7 @@ function locationLine(loc: InvoiceOrder['location']): string {
 function dietaryFlags(d: InvoiceOrder['dietary']): string[] {
 	if (!d) return [];
 	const flags: string[] = [];
-	// NOTE: no HALAL flag — Sula's kitchen is halal-certified by default since 2010,
+	// NOTE: no HALAL flag, Sula's kitchen is halal-certified by default since 2010,
 	// so every meat dish is already halal. Surfacing it would be noise for the line cooks.
 	if (d.hasJain) flags.push('JAIN PREP');
 	if (d.hasVegan) flags.push('VEGAN');
@@ -45,7 +45,7 @@ function dietaryFlags(d: InvoiceOrder['dietary']): string[] {
 	return flags;
 }
 
-// Hard allergy/dietary-restriction flags — surfaced in a prominent gold-bordered
+// Hard allergy/dietary-restriction flags, surfaced in a prominent gold-bordered
 // callout box at the top of the kitchen sheet, separate from the soft dietary
 // flags strip. Cross-contamination risk = needs a chef's eyes on it.
 function allergyFlags(d: InvoiceOrder['dietary']): string[] {
@@ -82,7 +82,7 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 		Page,
 		{ size: 'LETTER', style: styles.pageDark },
 
-		// Plum hero (no separate band — page is already plum)
+		// Plum hero (no separate band, page is already plum)
 		e(
 			View,
 			{ style: styles.kitchenHero },
@@ -124,14 +124,14 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 				)
 			),
 
-			// Allergy callout — only renders if any hard allergy/restriction flagged.
+			// Allergy callout, only renders if any hard allergy/restriction flagged.
 			// Cross-contamination risk; lead chef has to sign off.
 			allergies.length > 0 && e(
 				View,
 				{ style: styles.allergyCallout },
-				e(Text, { style: styles.allergyCalloutLabel }, '⚠ Allergy / restriction flags — chef sign-off required'),
+				e(Text, { style: styles.allergyCalloutLabel }, '⚠ Allergy / restriction flags, chef sign-off required'),
 				e(Text, { style: styles.allergyCalloutBody }, allergies.join(' · ')),
-				e(Text, { style: styles.allergyCalloutNote }, 'Confirm separate prep surface, dedicated utensils, and ingredient check on all sauces. Cross-contamination risk on shared kitchen equipment — flag any uncertainty to the lead chef before service.')
+				e(Text, { style: styles.allergyCalloutNote }, 'Confirm separate prep surface, dedicated utensils, and ingredient check on all sauces. Cross-contamination risk on shared kitchen equipment, flag any uncertainty to the lead chef before service.')
 			),
 
 			// Dietary flags strip

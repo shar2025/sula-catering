@@ -1,5 +1,5 @@
 /**
- * /api/neela/invoice/sample — public PDF preview using mock data.
+ * /api/neela/invoice/sample, public PDF preview using mock data.
  * No DB read, no Resend, no env vars required. Generates the same Sula-branded
  * PDF the real endpoint produces, with a "SAMPLE" gold watermark on pages 1+2
  * so it's never confused for a real order.

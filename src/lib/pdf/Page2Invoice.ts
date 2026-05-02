@@ -1,4 +1,4 @@
-// Page 2 — The Estimate (receipt of dreams).
+// Page 2, The Estimate (receipt of dreams).
 // Plum-dominant page with smaller hero band (logo + reference number).
 // Cream card with menu-style line items (gold dotted leaders), then a
 // gold-bordered total card at the right with the total in giant Cormorant

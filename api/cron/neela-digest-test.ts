@@ -1,5 +1,5 @@
 /**
- * /api/cron/neela-digest-test — manual GET trigger for the daily digest.
+ * /api/cron/neela-digest-test, manual GET trigger for the daily digest.
  *
  * Useful for testing the email format before the real cron fires. Hits the
  * same code path. Open without auth for tonight; lock down later.

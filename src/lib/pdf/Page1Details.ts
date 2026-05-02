@@ -1,4 +1,4 @@
-// Page 1 — Catering Order welcome page.
+// Page 1, Catering Order welcome page.
 // Plum-dominant page with midnight hero band, gold elephant logo, customer
 // name set in giant Cormorant italic gold-shimmer, then a cream content card
 // with two-column event details.
@@ -66,7 +66,10 @@ function pageFooter() {
 	);
 }
 
-export function renderPage1(order: InvoiceOrder, opts: { watermark?: string; logoBuffer?: Buffer | null } = {}) {
+export function renderPage1(
+	order: InvoiceOrder,
+	opts: { watermark?: string; logoBuffer?: Buffer | null; forCustomer?: boolean } = {}
+) {
 	const customerName = order.contact?.name || 'Your Order';
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const eventTypeDisplay = order.eventType
@@ -117,7 +120,7 @@ export function renderPage1(order: InvoiceOrder, opts: { watermark?: string; log
 			View,
 			{ style: styles.creamCard },
 			e(View, { style: styles.creamCardAccent }),
-			e(Text, { style: styles.sectionEyebrow }, 'Your event'),
+			e(Text, { style: styles.sectionEyebrow }, opts.forCustomer ? 'For your records' : 'Your event'),
 			e(
 				Text,
 				{ style: styles.sectionTitle },
@@ -132,7 +135,15 @@ export function renderPage1(order: InvoiceOrder, opts: { watermark?: string; log
 			),
 			diamondDivider(),
 			e(Text, { style: styles.fieldLabel }, 'Reference'),
-			e(Text, { style: styles.fieldValue }, order.reference)
+			e(Text, { style: styles.fieldValue }, order.reference),
+			// Customer-copy-only note: sets expectations that pricing follows from
+			// the events team in writing, NOT from this PDF. Renders as a quiet
+			// italic line under the reference number.
+			opts.forCustomer && e(
+				Text,
+				{ style: styles.forRecordsNote },
+				'Quote request received. The events team will send your written quote within one business day. Booking confirms once you review and approve that quote, no charge or commitment until then.'
+			)
 		),
 
 		// Optional rotated watermark behind the content (used by sample preview)

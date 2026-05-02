@@ -12,7 +12,7 @@ This is the playbook for the questions that don't fit cleanly into menus or pric
 
 ## Order minimums
 
-- **Off-site catering (drop-off or full-service): 15 guests minimum.** This is enforced by the quote form's conditional logic — every setup option starts at 15 guests, so smaller off-site orders aren't supported.
+- **Off-site catering (drop-off or full-service): 15 guests minimum.** This is enforced by the quote form's conditional logic, every setup option starts at 15 guests, so smaller off-site orders aren't supported.
 - **In-restaurant group dining: 7 guests minimum** (handled through Group Reservations at any of the three Sula restaurants).
 - **Below 7 guests:** regular reservation or walk-in at any Sula restaurant.
 - **Sula Café drop-offs** have their own smaller minimums for café-style orders. Refer to Sula Café for those.
@@ -23,7 +23,7 @@ When someone asks about catering for fewer than 15 guests, don't apologize or re
 
 How far ahead Sula likes to be booked, by event type:
 - **Smaller corporate drop-off (under ~30 guests):** 48 hours minimum. We can sometimes turn things around faster, but a couple of days gives the chefs room to make it nice.
-- **Mid-size corporate / private parties (30–150 guests):** 1 to 2 weeks ideally.
+- **Mid-size corporate / private parties (30-150 guests):** 1 to 2 weeks ideally.
 - **Weddings:** 4 to 6 weeks at minimum, 6 to 9 months in peak season (May to October). Most couples reach out 6 to 12 months out.
 - **Last-minute requests:** call 604-215-1130 directly, our team can usually find a way for smaller guest counts.
 
@@ -46,14 +46,14 @@ For most events, expect a deposit somewhere in the **25-50% range** to lock in y
 ## Cancellations & changes
 
 - We're flexible with menu and headcount changes when there's reasonable lead time.
-- Cancellation specifics (refund window, deposit forfeiture) are spelled out in the written quote and contract — typical for catering, but not something to quote off the cuff.
+- Cancellation specifics (refund window, deposit forfeiture) are spelled out in the written quote and contract, typical for catering, but not something to quote off the cuff.
 - For any cancellation question, point at events@sulaindianrestaurant.com so the team can pull up the file.
 
 ## Service area
 
 We cater across the **Greater Vancouver Regional District (GVRD)**:
 - Vancouver, Burnaby, Richmond, Surrey, North Vancouver, West Vancouver
-- Sometimes further with extra travel coordination — ask.
+- Sometimes further with extra travel coordination, ask.
 
 We do **not** cater Toronto, Calgary, Victoria, the Okanagan, or the Sunshine Coast. If someone asks about an out-of-region event, gently redirect them to a local caterer.
 
@@ -61,7 +61,7 @@ We do **not** cater Toronto, Calgary, Victoria, the Okanagan, or the Sunshine Co
 
 - All chicken and lamb is **halal-certified**, sourced from trusted local BC suppliers. We've been a halal kitchen since the start.
 - Dedicated kitchen areas for **vegan, vegetarian, and Jain** prep so cross-contamination is handled.
-- Many curries are **gluten-free** by default — most of the dal, chicken, lamb, and vegetable curries. The naan and a few specific items have gluten. We can flag what's safe for any given menu.
+- Many curries are **gluten-free** by default, most of the dal, chicken, lamb, and vegetable curries. The naan and a few specific items have gluten. We can flag what's safe for any given menu.
 - Dairy-free options exist across the menu, especially in the vegan curries and most appetizers.
 - Spice level is dialled per event (Mild, Med, Med-hot, Hot, Extra Hot).
 
@@ -69,7 +69,7 @@ We do **not** cater Toronto, Calgary, Victoria, the Okanagan, or the Sunshine Co
 
 - **Nut-free preparations are available** on request, and we take it seriously.
 - Honest caveat: our kitchen handles nuts in other dishes (cashews in some korma, almonds in some desserts), so for severe nut allergies we always flag the cross-contamination risk and ask the client to confirm they're comfortable.
-- For severe allergies (peanut, tree nut, shellfish, gluten — anaphylaxis-grade), always recommend the client tell us in writing on the inquiry form so the chefs see it before menu finalization.
+- For severe allergies (peanut, tree nut, shellfish, gluten, anaphylaxis-grade), always recommend the client tell us in writing on the inquiry form so the chefs see it before menu finalization.
 - Never claim "100% allergen-free" because no shared kitchen is.
 
 ## Bar & alcohol
@@ -82,7 +82,7 @@ We do **not** cater Toronto, Calgary, Victoria, the Okanagan, or the Sunshine Co
 
 Our setup options scale with the event:
 - **Aluminum trays:** free, comes standard. Great for drop-offs.
-- **Reusable plastic bowls (15–90 guests):** $75 to $150.
+- **Reusable plastic bowls (15-90 guests):** $75 to $150.
 - **Non-heated bowl setup (up to 30 guests):** +$180.
 - **Heated stainless steel:** +$325.
 - **Premium heated hammered copper:** +$495.
@@ -104,7 +104,7 @@ Anything fancier (linens, glassware, full event rentals) is handled through our 
 ## Outdoor events
 
 - We cater outdoors (parks, backyards, venues with patios) frequently.
-- Weather contingency is on the client — if it rains, we can usually still deliver, but full-service outdoor setups need a backup plan (tent, indoor space).
+- Weather contingency is on the client, if it rains, we can usually still deliver, but full-service outdoor setups need a backup plan (tent, indoor space).
 - For outdoor weddings, we strongly recommend a tasting + site visit a few weeks ahead so we know the layout.
 - Hot summer days: we use insulated transport and recommend serving food within the standard hot-hold window.
 
@@ -112,7 +112,7 @@ Anything fancier (linens, glassware, full event rentals) is handled through our 
 
 - Smaller orders (under 50 guests, drop-off): often possible within 48 hours, sometimes same-day.
 - Larger or weddings: rarely doable last-minute due to chef prep.
-- Always have them call 604-215-1130 rather than emailing — fastest path.
+- Always have them call 604-215-1130 rather than emailing, fastest path.
 
 ## Sula credibility points (weave in naturally, NOT every reply)
 

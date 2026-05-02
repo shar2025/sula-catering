@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
 		paddingBottom: 0
 	},
 
-	// PAGE 1 — welcome hero band (midnight → plum approximated as stacked navy + plum)
+	// PAGE 1, welcome hero band (midnight → plum approximated as stacked navy + plum)
 	heroBand: {
 		backgroundColor: COLORS.midnight,
 		paddingTop: 60,
@@ -248,7 +248,20 @@ export const styles = StyleSheet.create({
 		lineHeight: 1.55
 	},
 
-	// PAGE 2 — smaller hero band
+	// "For your records" footer note on the customer-facing Page 1 (when the
+	// PDF is generated with audience='customer'). Quiet italic line that sets
+	// expectations: this is a quote REQUEST receipt, not a booking confirmation.
+	forRecordsNote: {
+		marginTop: 18,
+		fontFamily: FONTS.heading,
+		fontStyle: 'italic',
+		fontSize: 10,
+		color: COLORS.mutedText,
+		lineHeight: 1.55,
+		textAlign: 'center'
+	},
+
+	// PAGE 2, smaller hero band
 	hero2Band: {
 		backgroundColor: COLORS.midnight,
 		paddingTop: 36,
@@ -473,7 +486,7 @@ export const styles = StyleSheet.create({
 		marginTop: 6
 	},
 
-	// PAGE 3 — full plum, kitchen sheet
+	// PAGE 3, full plum, kitchen sheet
 	kitchenHero: {
 		paddingTop: 40,
 		paddingBottom: 30,
@@ -579,7 +592,7 @@ export const styles = StyleSheet.create({
 		lineHeight: 1.55
 	},
 
-	// Allergy callout — gold-bordered alert box on plum, brighter than the
+	// Allergy callout, gold-bordered alert box on plum, brighter than the
 	// soft dietary card. Surfaces only when there's an actual allergy/restriction.
 	allergyCallout: {
 		marginBottom: 14,

@@ -1,17 +1,20 @@
 /**
- * /api/neela/invoice/[reference] — generates the Sula PDF invoice on demand.
+ * /api/neela/invoice/[reference], generates the Sula PDF invoice on demand.
  *
  * Reads the order from neela_orders by reference, runs the portioning
  * calculator, builds the 3-page Sula-branded PDF via @react-pdf/renderer,
  * and streams it back as application/pdf.
  *
  * Query params:
- *   ?audience=customer  → pages 1+2 only (no kitchen sheet)
- *   ?audience=kitchen   → page 3 only
- *   default             → all 3 pages
+ *   ?audience=customer  → page 1 ONLY (catering details, no pricing).
+ *                         The customer never sees Neela's preliminary line-items;
+ *                         events team controls when the official quote goes out.
+ *   ?audience=kitchen   → page 3 only (kitchen sheet)
+ *   ?audience=internal  → all 3 pages (events-team copy)
+ *   default             → all 3 pages (legacy 'all' alias)
  *
  * Required env:
- *   POSTGRES_URL  — Vercel Postgres / Neon (where neela_orders lives)
+ *   POSTGRES_URL , Vercel Postgres / Neon (where neela_orders lives)
  *
  * 404 if the reference isn't found. 503 if Postgres isn't configured.
  */
@@ -35,8 +38,13 @@ interface OrderRow {
 function parseAudience(raw: string | string[] | undefined): Audience {
 	const v = Array.isArray(raw) ? raw[0] : raw || '';
 	const s = String(v).toLowerCase();
+	// 'customer' = page 1 ONLY (catering details, no pricing). The customer
+	// never sees Neela's preliminary line-items, events team controls when
+	// the official quote goes out.
 	if (s === 'customer') return 'customer';
 	if (s === 'kitchen') return 'kitchen';
+	if (s === 'internal') return 'internal';
+	// Default = all 3 pages (events-team copy)
 	return 'all';
 }
 
@@ -85,7 +93,7 @@ function inferMenu(orderJson: Record<string, unknown>): { appetizers: MenuItem[]
 			curries.push({ name: 'Non-Veg Curry #1', isNonVeg: true });
 			curries.push({ name: 'Non-Veg Curry #2', isNonVeg: true });
 		} else if (tier.includes('appetizer') || tier.includes('street food')) {
-			// Appetizer-heavy tier — represented mostly by the appetizer block
+			// Appetizer-heavy tier, represented mostly by the appetizer block
 		}
 	}
 	if (appetizers.length === 0) {

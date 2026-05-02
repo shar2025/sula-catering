@@ -1,5 +1,5 @@
 /**
- * /api/neela-lead — captures a lead (name + email) from inside the Neela chat.
+ * /api/neela-lead, captures a lead (name + email) from inside the Neela chat.
  *
  * For now, logs to Vercel function logs and returns 200. Later, wire to
  * the events team's email or CRM (Resend, Zapier, HubSpot, etc.) by adding

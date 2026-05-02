@@ -1,11 +1,11 @@
 /**
- * /api/cron/neela-digest — daily digest, scheduled via vercel.json crons.
+ * /api/cron/neela-digest, daily digest, scheduled via vercel.json crons.
  * Runs at 16:00 UTC (= 8am PST / 9am PDT).
  *
  * Required env (silent skip if missing):
- *   POSTGRES_URL          — Vercel Postgres / Neon
- *   ANTHROPIC_API_KEY     — Claude Sonnet for summarization (Neela var also accepted)
- *   RESEND_API_KEY        — Resend for sending the email
+ *   POSTGRES_URL         , Vercel Postgres / Neon
+ *   ANTHROPIC_API_KEY    , Claude Sonnet for summarization (Neela var also accepted)
+ *   RESEND_API_KEY       , Resend for sending the email
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';

@@ -1,10 +1,10 @@
 /**
- * /api/neela/submit-order — captures a customer-confirmed order from the chat,
+ * /api/neela/submit-order, captures a customer-confirmed order from the chat,
  * persists to Postgres (neela_orders), and emails the events team.
  *
  * Required env (silent skip if missing):
- *   POSTGRES_URL          — Vercel Postgres / Neon (table auto-creates)
- *   RESEND_API_KEY        — Resend; without it order still persists, email skipped
+ *   POSTGRES_URL         , Vercel Postgres / Neon (table auto-creates)
+ *   RESEND_API_KEY       , Resend; without it order still persists, email skipped
  *
  * Returns:
  *   { ok: true, reference: "SC-0502-A7K2", emailed: true|false, message: "..." }
@@ -148,7 +148,7 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 	if (!name) return { ok: false, error: 'order.contact.name required' };
 	if (!email || !isValidEmail(email)) return { ok: false, error: 'order.contact.email required (valid email)' };
 
-	// eventType — required for full + quick, optional for consultation.
+	// eventType, required for full + quick, optional for consultation.
 	if (mode !== 'consultation') {
 		if (!o.eventType || !VALID_EVENT_TYPES.includes(o.eventType as EventType)) {
 			return { ok: false, error: 'order.eventType required (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
@@ -157,7 +157,7 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		return { ok: false, error: 'order.eventType invalid (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
 	}
 
-	// guestCount — required for full (number), required for quick (number or "rough range" string),
+	// guestCount, required for full (number), required for quick (number or "rough range" string),
 	// optional for consultation.
 	let guestCountValue: number | string | undefined;
 	if (mode === 'full') {
@@ -179,7 +179,7 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		guestCountValue = typeof o.guestCount === 'number' ? Math.floor(o.guestCount) : String(o.guestCount).slice(0, 80);
 	}
 
-	// eventDate — required for full + quick, optional for consultation.
+	// eventDate, required for full + quick, optional for consultation.
 	const eventDate = String(o.eventDate || '').trim().slice(0, 200);
 	if (mode !== 'consultation' && !eventDate) {
 		return { ok: false, error: 'order.eventDate required (specific date or month for ' + mode + ' mode)' };
@@ -207,7 +207,7 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 			hasNutAllergy: typeof o.dietary.hasNutAllergy === 'boolean' ? o.dietary.hasNutAllergy : undefined,
 			hasShellfishAllergy: typeof o.dietary.hasShellfishAllergy === 'boolean' ? o.dietary.hasShellfishAllergy : undefined,
 			hasDairyFree: typeof o.dietary.hasDairyFree === 'boolean' ? o.dietary.hasDairyFree : undefined,
-			// halal field is silently ignored if sent — kitchen is halal by default
+			// halal field is silently ignored if sent, kitchen is halal by default
 			notes: o.dietary.notes ? String(o.dietary.notes).slice(0, 800) : undefined
 		} : undefined,
 		menuTier: o.menuTier ? String(o.menuTier).slice(0, 200) : undefined,
@@ -626,7 +626,10 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		return { sent: false };
 	}
 
-	// Render PDFs in parallel where possible
+	// Render PDFs in parallel where possible.
+	// 'all' (events team) → all 3 pages. 'customer' → page 1 only (catering details,
+	// no pricing, events team controls when the official quote goes out). 'kitchen'
+	// → page 3 only (only when KITCHEN_EMAIL is set).
 	const generatePdfs = shouldGeneratePdf(order);
 	const [fullBuffer, customerBuffer, kitchenBuffer] = generatePdfs
 		? await Promise.all([
@@ -645,7 +648,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 
-		// 1) Events team — full 3-page PDF attached. In test mode this routes to NEELA_TEST_EMAIL.
+		// 1) Events team, full 3-page PDF attached. In test mode this routes to NEELA_TEST_EMAIL.
 		const teamAttachments = fullBuffer
 			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
 			: undefined;
@@ -662,14 +665,14 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer, testMode });
 		await markEmailed(reference);
 
-		// 2) Customer copy — pages 1 + 2 only (no kitchen sheet).
-		// In test mode, redirect this to NEELA_TEST_EMAIL too (we don't want to email
-		// real customers during testing). reply-to still points at the events team.
+		// 2) Customer copy, page 1 ONLY (catering details, no pricing). The
+		// customer never sees Neela's preliminary line-items; events team
+		// controls the official quote. In test mode, redirect this to
+		// NEELA_TEST_EMAIL (we don't want to email real customers during testing).
+		// reply-to points at the events team so customer replies land there.
 		if (customerBuffer && order.contact.email) {
 			try {
-				const customerSubjectBase = order.mode === 'quick'
-					? `Sula Catering, your inquiry ${reference}`
-					: `Sula Catering, your order ${reference}`;
+				const customerSubjectBase = `Sula Catering, your event details (for your records) ${reference}`;
 				const customerSubject = withTestPrefix(customerSubjectBase);
 				const customerTo = testMode ? teamRecipient : order.contact.email;
 				const customerHtml = buildCustomerEmailHtml(reference, order);
@@ -712,7 +715,11 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 	}
 }
 
-// Customer-facing email body (warmer, simpler, no transcript dump)
+// Customer-facing email body. Pages-1-only PDF attached. The customer does NOT
+// see Neela's preliminary pricing line items, events team controls when the
+// real quote goes out. Body copy makes the no-commitment workflow explicit:
+// quote request now, written quote within a business day, booking confirms
+// only after the customer reviews + approves that quote.
 function buildCustomerEmailHtml(reference: string, order: Order): string {
 	const dateLabel = new Date().toLocaleDateString('en-CA', {
 		weekday: 'long',
@@ -721,11 +728,9 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 		year: 'numeric',
 		timeZone: 'America/Vancouver'
 	});
-	const isQuick = order.mode === 'quick';
-	const heading = isQuick ? 'Thanks for the inquiry' : 'Your order is in';
-	const sub = isQuick
-		? 'Our events team will be back within a business day with menu ideas and tailored pricing.'
-		: 'Our events team will be in touch within a business day to confirm details.';
+	const heading = 'Your event details';
+	const subline = 'For your records';
+	const body = "Thanks for sharing your event details with Neela. Attached is a copy of what we captured for your records. Our events team will review and send a written quote within one business day. Your event is confirmed once you review and approve that quote, no charge or commitment until then.";
 	return `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#f5ede0;font-family:'Helvetica Neue',Arial,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5ede0">
@@ -734,13 +739,13 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 			<tr><td style="padding:30px 32px 22px;background:linear-gradient(135deg,#0a1628 0%,#25042d 70%);text-align:center">
 				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#b8956a">Sula Indian Catering</p>
 				<h1 style="margin:8px 0 4px;font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;color:#f5ede0;letter-spacing:0.4px;font-style:italic">${escapeHtml(heading)}</h1>
-				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:rgba(245,237,224,0.78);letter-spacing:0.3px">Reference <strong style="color:#d4b572">${escapeHtml(reference)}</strong></p>
+				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:rgba(245,237,224,0.78);letter-spacing:2px;text-transform:uppercase">${escapeHtml(subline)} &middot; <strong style="color:#d4b572;letter-spacing:0.5px">${escapeHtml(reference)}</strong></p>
 			</td></tr>
 			<tr><td style="padding:24px 32px">
 				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
-				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${escapeHtml(sub)}</p>
-				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">Attached is a PDF copy of what we have on file so far. Reply to this email if anything needs to change.</p>
-				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">Sula Indian Catering &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
+				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">${escapeHtml(body)}</p>
+				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">Reply to this email if anything in the attached needs adjusting before we put together the quote.</p>
+				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
 			</td></tr>
 			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
 				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>

@@ -1,13 +1,13 @@
 # Neela setup
 
-Neela is the AI event-planning assistant on sulacatering.com — the floating gold "Ask Neela" button is wired into every page via `src/components/Neela.astro`. Three Vercel serverless functions back her:
+Neela is the AI event-planning assistant on sulacatering.com, the floating gold "Ask Neela" button is wired into every page via `src/components/Neela.astro`. Three Vercel serverless functions back her:
 
-- `api/neela.ts` — chat completion (Anthropic Claude Sonnet)
-- `api/neela-voice.ts` — text-to-speech proxy (ElevenLabs)
-- `api/neela-lead.ts` — captures name + email when a visitor opts in
-- `api/neela/submit-order.ts` — captures a customer-confirmed full order, persists to `neela_orders`, emails the events team
-- `api/cron/neela-digest.ts` — daily summary email (cron at 16:00 UTC)
-- `api/admin/neela-stats.ts` — read-only admin stats endpoint
+- `api/neela.ts`, chat completion (Anthropic Claude Sonnet)
+- `api/neela-voice.ts`, text-to-speech proxy (ElevenLabs)
+- `api/neela-lead.ts`, captures name + email when a visitor opts in
+- `api/neela/submit-order.ts`, captures a customer-confirmed full order, persists to `neela_orders`, emails the events team
+- `api/cron/neela-digest.ts`, daily summary email (cron at 16:00 UTC)
+- `api/admin/neela-stats.ts`, read-only admin stats endpoint
 
 Until the env vars below are set in Vercel, the chat shows a polite fallback message pointing visitors to email, phone, and Calendly. Voice replies stay hidden until the ElevenLabs key lands.
 
@@ -20,7 +20,7 @@ Set these in **Vercel → Project → Settings → Environment Variables**, then
 | `ANTHROPIC_API_KEY` | Chat replies | Generate at [console.anthropic.com](https://console.anthropic.com/) → API Keys. Paste the `sk-ant-…` value. The variable can also be named `Neela` (the code accepts either). |
 | `ELEVENLABS_API_KEY` | Premium voice replies (optional) | Sign up at [elevenlabs.io](https://elevenlabs.io/), then Profile → API Key. Paste the value. **Without this set, Neela still talks back via the browser's built-in Web Speech Synthesis** (free, slightly robotic). The frontend tries ElevenLabs first and falls back automatically. |
 | `ELEVENLABS_VOICE_ID` | Voice replies (optional) | Default is **Rachel** (`21m00Tcm4TlvDq8ikWAM`), a warm refined female voice from the ElevenLabs library. To pick a different voice, browse [elevenlabs.io/app/voice-library](https://elevenlabs.io/app/voice-library), open a voice, and copy its ID into this var. |
-| `POSTGRES_URL` | Chat persistence (optional) | Vercel → Storage → Create → Postgres (Neon-backed). When you create the DB, Vercel auto-injects `POSTGRES_URL` (and a few siblings) into every project linked to it. The `neela_chats` table auto-creates on first insert. If unset, Neela still replies — persistence just silently no-ops. |
+| `POSTGRES_URL` | Chat persistence (optional) | Vercel → Storage → Create → Postgres (Neon-backed). When you create the DB, Vercel auto-injects `POSTGRES_URL` (and a few siblings) into every project linked to it. The `neela_chats` table auto-creates on first insert. If unset, Neela still replies, persistence just silently no-ops. |
 | `RESEND_API_KEY` | All transactional email (digests, orders, customer copies) | Sign up at [resend.com](https://resend.com), then Profile → API Keys. Free tier covers 3,000 emails/mo. Without DNS verification, the only working sender is `onboarding@resend.dev` (Resend's default), which is what the code falls back to. To send from `neela@sulacatering.com`, verify the `sulacatering.com` domain in Resend (DNS TXT record) and set `NEELA_FROM_EMAIL` below. |
 | `NEELA_TEST_EMAIL` | Routes ALL notifications to a test inbox (optional) | When set (e.g. `mail.sharathvittal@gmail.com`), every order email, customer copy, kitchen email, and daily digest goes to this address INSTEAD of the production events team. Subject lines get a `[TEST MODE]` prefix. Use this during testing to verify formatting without spamming real customers. Unset for production. |
 | `NEELA_FROM_EMAIL` | Sender address override (optional) | Format: `Neela <neela@sulacatering.com>` or any verified-domain address. Falls back to `Neela <onboarding@resend.dev>` (Resend's default unverified sender) if unset. Once you've verified the `sulacatering.com` domain in Resend's dashboard, set this to the branded address. |
@@ -54,7 +54,7 @@ Quick options:
 
 - **Resend** (transactional email): add `RESEND_API_KEY`, post to `https://api.resend.com/emails` with `events@sulaindianrestaurant.com` as the recipient.
 - **Zapier Webhook**: add `ZAPIER_LEAD_WEBHOOK_URL`, POST the JSON straight through.
-- **HubSpot / CRM**: their REST API works the same — keep the API key in env, never the code.
+- **HubSpot / CRM**: their REST API works the same, keep the API key in env, never the code.
 
 ## Customizing Neela's persona
 
@@ -93,7 +93,7 @@ Set `ANTHROPIC_API_KEY` (or `Neela`) in your shell before running for proper LLM
 
 ### Token budget
 
-Inline-prompt path supports up to **25k tokens**. If the corpus is larger, the script logs `RAG mode required — corpus exceeds prompt budget; switch to vector retrieval` and sets `EMAIL_CORPUS_OVER_BUDGET = true`. The downstream wiring in `api/neela.ts` should branch at that point: under budget = inline as a 5th cache_control block (with one of persona/site/forms/policies merged to free a slot, since Anthropic caps at 4); over budget = move to a vector index (Voyage AI embed → Cloudflare Vectorize) and retrieve top-k per chat turn.
+Inline-prompt path supports up to **25k tokens**. If the corpus is larger, the script logs `RAG mode required, corpus exceeds prompt budget; switch to vector retrieval` and sets `EMAIL_CORPUS_OVER_BUDGET = true`. The downstream wiring in `api/neela.ts` should branch at that point: under budget = inline as a 5th cache_control block (with one of persona/site/forms/policies merged to free a slot, since Anthropic caps at 4); over budget = move to a vector index (Voyage AI embed → Cloudflare Vectorize) and retrieve top-k per chat turn.
 
 ### Status
 

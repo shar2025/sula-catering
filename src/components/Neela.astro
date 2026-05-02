@@ -1,11 +1,11 @@
 ---
-// Neela — Sula Catering's AI event-planning assistant.
+// Neela, Sula Catering's AI event-planning assistant.
 // Renders site-wide via Layout.astro. UI here is fully self-contained.
 //
 // Backend wiring (Commit 5b):
-//   POST /api/neela        — chat completion (Anthropic Claude Sonnet)
-//   POST /api/neela-voice  — TTS (ElevenLabs)
-//   POST /api/neela-lead   — lead capture
+//   POST /api/neela       , chat completion (Anthropic Claude Sonnet)
+//   POST /api/neela-voice , TTS (ElevenLabs)
+//   POST /api/neela-lead  , lead capture
 // Until those endpoints exist, sends gracefully fail to the hard-error
 // fallback (email + phone + Calendly).
 ---
@@ -172,7 +172,7 @@
 	.neela-send:disabled{opacity:0.5;cursor:not-allowed;transform:none}
 	.neela-privacy{margin:0;padding:6px 16px 12px;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:var(--gold-light);opacity:0.6;letter-spacing:0.3px;background:rgba(10,22,40,0.4)}
 
-	/* Voice-mode indicator dot next to "Neela" — pulses when speaker on AND mic has been used */
+	/* Voice-mode indicator dot next to "Neela", pulses when speaker on AND mic has been used */
 	.neela-voice-mode-dot{display:none;width:7px;height:7px;border-radius:50%;background:var(--gold-shimmer);box-shadow:0 0 0 0 rgba(232,201,135,0.7);margin-left:6px;vertical-align:middle;animation:neela-voice-pulse 2.4s ease-in-out infinite}
 	.neela-voice-mode-active .neela-voice-mode-dot{display:inline-block}
 	@keyframes neela-voice-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,201,135,0.6)}50%{box-shadow:0 0 0 6px rgba(232,201,135,0)}}
@@ -180,7 +180,7 @@
 	.neela-voice-mode-dot.listening-now{background:#e87b5a;animation:neela-voice-loop-pulse 1.1s ease-in-out infinite}
 	@keyframes neela-voice-loop-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,123,90,0.75)}50%{box-shadow:0 0 0 7px rgba(232,123,90,0)}}
 
-	/* Voice nudge pill — appears above the mic button after Neela's 2nd reply */
+	/* Voice nudge pill, appears above the mic button after Neela's 2nd reply */
 	.neela-voice-nudge{position:relative;align-self:flex-start;margin:0 16px 8px;padding:10px 16px;background:linear-gradient(135deg,rgba(184,149,106,0.92),rgba(232,201,135,0.92));color:var(--midnight);border-radius:14px;box-shadow:0 6px 18px rgba(184,149,106,0.32),0 0 0 1px rgba(232,201,135,0.4);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;letter-spacing:0.2px;line-height:1.4;animation:neela-nudge-in 0.55s cubic-bezier(0.4,0,0.2,1) both,neela-nudge-pulse 1.6s ease-in-out 0.6s 1;cursor:pointer;max-width:260px}
 	.neela-voice-nudge[hidden]{display:none}
 	.neela-voice-nudge-text{display:block;font-weight:500}
@@ -190,7 +190,7 @@
 	@keyframes neela-nudge-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 	@keyframes neela-nudge-out{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-4px)}}
 
-	/* ORDER SUMMARY CARD — renders below Neela's bubble when she emits the order marker */
+	/* ORDER SUMMARY CARD, renders below Neela's bubble when she emits the order marker */
 	.neela-order-card{align-self:stretch;margin:4px 4px 8px;padding:18px 20px;background:linear-gradient(135deg,rgba(20,36,66,0.55),rgba(37,4,45,0.35));border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 0 1px rgba(232,201,135,0.08),0 8px 22px rgba(10,22,40,0.32);animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both;position:relative}
 	.neela-order-card-dismissed{opacity:0;transform:translateY(-6px);transition:opacity 0.25s ease,transform 0.25s ease}
 	.neela-order-card-head{margin-bottom:14px}
@@ -218,7 +218,7 @@
 	.neela-order-card-errored{border-color:rgba(232,123,90,0.55)}
 	.neela-order-card-errored .neela-order-sent-title{color:#f0c1a8}
 
-	/* Consultation variant — Calendly-prominent, no confirm card */
+	/* Consultation variant, Calendly-prominent, no confirm card */
 	.neela-order-card-consultation{text-align:center;padding:22px 22px}
 	.neela-order-card-consultation .neela-order-card-title{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:600;font-size:21px;color:var(--gold-light);letter-spacing:0.3px}
 	.neela-order-card-consultation .neela-order-card-sub{margin:4px 0 16px;font-size:15px}
@@ -226,7 +226,7 @@
 	.neela-order-calendly:hover{transform:translateY(-1px);background-position:100% 0;box-shadow:0 10px 24px rgba(184,149,106,0.5)}
 	.neela-order-noted{margin:14px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;color:rgba(245,237,224,0.65);letter-spacing:0.2px}
 
-	/* QUOTE SECTION inside the order card — itemized estimate with gold dotted leaders */
+	/* QUOTE SECTION inside the order card, itemized estimate with gold dotted leaders */
 	.neela-quote{margin:0 0 14px;padding:14px 16px;background:linear-gradient(180deg,rgba(10,22,40,0.55),rgba(37,4,45,0.32));border:1px solid rgba(184,149,106,0.32);border-radius:8px}
 	.neela-quote-title{margin:0 0 10px;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:var(--gold);letter-spacing:0.5px;font-weight:500}
 	.neela-quote-title em{font-style:italic}
@@ -241,7 +241,7 @@
 	.neela-quote-total span:last-child{font-variant-numeric:tabular-nums;font-size:18px}
 	.neela-quote-disclaimer{margin:10px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12px;color:rgba(245,237,224,0.6);line-height:1.5;letter-spacing:0.2px}
 
-	/* MOBILE — full-screen modal slide-up */
+	/* MOBILE, full-screen modal slide-up */
 	@media (max-width:600px){
 		.neela-fab{right:18px;bottom:18px;height:56px;font-size:14px;padding-right:16px}
 		.neela-fab-glyph{width:32px;height:32px;margin:6px 0 6px 6px}
@@ -427,11 +427,15 @@
 	}
 
 	function buildOrderCardInnerHtml(order, mode) {
-		const title = mode === 'quick' ? "Here's what I've got so far" : "Here's your order";
+		// Title + sub frame the card as a quote REQUEST (not a booking) so customers
+		// don't think hitting the button locks in their event. The events team
+		// reviews the request and sends an official written quote; the customer
+		// approves that quote, and only then is the booking confirmed.
+		const title = mode === 'quick' ? "Here's what I've got so far" : "Here's your event details";
 		const sub = mode === 'quick'
-			? "Send this off and the events team comes back with menu ideas + tailored pricing."
-			: "Confirm and the events team gets all this with your contact info.";
-		const confirmLabel = mode === 'quick' ? 'Send for Menu Ideas' : 'Confirm & Send to Events Team';
+			? "Send this off and the events team comes back with menu ideas + tailored pricing. No commitment."
+			: "Sending this submits a quote request, nothing's booked yet. The events team sends a written quote within a business day; your event confirms once you approve that quote.";
+		const confirmLabel = mode === 'quick' ? 'Send for Menu Ideas' : 'Send Quote Request';
 
 		const loc = order.location && (order.location.venueOrAddress || order.location.city)
 			? [order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')
@@ -471,7 +475,7 @@
 		);
 	}
 
-	// Quote slot — populated by a later commit when Neela emits a `quote` object.
+	// Quote slot, populated by a later commit when Neela emits a `quote` object.
 	function renderQuoteSection(quote) {
 		if (!quote || !Array.isArray(quote.line_items) || !quote.line_items.length) return '';
 		const items = quote.line_items.map((it) => {
@@ -514,12 +518,14 @@
 				card.classList.remove('neela-order-card-submitting');
 				card.classList.add('neela-order-card-sent');
 				const ref = escapeHtml(String(data.reference));
+				// Customer-facing invoice URL = page 1 only. The customer never sees
+				// Neela's preliminary line items; events team controls the quote.
 				const invoiceUrl = '/api/neela/invoice/' + encodeURIComponent(String(data.reference)) + '?audience=customer';
 				card.innerHTML =
 					'<p class="neela-order-sent-icon">✓</p>' +
-					'<p class="neela-order-sent-title">Sent</p>' +
-					'<p class="neela-order-sent-body">Your reference is <strong>' + ref + '</strong>. The events team will reach out within a business day.</p>' +
-					'<a class="neela-order-view-invoice" href="' + invoiceUrl + '" target="_blank" rel="noopener noreferrer">View invoice ↗</a>';
+					'<p class="neela-order-sent-title">Quote request submitted</p>' +
+					'<p class="neela-order-sent-body">Reference <strong>' + ref + '</strong>. The events team will send your written quote within one business day. Booking confirms once you approve the quote, no charge or commitment until then.</p>' +
+					'<a class="neela-order-view-invoice" href="' + invoiceUrl + '" target="_blank" rel="noopener noreferrer">View your details ↗</a>';
 				// Order locked in → exit voice loop (natural conversation pause).
 				// User can re-engage by tapping mic again if they want to keep chatting.
 				exitVoiceLoop();
@@ -568,7 +574,7 @@
 		modal.classList.remove('active');
 		modal.setAttribute('aria-hidden', 'true');
 		document.body.classList.remove('neela-open');
-		// Stop any in-flight audio. Note: we do NOT clear voiceLoopActive here — the
+		// Stop any in-flight audio. Note: we do NOT clear voiceLoopActive here, the
 		// flag is persisted to localStorage so reopening the modal restores the loop
 		// preference. We just stop the active recording until the user reopens.
 		try { stopCurrentAudio(); } catch (e) {}
@@ -591,7 +597,7 @@
 		submitMessage();
 	});
 
-	// Voice playback — dual-path TTS:
+	// Voice playback, dual-path TTS:
 	//   1. Try ElevenLabs via /api/neela-voice (premium voice; needs ELEVENLABS_API_KEY).
 	//   2. Fall back to browser Web Speech Synthesis (free, robotic, works immediately).
 	//   3. If both fail, hide the speaker toggle.
@@ -630,7 +636,7 @@
 	let currentAudio = null;
 	let audioUnlocked = false;
 	// True between TTS start and TTS end. While true, the SpeechRecognition's
-	// onresult handler ignores any incoming results — this prevents Neela's
+	// onresult handler ignores any incoming results, this prevents Neela's
 	// own voice from being captured back as user input when the mic stays open
 	// in continuous mode.
 	let neelaIsSpeaking = false;
@@ -640,9 +646,9 @@
 	// natural > generic feminine names > any en-* > first available.
 	// getVoices() is async on Chrome; voiceschanged fires when the list is ready.
 	const VOICE_PREFERENCE = [
-		// Apple — highest quality on macOS / iOS
+		// Apple, highest quality on macOS / iOS
 		'Samantha', 'Karen', 'Moira', 'Tessa', 'Allison', 'Ava (Premium)', 'Ava',
-		// Microsoft Edge — Natural neural voices on Windows / Edge
+		// Microsoft Edge, Natural neural voices on Windows / Edge
 		'Microsoft Aria Online (Natural) - English (United States)',
 		'Microsoft Jenny Online (Natural) - English (United States)',
 		'Microsoft Sonia Online (Natural) - English (United Kingdom)',
@@ -850,7 +856,7 @@
 	// Backwards-compatible alias for any older code path that still calls the old name.
 	function playSpokenReply(t) { return playNeelaVoice(t); }
 
-	// Mic — Web Speech API (browser-native). Hidden if unsupported.
+	// Mic, Web Speech API (browser-native). Hidden if unsupported.
 	const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 	let recognizer = null;
 	let recognizing = false;
@@ -915,7 +921,7 @@
 		recognizer.lang = 'en-CA';
 		// IMPORTANT: continuous mode keeps the recognition session open across multiple
 		// user/Neela turns. Without it, the session ends after each utterance and the
-		// next .start() needs to be treated as a user gesture by the OS — which iOS
+		// next .start() needs to be treated as a user gesture by the OS, which iOS
 		// Safari blocks when called from a non-user-initiated callback (like the
 		// audio 'ended' event). Continuous + interimResults=false avoids that path:
 		// one .start() at first mic tap, the session stays alive, no user gesture
@@ -925,8 +931,8 @@
 		let baseline = '';
 		// Auto-submit on voice silence: each final-result event resets a debounce
 		// timer; when no new result arrives within AUTO_SUBMIT_DELAY ms, we submit.
-		// Required because in continuous mode the session never ends naturally —
-		// onend would never fire — so the previous "submit on onend" hook can't run.
+		// Required because in continuous mode the session never ends naturally ,
+		// onend would never fire, so the previous "submit on onend" hook can't run.
 		const AUTO_SUBMIT_DELAY = 1100;
 		let autoSubmitTimer = null;
 		function scheduleAutoSubmit() {
@@ -981,7 +987,7 @@
 		recognizer.onerror = (e) => {
 			console.log('[neela-loop] recognizer.onerror:', e?.error || e?.message || e);
 			// 'no-speech' is benign in continuous mode (just silence); session continues.
-			// 'audio-capture' / 'aborted' / 'network' are session-killing — onend fires next.
+			// 'audio-capture' / 'aborted' / 'network' are session-killing, onend fires next.
 		};
 		recognizer.onend = () => {
 			console.log('[neela-loop] recognizer.onend fired, voiceLoopActive:', voiceLoopActive, 'neelaIsSpeaking:', neelaIsSpeaking);
@@ -990,7 +996,7 @@
 			// In continuous mode, onend means the session was killed (OS timeout, error,
 			// or explicit stop()). If we're still in the voice loop and Neela isn't
 			// speaking, attempt to restart the session. iOS Safari may block this when
-			// the call doesn't trace to a user gesture — diagnostic logs will reveal.
+			// the call doesn't trace to a user gesture, diagnostic logs will reveal.
 			if (voiceLoopActive && !neelaIsSpeaking) {
 				setTimeout(() => {
 					if (voiceLoopActive && !recognizing && !neelaIsSpeaking && modal.classList.contains('active')) {
@@ -1044,7 +1050,7 @@
 		if (!voiceLoopActive) return;
 		if (!speakerOn) return;
 		if (!modal || !modal.classList.contains('active')) return;
-		// In continuous mode the recognition session should already be alive — the
+		// In continuous mode the recognition session should already be alive, the
 		// neelaIsSpeaking gate just stopped onresult from processing during TTS.
 		// If it died (OS timeout during a long Neela reply), try to restart. This
 		// is the call iOS Safari may block, but with continuous mode it's the
@@ -1078,7 +1084,7 @@
 		if (modal) modal.classList.toggle('neela-voice-mode-active', active);
 	}
 
-	// Voice nudge pill — shown after Neela's 2nd reply, only on Web-Speech-capable
+	// Voice nudge pill, shown after Neela's 2nd reply, only on Web-Speech-capable
 	// browsers, once per persistent profile (localStorage). Auto-dismisses after
 	// 6s or on tap. Copy adapts to whether the speaker is currently muted.
 	const VOICE_NUDGE_KEY = 'neela_voice_nudged_v2'; // bumped so persisted-mute users see the new copy once

@@ -59,8 +59,8 @@ Addresses sourced from the schema markup on sulaindianrestaurant.com/list-of-awa
 
 1. **Commercial Drive**, **1128 Commercial Drive, Vancouver, BC V5L 3X2**, **opened 2010**. The original. Grandview-Woodland / Trout Lake area. Indoor garden-style décor. North Indian + Mangalorean menu. Sula's anchor.
 2. **Main Street**, **3003 Main Street, Vancouver, BC V5T 3G6**, **opened 2020**. Riley Park / Mount Pleasant area. Coastal Mangalore + Mumbai street food + traditional North Indian. Award-winning Indian cocktail program.
-3. **Davie Street (West End)**, **1226 Davie Street, Vancouver, BC V6E 1N3**, **opened February 28, 2024**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Executive Chef **Balvant "Bal" Ajagaonkar**. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am–10pm.
-4. **Sula Café**, 260 East 5th Avenue (Mount Pleasant), the newest. Takeout-only. Sula chai + Alai coffee partnership + house-made masala focaccia in partnership with Union Market + Indian-inspired baked goods. Replaced L'Atelier Patisserie. Café entrance is "underneath a sign with a monkey enjoying a warm drink." Mon-Fri 8am–4pm, Sat-Sun 9am–4pm.
+3. **Davie Street (West End)**, **1226 Davie Street, Vancouver, BC V6E 1N3**, **opened February 28, 2024**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Executive Chef **Balvant "Bal" Ajagaonkar**. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am,10pm.
+4. **Sula Café**, 260 East 5th Avenue (Mount Pleasant), the newest. Takeout-only. Sula chai + Alai coffee partnership + house-made masala focaccia in partnership with Union Market + Indian-inspired baked goods. Replaced L'Atelier Patisserie. Café entrance is "underneath a sign with a monkey enjoying a warm drink." Mon-Fri 8am,4pm, Sat-Sun 9am,4pm.
 
 **Canonical restaurant phone numbers** (from schema markup):
 - +1-604-215-1130 (also the catering / events line)
