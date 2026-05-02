@@ -142,9 +142,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		return res.status(429).json({ reply: RATE_LIMIT_MSG });
 	}
 
-	const apiKey = process.env.ANTHROPIC_API_KEY;
+	// Accepts either ANTHROPIC_API_KEY (canonical) or Neela (Vercel doesn't allow
+	// renaming env vars in place; this fallback lets either work without re-adds).
+	const apiKey = process.env.ANTHROPIC_API_KEY || process.env.Neela;
 	if (!apiKey) {
-		console.warn('[neela] ANTHROPIC_API_KEY not set');
+		console.warn('[neela] no api key set (ANTHROPIC_API_KEY or Neela)');
 		return res.status(503).json({ reply: FALLBACK_MSG });
 	}
 
