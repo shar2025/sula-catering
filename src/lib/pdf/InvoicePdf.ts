@@ -57,15 +57,16 @@ export function buildInvoicePdf(opts: {
 	order: InvoiceOrder;
 	sheet: KitchenSheet;
 	audience: Audience;
+	watermark?: string; // optional rotated text behind the cream card on Page 1 (e.g. "SAMPLE")
 }) {
 	ensureFonts();
 	const e = React.createElement;
-	const { order, sheet, audience } = opts;
+	const { order, sheet, audience, watermark } = opts;
 
 	const children: React.ReactNode[] = [];
 	if (audience !== 'kitchen') {
-		children.push(renderPage1(order));
-		children.push(renderPage2(order));
+		children.push(renderPage1(order, { watermark }));
+		children.push(renderPage2(order, { watermark }));
 	}
 	if (audience !== 'customer') {
 		children.push(renderPage3(order, sheet));

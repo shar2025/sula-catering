@@ -33,7 +33,7 @@ function pageFooter() {
 	);
 }
 
-export function renderPage2(order: InvoiceOrder) {
+export function renderPage2(order: InvoiceOrder, opts: { watermark?: string } = {}) {
 	const q = order.quote;
 	const lineItems = q && q.line_items ? q.line_items : [];
 	const guestStr = order.guestCount === undefined ? '' : String(order.guestCount);
@@ -133,6 +133,9 @@ export function renderPage2(order: InvoiceOrder) {
 			{ style: styles.stamp },
 			e(Text, { style: styles.stampText }, 'Preliminary · final quote from events team')
 		),
+
+		// Optional rotated watermark behind the content (used by sample preview)
+		opts.watermark && e(Text, { style: styles.sampleWatermark }, opts.watermark),
 
 		pageFooter()
 	);

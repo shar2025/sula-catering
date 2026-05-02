@@ -65,7 +65,7 @@ function pageFooter() {
 	);
 }
 
-export function renderPage1(order: InvoiceOrder) {
+export function renderPage1(order: InvoiceOrder, opts: { watermark?: string } = {}) {
 	const customerName = order.contact?.name || 'Your Order';
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const eventTypeDisplay = order.eventType
@@ -133,6 +133,9 @@ export function renderPage1(order: InvoiceOrder) {
 			e(Text, { style: styles.fieldLabel }, 'Reference'),
 			e(Text, { style: styles.fieldValue }, order.reference)
 		),
+
+		// Optional rotated watermark behind the content (used by sample preview)
+		opts.watermark && e(Text, { style: styles.sampleWatermark }, opts.watermark),
 
 		pageFooter()
 	);

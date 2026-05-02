@@ -412,6 +412,23 @@ export const styles = StyleSheet.create({
 		fontWeight: 700
 	},
 
+	// SAMPLE watermark (only used by the sample preview endpoint)
+	sampleWatermark: {
+		position: 'absolute',
+		top: 360,
+		left: 0,
+		right: 0,
+		textAlign: 'center',
+		fontFamily: FONTS.heading,
+		fontStyle: 'italic',
+		fontSize: 130,
+		color: COLORS.gold,
+		opacity: 0.08,
+		letterSpacing: 16,
+		transform: 'rotate(-30deg)',
+		fontWeight: 700
+	},
+
 	// Revisions policy footer
 	revisions: {
 		marginTop: 26,
