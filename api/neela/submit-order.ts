@@ -43,6 +43,19 @@ interface Contact {
 	email: string;
 	phone?: string;
 }
+interface QuoteLineItem {
+	label: string;
+	amount: number;
+}
+interface Quote {
+	line_items: QuoteLineItem[];
+	subtotal?: number;
+	tax_label?: string;
+	tax_amount?: number;
+	total?: number;
+	currency?: string;
+	disclaimer?: string;
+}
 interface Order {
 	mode: Mode;
 	eventType?: EventType;
@@ -57,6 +70,7 @@ interface Order {
 	setupStyle?: string;
 	contact: Contact;
 	notes?: string;
+	quote?: Quote;
 	transcriptSnippet?: string;
 }
 interface SubmitBody {
@@ -179,9 +193,40 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 			phone: c.phone ? String(c.phone).slice(0, 80) : undefined
 		},
 		notes: o.notes ? String(o.notes).slice(0, 4000) : undefined,
+		quote: cleanQuote(o.quote),
 		transcriptSnippet: o.transcriptSnippet ? String(o.transcriptSnippet).slice(0, 16000) : undefined
 	};
 	return { ok: true, sessionId, order };
+}
+
+function cleanQuote(q: unknown): Quote | undefined {
+	if (!q || typeof q !== 'object') return undefined;
+	const raw = q as Partial<Quote>;
+	if (!Array.isArray(raw.line_items) || raw.line_items.length === 0) return undefined;
+	const items: QuoteLineItem[] = [];
+	for (const li of raw.line_items.slice(0, 30)) {
+		if (!li || typeof li !== 'object') continue;
+		const label = String((li as QuoteLineItem).label || '').slice(0, 200).trim();
+		const amount = Number((li as QuoteLineItem).amount);
+		if (!label || !Number.isFinite(amount)) continue;
+		items.push({ label, amount: Math.round(amount * 100) / 100 });
+	}
+	if (items.length === 0) return undefined;
+	const num = (n: unknown): number | undefined => {
+		const v = Number(n);
+		return Number.isFinite(v) ? Math.round(v * 100) / 100 : undefined;
+	};
+	return {
+		line_items: items,
+		subtotal: num(raw.subtotal),
+		tax_label: raw.tax_label ? String(raw.tax_label).slice(0, 80) : 'GST 5%',
+		tax_amount: num(raw.tax_amount),
+		total: num(raw.total),
+		currency: raw.currency ? String(raw.currency).slice(0, 8) : 'CAD',
+		disclaimer: raw.disclaimer
+			? String(raw.disclaimer).slice(0, 600)
+			: 'Preliminary estimate. Final quote in writing from the events team.'
+	};
 }
 
 let tableEnsured = false;
@@ -257,6 +302,38 @@ function dietaryLines(d?: Dietary): string[] {
 function row(label: string, value: string | undefined): string {
 	if (!value) return '';
 	return `<tr><td style="padding:6px 14px 6px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase;vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td><td style="padding:6px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">${escapeHtml(value)}</td></tr>`;
+}
+
+function fmtMoney(n: number | undefined): string {
+	if (n === undefined || !Number.isFinite(n)) return '';
+	return '$' + n.toFixed(2);
+}
+
+function buildQuoteHtml(q?: Quote): string {
+	if (!q || !q.line_items || q.line_items.length === 0) return '';
+	const items = q.line_items
+		.map(
+			(li) =>
+				`<tr><td style="padding:5px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#1a1a1a;border-bottom:1px dotted rgba(184,149,106,0.35)">${escapeHtml(li.label)}</td><td style="padding:5px 0;text-align:right;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#1a1a1a;font-variant-numeric:tabular-nums;border-bottom:1px dotted rgba(184,149,106,0.35);white-space:nowrap">${escapeHtml(fmtMoney(li.amount))}</td></tr>`
+		)
+		.join('');
+	const sumRow = (label: string, amount: number | undefined, opts: { strong?: boolean; gold?: boolean; topBorder?: boolean } = {}): string => {
+		if (amount === undefined) return '';
+		const weight = opts.strong ? '700' : '500';
+		const color = opts.gold ? '#b8956a' : '#1a1a1a';
+		const fontSize = opts.strong ? '15px' : '13px';
+		const border = opts.topBorder ? 'border-top:1px solid rgba(184,149,106,0.4);padding-top:8px' : '';
+		return `<tr><td style="padding:6px 0;${border};font-family:'Helvetica Neue',Arial,sans-serif;font-size:${fontSize};color:${color};font-weight:${weight};letter-spacing:0.2px">${escapeHtml(label)}</td><td style="padding:6px 0;${border};text-align:right;font-family:'Helvetica Neue',Arial,sans-serif;font-size:${fontSize};color:${color};font-weight:${weight};font-variant-numeric:tabular-nums;white-space:nowrap">${escapeHtml(fmtMoney(amount))}</td></tr>`;
+	};
+	return `
+				<h2 style="margin:18px 0 10px;font-family:'Cormorant Garamond',Georgia,serif;color:#b8956a;font-size:20px;letter-spacing:0.4px;font-weight:600"><em>Preliminary estimate</em></h2>
+				<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin-bottom:8px">
+					${items}
+					${sumRow('Subtotal', q.subtotal)}
+					${sumRow(q.tax_label || 'Tax', q.tax_amount)}
+					${sumRow('Total', q.total, { strong: true, gold: true, topBorder: true })}
+				</table>
+				${q.disclaimer ? `<p style="margin:6px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12px;color:#888;line-height:1.5">${escapeHtml(q.disclaimer)}</p>` : ''}`;
 }
 
 function modeEyebrow(mode: Mode): string {
@@ -349,6 +426,8 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 				${order.notes ? `<div style="margin-top:14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase">Customer notes</div><p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${escapeHtml(order.notes)}</p>` : ''}
 			</td></tr>
 
+			${order.quote && order.quote.line_items && order.quote.line_items.length ? `<tr><td style="padding:18px 32px 8px">${buildQuoteHtml(order.quote)}</td></tr>` : ''}
+
 			<tr><td style="padding:18px 32px 24px">
 				<h2 style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;color:#b8956a;font-size:20px;letter-spacing:0.4px;font-weight:600">Conversation snippet</h2>
 				${transcriptHtml}
@@ -382,6 +461,14 @@ function buildOrderEmailText(reference: string, order: Order): string {
 	const dietary = dietaryLines(order.dietary);
 	if (dietary.length) lines.push('Dietary:\n  ' + dietary.join('\n  '));
 	if (order.notes) lines.push(`Notes: ${order.notes}`);
+	if (order.quote && order.quote.line_items && order.quote.line_items.length) {
+		lines.push('\n--- preliminary estimate ---');
+		for (const li of order.quote.line_items) lines.push(`  ${li.label} ${fmtMoney(li.amount)}`);
+		if (order.quote.subtotal !== undefined) lines.push(`  Subtotal: ${fmtMoney(order.quote.subtotal)}`);
+		if (order.quote.tax_amount !== undefined) lines.push(`  ${order.quote.tax_label || 'Tax'}: ${fmtMoney(order.quote.tax_amount)}`);
+		if (order.quote.total !== undefined) lines.push(`  Total: ${fmtMoney(order.quote.total)}`);
+		if (order.quote.disclaimer) lines.push(`  (${order.quote.disclaimer})`);
+	}
 	if (order.transcriptSnippet) lines.push('\n--- conversation ---\n' + order.transcriptSnippet);
 	return lines.join('\n');
 }
