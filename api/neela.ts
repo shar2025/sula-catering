@@ -33,16 +33,16 @@ import { BUYOUT_KNOWLEDGE, BUYOUT_KNOWLEDGE_VERSION } from '../src/lib/neela-buy
 export const config = { maxDuration: 60 };
 
 const ANTHROPIC_TIMEOUT_MS = 25000;
-const MAX_USER_MESSAGES = 15;
+const MAX_USER_MESSAGES = 25;
 const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
-const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_MAX = 40;
 
 const FALLBACK_MSG =
 	"I'm taking a quick break right now. Email events@sulaindianrestaurant.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
 const RATE_LIMIT_MSG =
 	"Looks like we've chatted plenty today. To keep going, drop us a line at events@sulaindianrestaurant.com or book a quick call at calendly.com/sula-catering/30min.";
 const CAP_MSG =
-	"I'd love to keep going. For the bigger questions, let's set up a quick call at calendly.com/sula-catering/30min, or email events@sulaindianrestaurant.com.";
+	"We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/ or book a call at calendly.com/sula-catering/30min.";
 
 const NEELA_PERSONA_AND_RULES = `You are Neela, Sula Catering's event-planning assistant. You help people plan weddings, corporate events, private parties, and café & chai catering across Greater Vancouver.
 

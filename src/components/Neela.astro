@@ -268,7 +268,7 @@
 	const SESSION_KEY = 'neela-conv-v1';
 	const SESSION_ID_KEY = 'neela-session-id';
 	const FALLBACK_MSG = "I'm taking a quick break right now. Email events@sulaindianrestaurant.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
-	const MAX_USER_MESSAGES = 15;
+	const MAX_USER_MESSAGES = 25;
 
 	let conversation = [];
 	let sessionId = '';
@@ -908,26 +908,43 @@
 	}
 
 	// Voice nudge pill — shown after Neela's 2nd reply, only on Web-Speech-capable
-	// browsers, only once per session. Auto-dismisses after 6s or any tap.
-	const VOICE_NUDGE_KEY = 'neela_voice_nudged';
+	// browsers, once per persistent profile (localStorage). Auto-dismisses after
+	// 6s or on tap. Copy adapts to whether the speaker is currently muted.
+	const VOICE_NUDGE_KEY = 'neela_voice_nudged_v2'; // bumped so persisted-mute users see the new copy once
 	const nudgeEl = document.getElementById('neela-voice-nudge');
 	let nudgeTimer = null;
 	function dismissVoiceNudge() {
 		if (!nudgeEl || nudgeEl.hidden) return;
 		nudgeEl.classList.add('neela-voice-nudge-dismissed');
 		setTimeout(() => { try { nudgeEl.hidden = true; nudgeEl.classList.remove('neela-voice-nudge-dismissed'); } catch (e) {} }, 320);
-		try { sessionStorage.setItem(VOICE_NUDGE_KEY, '1'); } catch (e) {}
+		try { localStorage.setItem(VOICE_NUDGE_KEY, '1'); } catch (e) {}
 		if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = null; }
 	}
 	function maybeShowVoiceNudge() {
 		if (!nudgeEl) return;
 		if (!SpeechRecognition) return; // silent on browsers without mic support (Firefox)
-		try { if (sessionStorage.getItem(VOICE_NUDGE_KEY) === '1') return; } catch (e) {}
+		try { if (localStorage.getItem(VOICE_NUDGE_KEY) === '1') return; } catch (e) {}
 		const assistantReplyCount = conversation.filter((m) => m && m.role === 'assistant').length;
 		if (assistantReplyCount !== 2) return;
-		if (haveUsedMicAtLeastOnce) return; // already in voice mode, nudge would be redundant
+		if (haveUsedMicAtLeastOnce && speakerOn) return; // both pieces in use, no nudge needed
+
+		// Branch copy on the customer's current state:
+		//   muted + no mic    → "tap speaker for voice replies, mic to talk"
+		//   speaker on + no mic → original "want to talk? tap the mic"
+		const txtEl = nudgeEl.querySelector('.neela-voice-nudge-text');
+		if (txtEl) {
+			if (!speakerOn && !haveUsedMicAtLeastOnce) {
+				txtEl.textContent = '🔊 Voice mode is on, tap the speaker to hear Neela, or the mic to talk to her.';
+			} else if (speakerOn && !haveUsedMicAtLeastOnce) {
+				txtEl.textContent = '🎤 Want to talk instead? Tap the mic.';
+			} else if (!speakerOn && haveUsedMicAtLeastOnce) {
+				txtEl.textContent = '🔊 Tap the speaker to hear Neela talk back.';
+			} else {
+				return; // both in use, nothing to nudge about
+			}
+		}
+
 		nudgeEl.hidden = false;
-		// Auto-dismiss after 6s
 		if (nudgeTimer) clearTimeout(nudgeTimer);
 		nudgeTimer = setTimeout(dismissVoiceNudge, 6000);
 	}
@@ -959,7 +976,7 @@
 		if (!text) return;
 		const userMessageCount = conversation.filter(m => m.role === 'user').length;
 		if (userMessageCount >= MAX_USER_MESSAGES) {
-			renderMessage('bot', "I'd love to keep going. For the bigger questions, let's set up a quick call: calendly.com/sula-catering/30min");
+			renderMessage('bot', "We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/ or book a call at calendly.com/sula-catering/30min.");
 			return;
 		}
 
