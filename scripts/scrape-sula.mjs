@@ -1,5 +1,5 @@
 /**
- * scrape-sula.mjs — fetches sulacafe.com + sulacatering.com sitemaps,
+ * scrape-sula.mjs, fetches sulacafe.com + sulacatering.com sitemaps,
  * downloads each page, strips chrome, extracts prose, writes
  * src/lib/neela-knowledge.ts as a string constant for Neela's system prompt.
  *

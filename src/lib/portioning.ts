@@ -75,7 +75,7 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 
 	const lines: KitchenLine[] = [];
 
-	// Appetizers — 50% of guests ÷ N appetizers, rounded up
+	// Appetizers, 50% of guests ÷ N appetizers, rounded up
 	for (const app of apps) {
 		const portions = numApps > 0 ? ceil((g * 0.5) / numApps) : 0;
 		lines.push({
@@ -85,7 +85,7 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 		});
 	}
 
-	// Curries — 75% of guests ÷ N curries, with non-veg double-weighting if applicable
+	// Curries, 75% of guests ÷ N curries, with non-veg double-weighting if applicable
 	if (numCurries > 0) {
 		const totalWeight =
 			vegCurries.length + (nonVegDouble ? nonVegCurries.length * 2 : nonVegCurries.length);
@@ -106,7 +106,7 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 	}
 
 	if (includeStarches) {
-		// Naan — 75% of guests ÷ 2 (split between Tandoori + Garlic), rounded up
+		// Naan, 75% of guests ÷ 2 (split between Tandoori + Garlic), rounded up
 		const naanEach = ceil((g * 0.75) / 2);
 		lines.push({
 			item: 'Tandoori Naan',
@@ -119,21 +119,21 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 			notes: `75% of ${g} guests ÷ 2 naan types`
 		});
 
-		// Basmati Rice — 50% of guests, rounded up
+		// Basmati Rice, 50% of guests, rounded up
 		lines.push({
 			item: 'Basmati Rice',
 			portions: String(ceil(g * 0.5)),
 			notes: `50% of ${g} guests`
 		});
 
-		// Lentil Wafers / Papadum — 50% of guests, rounded up
+		// Lentil Wafers / Papadum, 50% of guests, rounded up
 		lines.push({
 			item: 'Lentil Wafers (Papadum)',
 			portions: String(ceil(g * 0.5)),
 			notes: `50% of ${g} guests`
 		});
 
-		// Mango Chutney — 24 oz scales from 30-guest baseline
+		// Mango Chutney, 24 oz scales from 30-guest baseline
 		const mangoOz = Math.round((24 * g) / 30);
 		lines.push({
 			item: 'Mango Chutney',
@@ -141,7 +141,7 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 			notes: `Scaled from 24 oz / 30 guests`
 		});
 
-		// Hot Sauce — 16 oz at 30-guest baseline
+		// Hot Sauce, 16 oz at 30-guest baseline
 		const hotOz = Math.round((16 * g) / 30);
 		lines.push({
 			item: 'Hot Sauce',
@@ -149,7 +149,7 @@ export function calculatePortions(input: PortioningInput): KitchenSheet {
 			notes: `Scaled from 16 oz / 30 guests`
 		});
 
-		// Appetizer-paired chutneys — only included when appetizers are on the menu
+		// Appetizer-paired chutneys, only included when appetizers are on the menu
 		if (numApps > 0) {
 			const mintOz = Math.round((12 * g) / 15);
 			const tamarindOz = Math.round((12 * g) / 15);
