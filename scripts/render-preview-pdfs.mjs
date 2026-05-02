@@ -106,10 +106,15 @@ async function renderAudience(audience, filename) {
 	return { audience, size: buf.length, ok, path };
 }
 
+// Bump the version suffix when iterating so prior previews are not clobbered.
+// v1 = first luxury redesign (rendered ◆ as garbage on Helvetica)
+// v2 = ornament-free, minimal customer page, gold-eyebrow internal headers
+const VERSION = process.env.PREVIEW_VERSION || 'v2';
+
 const results = [];
-results.push(await renderAudience('customer', 'Sula-PREVIEW-customer.pdf'));
-results.push(await renderAudience('internal', 'Sula-PREVIEW-internal.pdf'));
-results.push(await renderAudience('kitchen', 'Sula-PREVIEW-kitchen.pdf'));
+results.push(await renderAudience('customer', `Sula-PREVIEW-customer-${VERSION}.pdf`));
+results.push(await renderAudience('internal', `Sula-PREVIEW-internal-${VERSION}.pdf`));
+results.push(await renderAudience('kitchen', `Sula-PREVIEW-kitchen-${VERSION}.pdf`));
 
 console.log('\n[preview] sanity checks:');
 const sizeOf = (a) => results.find((r) => r.audience === a)?.size || 0;

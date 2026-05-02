@@ -102,14 +102,9 @@ function kitchenBand(logoBuffer: Buffer | null | undefined) {
 	);
 }
 
-// Helper: render a plum-accented section header with leading gold diamond.
+// Helper: render a small-caps gold section eyebrow with thin gold underline.
 function sectionHeader(label: string) {
-	return e(
-		View,
-		{ style: styles.sectionGold },
-		e(Text, { style: styles.sectionGoldOrnament }, '◆'),
-		e(Text, { style: styles.sectionGoldText }, label)
-	);
+	return e(Text, { style: styles.sectionEyebrowCompact }, label);
 }
 
 export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { logoBuffer?: Buffer | null } = {}) {
@@ -132,6 +127,7 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 	right.push(kitchenField('Payment', payment));
 
 	const checklist = [
+		'Take business cards',
 		'All items packed & counted',
 		'Chutneys & sauces sealed',
 		'Dinnerware loaded',

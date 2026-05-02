@@ -1,27 +1,37 @@
-// Sula PDF style system, elevated to match the live sulacatering.com aesthetic:
-// midnight + navy header panel, cream warm body, plum accents, gold rules and
-// ornaments throughout. Reads like a fine-dining catering presentation, not an
-// invoice with a brand sticker on top.
+// Sula PDF style system, v2 luxury redesign.
+//
+// CUSTOMER PAGE (page 1) is treated as a fine-dining confirmation: minimal,
+// generous whitespace, no row dividers, no alt-row tints, no section headers.
+// Reads like a wedding invitation, not an invoice. Plum small caps labels,
+// midnight body values, generous vertical spacing between rows.
+//
+// INTERNAL / KITCHEN PAGES (page 2 + 3) stay denser since they convey
+// operational data: alt-row tints on the line-item table and the portioning
+// table, gold-eyebrow section headers, plum total stripe.
 //
 // COLOUR PHILOSOPHY:
 //   page base   = cream (#f5ede0)        warm restaurant tablecloth feel
-//   alt rows    = white (#ffffff)        pop against the cream
 //   header band = midnight to navy       deep, considered, signature
 //   accents     = gold (#b8956a) and plum (#25042d)
 //
-// LETTER-SPACING POLICY: tracking stays at 0 on every multi-letter run.
-// pdftotext extracts wide-tracked uppercase as separate glyphs ("D I E TA R Y")
-// which breaks search and screen-reader flow. All emphasis comes from font
-// weight, size, colour, fill, and underlines, not letter spacing.
+// LETTER-SPACING POLICY:
+//   letterSpacing > 0 is permitted ONLY on the document title (decorative).
+//   Body labels, values, and section eyebrows stay at 0 so pdftotext
+//   extracts them as searchable words rather than splayed glyphs.
 //
-// CHARACTER POLICY: never use em dashes (U+2014) or en dashes (U+2013) in any
-// label, separator, or copy. Use commas, periods, middle dot (·, U+00B7), or
-// the gold diamond ornament (◆, U+25C6) as decorative separators.
+// CHARACTER POLICY: never use em dashes (U+2014) or en dashes (U+2013); never
+// use diamonds, geometric ornaments, or other non-WinAnsi glyphs (Helvetica
+// substitutes garbage for them). Use commas, periods, middle dot (·, U+00B7),
+// thin gold rules, and whitespace as separators.
+//
+// FONT POLICY: react-pdf's built-in Helvetica family only. External font
+// registration (Cormorant Garamond, Playfair, etc.) is unreliable on Vercel
+// cold-start and the fetch can hang the renderer. Brand richness comes from
+// colour + weight + size + tracking on the doc title.
 
 import { Font, StyleSheet } from '@react-pdf/renderer';
 
 // ---------- Brand palette ----------
-// Lifted from the chat panel (Neela.astro) and the live site CSS variables.
 export const COLORS = {
 	// Body ink + neutrals
 	black: '#000000',
@@ -29,22 +39,22 @@ export const COLORS = {
 	textSoft: '#3a3a3a',
 	muted: '#6b6b6b',
 	rule: '#1a1a1a',
-	ruleSoft: '#cfc4ad',        // warm cream-toned rule on cream base
-	bg: '#f5ede0',              // page base, soft cream (was #ffffff)
-	white: '#ffffff',           // alt-row pop colour on cream base
-	zebra: '#ffffff',           // alternating row bg, white on cream base
-	creamSoft: '#fbf6ec',       // very faint cream surface
-	zebraDark: '#ebe0c8',       // darker tint for emphasis blocks
+	ruleSoft: '#cfc4ad',
+	bg: '#f5ede0',              // page base, soft cream
+	white: '#ffffff',           // alt-row pop colour on cream
+	zebra: '#ffffff',           // alternating row bg, white on cream
+	creamSoft: '#fbf6ec',
+	zebraDark: '#ebe0c8',
 
 	// Brand
 	midnight: '#0a1628',
 	navy: '#142442',
-	navySoft: '#1c2f55',        // mid-tone navy for gradient layer
+	navySoft: '#1c2f55',
 	plum: '#25042d',
 	plumSoft: '#3d1547',
 	gold: '#b8956a',
 	goldSoft: '#d4b88a',
-	goldDeep: '#9b7b54',         // darker gold for inner ornament accents
+	goldDeep: '#9b7b54',
 	goldFaint: 'rgba(184,149,106,0.32)',
 	cream: '#f5ede0',
 	creamMuted: 'rgba(245,237,224,0.78)',
@@ -52,9 +62,6 @@ export const COLORS = {
 };
 
 // ---------- Logo ----------
-// Logo is pre-fetched at function init via loadLogo() and passed as a Buffer.
-// We avoid passing a remote URL to <Image src> because react-pdf fetches at
-// render time and any network blip throws the whole render.
 export const LOGO_URL = 'https://sulacatering.com/apple-touch-icon.png';
 
 let cachedLogo: Buffer | null = null;
@@ -86,9 +93,19 @@ export async function loadLogo(): Promise<Buffer | null> {
 }
 
 // ---------- Fonts ----------
-// Use react-pdf's built-in Helvetica family; bundling external fonts (Playfair,
-// Cormorant) into Vercel serverless was unreliable and the font fetch can hang
-// the renderer cold-start. Brand richness comes from colour + weight + size.
+// Built-in Helvetica only. Cormorant Garamond registration was considered but
+// rejected: external font fetch at render time hangs the renderer on Vercel
+// cold-start. To enable a serif title later, uncomment the block below and
+// verify cold-start times in production:
+//
+//   try {
+//     Font.register({
+//       family: 'Cormorant Garamond',
+//       src: 'https://...your-stable-cdn.../CormorantGaramond-Bold.ttf'
+//     });
+//   } catch (err) { console.warn('[pdf] cormorant register failed', err); }
+//
+// Until then docTitleSerif uses Helvetica Bold + tracking 4pt for poise.
 let fontsRegistered = false;
 export function ensureFonts(): void {
 	if (fontsRegistered) return;
@@ -102,10 +119,8 @@ export const FONTS = {
 	boldItalic: 'Helvetica-BoldOblique'
 };
 
-// Page geometry. Keep the page itself padding-free so we can render full-bleed
-// brand bands at the top of every page. Content sits inside `contentInner`
-// which carries the horizontal padding.
-const HORIZONTAL_PADDING = 44;
+const HORIZONTAL_PADDING_DENSE = 44;   // page 2/3
+const HORIZONTAL_PADDING_WIDE = 60;    // page 1, generous margins
 
 // ---------- Shared styles ----------
 export const styles = StyleSheet.create({
@@ -119,35 +134,37 @@ export const styles = StyleSheet.create({
 		paddingBottom: 50
 	},
 
-	// Inner content wrapper, applies the body horizontal padding so brand bands
-	// can break out to the page edge.
+	// Dense inner wrapper, used by Page 2 (Invoice) and Page 3 (Kitchen) where
+	// operational data needs the horizontal real-estate.
 	contentInner: {
-		paddingHorizontal: HORIZONTAL_PADDING,
+		paddingHorizontal: HORIZONTAL_PADDING_DENSE,
 		paddingTop: 10
 	},
+	// Wide inner wrapper, used by Page 1 (customer + internal-summary) for the
+	// fine-dining-confirmation aesthetic. 60pt side margins, ample breathing
+	// room above the field grid.
+	contentInnerWide: {
+		paddingHorizontal: HORIZONTAL_PADDING_WIDE,
+		paddingTop: 16
+	},
 
-	// ---------- Brand panel (top of every page) ----------
-	// Full-bleed midnight panel, taller than a thin band. Logo enlarged, name
-	// in bigger weight, italic gold tagline, gold ornament line below.
-	// A second View at the bottom acts as a navy gradient shade so the
-	// midnight->navy transition reads as a soft vertical gradient on cheap
-	// printers and on screen.
+	// ---------- Brand panel (top of page 1) ----------
+	// Full-bleed midnight panel with a navy gradient shade at the bottom.
+	// Logo, wordmark, italic gold tagline. No "Est. 2010", no ornament row.
 	brandBand: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 22,
-		paddingBottom: 22,
-		paddingHorizontal: HORIZONTAL_PADDING,
+		paddingTop: 26,
+		paddingBottom: 24,
+		paddingHorizontal: HORIZONTAL_PADDING_WIDE,
 		alignItems: 'center',
 		position: 'relative'
 	},
-	// Compact variant used on Page 2 (Invoice) and Page 3 (Kitchen) so the
-	// document doesn't burn a quarter of every page on chrome. Same midnight
-	// background + gold rule, just less vertical padding and a smaller logo.
+	// Compact brand panel for Page 2 (Invoice) and Page 3 (Kitchen).
 	brandBandCompact: {
 		backgroundColor: COLORS.midnight,
-		paddingTop: 11,
-		paddingBottom: 11,
-		paddingHorizontal: HORIZONTAL_PADDING,
+		paddingTop: 9,
+		paddingBottom: 9,
+		paddingHorizontal: HORIZONTAL_PADDING_DENSE,
 		alignItems: 'center',
 		position: 'relative'
 	},
@@ -174,213 +191,124 @@ export const styles = StyleSheet.create({
 		backgroundColor: COLORS.gold
 	},
 	brandLogo: { width: 56, height: 56, marginBottom: 6 },
-	brandLogoLarge: { width: 70, height: 70, marginBottom: 8 },
+	brandLogoLarge: { width: 72, height: 72, marginBottom: 10 },
 	brandLogoSmall: { width: 38, height: 38, marginBottom: 4 },
 	brandName: {
 		fontFamily: FONTS.bold,
 		fontSize: 20,
 		color: COLORS.cream,
-		marginBottom: 3
+		marginBottom: 4
 	},
 	brandTagline: {
 		fontFamily: FONTS.italic,
 		fontSize: 10.5,
-		color: COLORS.gold,
-		marginBottom: 4
-	},
-	brandEst: {
-		fontSize: 8.5,
-		color: COLORS.creamMuted,
-		marginBottom: 3
-	},
-	// Gold ornament row inside the brand band: ◆  Sula Indian Restaurant  ◆
-	// Used by Page 1; we also use a thin gold rule + diamond combo for Page 2/3.
-	brandOrnamentRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginTop: 4
-	},
-	brandOrnamentRule: {
-		width: 32,
-		height: 0.7,
-		backgroundColor: COLORS.gold,
-		marginHorizontal: 8
-	},
-	brandOrnamentGlyph: {
-		fontFamily: FONTS.bold,
-		fontSize: 9,
 		color: COLORS.gold
 	},
 
-	// ---------- Document title block (below brand band) ----------
-	// Centered title flanked by gold diamond ornaments and thin gold rules.
-	// Sits on the cream page surface immediately below the midnight panel.
-	docTitleWrap: {
-		alignItems: 'center',
-		marginTop: 10,
-		marginBottom: 2
-	},
-	docTitleRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		marginBottom: 4
-	},
-	docTitleSideRule: {
-		flex: 1,
+	// ---------- Document title block (Page 1, minimal) ----------
+	// A single thin gold rule centered above, then the title in Helvetica Bold
+	// with 4pt tracking for serif-feel poise, in plum, centered. Ample
+	// whitespace before and after so the title reads as a statement piece.
+	docTitleEyebrowRule: {
+		alignSelf: 'center',
+		width: 56,
 		height: 0.6,
 		backgroundColor: COLORS.gold,
-		maxWidth: 110
+		marginTop: 8,
+		marginBottom: 6
 	},
-	docTitleOrnament: {
+	docTitleSerif: {
 		fontFamily: FONTS.bold,
-		fontSize: 11,
-		color: COLORS.gold,
-		marginHorizontal: 8
-	},
-	docTitle: {
-		fontFamily: FONTS.bold,
-		fontSize: 16,
+		fontSize: 18,
 		color: COLORS.plum,
 		textAlign: 'center',
-		marginHorizontal: 6
+		letterSpacing: 4,
+		marginTop: 4,
+		marginBottom: 18
 	},
-	docTitleSmall: {
+
+	// ---------- Document title block (Page 2 INVOICE, smaller, no flanking) ----------
+	docTitleInvoice: {
 		fontFamily: FONTS.bold,
 		fontSize: 14,
 		color: COLORS.plum,
 		textAlign: 'center',
-		marginHorizontal: 6
-	},
-	locationsLine: {
-		fontSize: 9,
-		color: COLORS.textSoft,
-		textAlign: 'center',
+		letterSpacing: 3,
 		marginTop: 6,
-		marginBottom: 2
-	},
-	cityLine: {
-		fontSize: 9,
-		color: COLORS.muted,
-		textAlign: 'center',
-		marginBottom: 2
-	},
-	contactLine: {
-		fontSize: 9,
-		color: COLORS.muted,
-		textAlign: 'center',
-		marginBottom: 6
-	},
-	headerRule: {
-		borderTopWidth: 0.6,
-		borderTopColor: COLORS.gold,
-		borderTopStyle: 'solid',
-		marginTop: 4,
-		marginBottom: 6
+		marginBottom: 8
 	},
 
-	// ---------- Section header (across all pages) ----------
-	// Gold diamond ornament + plum text + thin gold underline rule.
-	section: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginTop: 4,
-		marginBottom: 6,
-		paddingBottom: 3,
-		borderBottomWidth: 0.8,
-		borderBottomColor: COLORS.gold,
-		borderBottomStyle: 'solid'
-	},
-	sectionOrnament: {
-		fontFamily: FONTS.bold,
-		fontSize: 10,
-		color: COLORS.gold,
-		marginRight: 8
-	},
-	sectionText: {
-		fontFamily: FONTS.bold,
-		fontSize: 12.5,
-		color: COLORS.plum
-	},
-
-	// Compact gold-rule section header used on Page 3 (kitchen sheet).
-	sectionGold: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		marginTop: 6,
-		marginBottom: 3,
-		paddingBottom: 2,
-		borderBottomWidth: 0.6,
-		borderBottomColor: COLORS.gold,
-		borderBottomStyle: 'solid'
-	},
-	sectionGoldOrnament: {
-		fontFamily: FONTS.bold,
-		fontSize: 9,
-		color: COLORS.gold,
-		marginRight: 6
-	},
-	sectionGoldText: {
-		fontFamily: FONTS.bold,
-		fontSize: 10.5,
-		color: COLORS.plum
-	},
-
-	// ---------- Two-column field grid (Page 1 details) ----------
-	// On the cream base, alternate rows pop white. The faint gold-tinted rule
-	// underneath each row reads as a thin restaurant menu divider.
+	// ---------- Field grid (Page 1, customer + internal-summary) ----------
+	// Clean two-column layout. NO row dividers, NO column borders, NO alt-row
+	// tints. Generous vertical spacing. Plum small-caps label, midnight body
+	// value. Bigger value font (11pt) so the data lifts off the page.
 	fieldRow: {
 		flexDirection: 'row',
 		alignItems: 'flex-start',
-		paddingVertical: 3.5,
-		paddingHorizontal: 6,
-		borderBottomWidth: 0.4,
-		borderBottomColor: COLORS.goldFaint,
-		borderBottomStyle: 'solid'
-	},
-	fieldRowAlt: {
-		backgroundColor: COLORS.white
+		paddingVertical: 5
 	},
 	fieldLabel: {
 		fontFamily: FONTS.bold,
-		fontSize: 9.5,
+		fontSize: 8.5,
 		color: COLORS.plum,
-		width: 160,
-		paddingRight: 8
+		width: 148,
+		paddingRight: 14,
+		paddingTop: 3
 	},
 	fieldValue: {
 		fontFamily: FONTS.body,
-		fontSize: 10,
-		color: COLORS.text,
+		fontSize: 11,
+		color: COLORS.midnight,
 		flex: 1,
-		lineHeight: 1.4,
-		paddingRight: 4
+		lineHeight: 1.45
 	},
 	fieldValueBold: {
 		fontFamily: FONTS.bold,
-		fontSize: 10,
-		color: COLORS.text,
+		fontSize: 11,
+		color: COLORS.midnight,
 		flex: 1,
-		lineHeight: 1.4,
-		paddingRight: 4
+		lineHeight: 1.45
 	},
 	dietBadge: {
 		fontFamily: FONTS.italic,
-		fontSize: 9,
+		fontSize: 9.5,
 		color: COLORS.gold
 	},
 
-	// ---------- Page 1 footer block ----------
-	page1Footer: {
-		marginTop: 14,
-		paddingTop: 8,
-		borderTopWidth: 0.4,
-		borderTopColor: COLORS.gold,
-		borderTopStyle: 'solid',
+	// Customer reference line at end of page 1 (centered, italic, muted).
+	customerReference: {
+		marginTop: 18,
+		fontFamily: FONTS.italic,
 		fontSize: 9,
 		color: COLORS.muted,
-		textAlign: 'center',
-		fontFamily: FONTS.italic
+		textAlign: 'center'
+	},
+
+	// ---------- Section eyebrow (Page 2 + Page 3 ONLY) ----------
+	// Small-caps gold text with a thin gold underline rule. Replaces the old
+	// gold-accent-bar + plum-text section header. Cleaner and reads as
+	// restraint rather than ornament.
+	sectionEyebrow: {
+		fontFamily: FONTS.bold,
+		fontSize: 9.5,
+		color: COLORS.gold,
+		paddingBottom: 4,
+		borderBottomWidth: 0.6,
+		borderBottomColor: COLORS.gold,
+		borderBottomStyle: 'solid',
+		marginTop: 10,
+		marginBottom: 8
+	},
+	sectionEyebrowCompact: {
+		fontFamily: FONTS.bold,
+		fontSize: 9,
+		color: COLORS.gold,
+		paddingBottom: 2,
+		borderBottomWidth: 0.6,
+		borderBottomColor: COLORS.gold,
+		borderBottomStyle: 'solid',
+		marginTop: 5,
+		marginBottom: 3
 	},
 
 	// ---------- Page 2 invoice meta ----------
@@ -390,8 +318,6 @@ export const styles = StyleSheet.create({
 		marginBottom: 6,
 		textAlign: 'center'
 	},
-	// Subtotal "chip" floats top-right above the table. Gold-bordered cream
-	// fill so it reads as a restraint accent, not a heavy gold block.
 	subtotalChip: {
 		alignSelf: 'flex-end',
 		marginTop: 4,
@@ -407,8 +333,7 @@ export const styles = StyleSheet.create({
 	subtotalChipLabel: {
 		fontFamily: FONTS.bold,
 		fontSize: 8.5,
-		color: COLORS.muted,
-		marginRight: 6
+		color: COLORS.muted
 	},
 	subtotalChipText: {
 		fontFamily: FONTS.bold,
@@ -417,6 +342,8 @@ export const styles = StyleSheet.create({
 	},
 
 	// ---------- Order line-item table (Page 2) ----------
+	// Plum header row, alternating white-on-cream rows, gold-faint underline,
+	// plum prices, and a plum total stripe with gold total amount.
 	tableHeaderRow: {
 		flexDirection: 'row',
 		paddingVertical: 8,
@@ -500,7 +427,8 @@ export const styles = StyleSheet.create({
 		color: COLORS.cream,
 		textAlign: 'center',
 		marginTop: 2,
-		marginBottom: 3
+		marginBottom: 3,
+		letterSpacing: 2
 	},
 	kitchenSubhead: {
 		fontFamily: FONTS.bold,
@@ -642,21 +570,7 @@ export const styles = StyleSheet.create({
 		flex: 2
 	},
 
-	// Delivery block (label/value pairs, simple)
-	deliveryBlock: { marginTop: 4 },
-	deliveryNoteHighlight: {
-		marginTop: 6,
-		paddingVertical: 4,
-		paddingHorizontal: 6,
-		borderLeftWidth: 2,
-		borderLeftColor: COLORS.gold,
-		borderLeftStyle: 'solid',
-		fontFamily: FONTS.bold,
-		fontSize: 9.5,
-		color: COLORS.text
-	},
-
-	// Pre-delivery checklist (single column, gold checkbox)
+	// Pre-delivery checklist
 	checklistItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -677,14 +591,28 @@ export const styles = StyleSheet.create({
 		color: COLORS.text
 	},
 
-	// ---------- Footer (page-number row) ----------
-	// Anchored 22pt above the bottom edge with a thin gold top rule, on a
-	// transparent surface so the cream page bg shows through.
+	// ---------- Footer (page-number row, all pages) ----------
+	// One thin gold top rule, "Sula Indian Catering · Vancouver since 2010"
+	// centered-left in muted text, page number right. No plum band, no ornaments.
 	footer: {
 		position: 'absolute',
 		bottom: 22,
-		left: HORIZONTAL_PADDING,
-		right: HORIZONTAL_PADDING,
+		left: HORIZONTAL_PADDING_DENSE,
+		right: HORIZONTAL_PADDING_DENSE,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingTop: 6,
+		borderTopWidth: 0.4,
+		borderTopColor: COLORS.gold,
+		borderTopStyle: 'solid'
+	},
+	// Wider footer for Page 1 to match the wider content margins.
+	footerWide: {
+		position: 'absolute',
+		bottom: 22,
+		left: HORIZONTAL_PADDING_WIDE,
+		right: HORIZONTAL_PADDING_WIDE,
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
@@ -708,7 +636,7 @@ export const styles = StyleSheet.create({
 		color: COLORS.plum
 	},
 
-	// ---------- Faint elephant watermark on internal pages ----------
+	// Faint elephant watermark on internal pages
 	pageWatermark: {
 		position: 'absolute',
 		top: 280,
@@ -720,7 +648,7 @@ export const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 
-	// ---------- SAMPLE watermark (sample preview only) ----------
+	// SAMPLE watermark (sample preview only)
 	sampleWatermark: {
 		position: 'absolute',
 		top: 320,

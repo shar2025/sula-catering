@@ -1,14 +1,16 @@
-// Page 1, Catering Details.
+// Page 1, Catering Details, fine-dining-confirmation aesthetic.
+//
 // Audience-aware title:
-//   forCustomer=true  → "CATERING SUBMISSION RECORD"
-//                       (at the customer stage it's neither an invoice nor a
-//                       final quote, just a record of their request, the
-//                       events team will follow up with the formal quote)
-//   forCustomer=false → "CATERING INVOICE"
+//   forCustomer=true  -> "CATERING SUBMISSION RECORD"
+//                       (the customer's record of their request, the events
+//                        team will follow up with the formal quote in writing)
+//   forCustomer=false -> "CATERING INVOICE"
 //                       (page 1 of the formal events-team copy)
 //
-// Layout: full-bleed midnight brand band at the top, gold dividing rule,
-// document title block, label/value field grid, gold-accented footer.
+// Layout philosophy: a wedding invitation, not an invoice template. Generous
+// whitespace, no row dividers, no column borders, no alt-row tints, no
+// "Catering Details" section header. Plum small caps labels, midnight body
+// values. Reference number sits at the bottom centered, italic, muted.
 
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
@@ -16,12 +18,6 @@ import { styles, COLORS } from './styles.js';
 import type { InvoiceOrder, MenuLine } from './InvoicePdf.js';
 
 const e = React.createElement;
-
-// Middle dot (·) is U+00B7. Avoid em/en dashes anywhere in the document.
-const LOCATIONS = 'Commercial Drive  ·  Main Street  ·  Davie Street  ·  Sula Cafe';
-const CONTACT_LINE_LEFT = 'events.sula@gmail.com';
-const CONTACT_LINE_RIGHT = 'sulaindianrestaurant.com';
-const STANDARD_INCLUDES = 'Tandoori Naan, Garlic Naan, Basmati Rice, Mango Chutney, Hot Sauce & Lentil Wafers';
 
 function formatEventDate(s: string | undefined): string {
 	if (!s) return '';
@@ -47,6 +43,8 @@ function eventTypeLabel(order: InvoiceOrder): string {
 	return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
+const STANDARD_INCLUDES = 'Tandoori Naan, Garlic Naan, Basmati Rice, Mango Chutney, Hot Sauce & Lentil Wafers';
+
 function menuItemRows(items: MenuLine[] | undefined): { label: string; value: string; diet?: string }[] {
 	if (!items || items.length === 0) return [];
 	const groups: Record<MenuLine['kind'], MenuLine[]> = { veg: [], vegan: [], nonveg: [], appetizer: [] };
@@ -69,13 +67,13 @@ function menuItemRows(items: MenuLine[] | undefined): { label: string; value: st
 	return rows;
 }
 
+// Plum small caps label (uppercased), midnight value, no border, no bg.
 function fieldRow(label: string, value: string | undefined, opts: { bold?: boolean; diet?: string; index: number } = { index: 0 }) {
 	if (!value) return null;
-	const baseStyle = opts.index % 2 === 1 ? { ...styles.fieldRow, ...styles.fieldRowAlt } : styles.fieldRow;
 	return e(
 		View,
-		{ style: baseStyle, key: `${label}-${opts.index}` },
-		e(Text, { style: styles.fieldLabel }, label),
+		{ style: styles.fieldRow, key: `${label}-${opts.index}` },
+		e(Text, { style: styles.fieldLabel }, label.toUpperCase()),
 		e(
 			Text,
 			{ style: opts.bold ? styles.fieldValueBold : styles.fieldValue },
@@ -85,6 +83,9 @@ function fieldRow(label: string, value: string | undefined, opts: { bold?: boole
 	);
 }
 
+// Brand band: midnight->navy panel with logo, wordmark, italic gold tagline.
+// No "Est. 2010", no ornament glyphs (those substitute as garbage in
+// Helvetica/WinAnsi).
 function brandBand(logoBuffer: Buffer | null | undefined) {
 	return e(
 		React.Fragment,
@@ -99,16 +100,7 @@ function brandBand(logoBuffer: Buffer | null | undefined) {
 				{ src: logoBuffer, style: styles.brandLogoLarge }
 			),
 			e(Text, { style: styles.brandName }, 'Sula Indian Restaurant'),
-			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.'),
-			e(Text, { style: styles.brandEst }, 'Est. 2010'),
-			// Gold ornament row: thin rule  ◆  thin rule
-			e(
-				View,
-				{ style: styles.brandOrnamentRow },
-				e(View, { style: styles.brandOrnamentRule }),
-				e(Text, { style: styles.brandOrnamentGlyph }, '◆'),
-				e(View, { style: styles.brandOrnamentRule })
-			)
+			e(Text, { style: styles.brandTagline }, 'Bold spices. Warm hospitality.')
 		),
 		e(View, { style: styles.brandBandRule })
 	);
@@ -117,7 +109,7 @@ function brandBand(logoBuffer: Buffer | null | undefined) {
 function pageFooter() {
 	return e(
 		View,
-		{ style: styles.footer, fixed: true },
+		{ style: styles.footerWide, fixed: true },
 		e(
 			Text,
 			{ style: styles.footerText },
@@ -148,18 +140,15 @@ export function renderPage1(
 
 	const curryRows = menuItemRows(order.menuItems);
 
-	// Build the field rows. Pass an `index` into fieldRow so we can zebra-stripe
-	// the visible (non-null) ones. We push in render order then re-index after
-	// filtering nulls so the alternation reads cleanly.
 	const rawRows: { label: string; value: string | undefined; bold?: boolean; diet?: string }[] = [];
 	rawRows.push({ label: 'Name', value: order.contact?.name, bold: true });
 	if (order.contact?.phone) rawRows.push({ label: 'Phone', value: order.contact.phone });
 	if (order.contact?.email) rawRows.push({ label: 'Email', value: order.contact.email });
-	rawRows.push({ label: 'Event Date (dd/mm/yyyy)', value: eventDateText, bold: true });
+	rawRows.push({ label: 'Event Date', value: eventDateText, bold: true });
 	rawRows.push({ label: 'Delivery Time', value: deliveryTimeText });
 	rawRows.push({ label: 'Event Address', value: addressText });
 	rawRows.push({ label: 'Event Type', value: eventTypeText });
-	if (guestStr) rawRows.push({ label: 'Number of Guests', value: guestStr });
+	if (guestStr) rawRows.push({ label: 'Guests', value: guestStr });
 	for (const r of curryRows) {
 		rawRows.push({ label: r.label, value: r.value, diet: r.diet });
 	}
@@ -169,11 +158,11 @@ export function renderPage1(
 	if (order.spiceLevel) rawRows.push({ label: 'Spice Level', value: order.spiceLevel });
 	rawRows.push({ label: 'Includes', value: STANDARD_INCLUDES });
 	if (order.additionalMenuItems) {
-		rawRows.push({ label: 'Additional Menu Items', value: order.additionalMenuItems });
+		rawRows.push({ label: 'Additional Items', value: order.additionalMenuItems });
 	} else if (order.addOns && order.addOns.length) {
-		rawRows.push({ label: 'Additional Menu Items', value: order.addOns.join(', ') });
+		rawRows.push({ label: 'Additional Items', value: order.addOns.join(', ') });
 	}
-	if (order.paymentMethod) rawRows.push({ label: 'Method of Payment', value: order.paymentMethod });
+	if (order.paymentMethod) rawRows.push({ label: 'Payment', value: order.paymentMethod });
 
 	const visible = rawRows.filter((r) => r.value);
 	const fieldRows = visible.map((r, i) =>
@@ -188,61 +177,23 @@ export function renderPage1(
 
 		brandBand(opts.logoBuffer),
 
-		// Inner padded content
+		// Inner padded content (wide margins, generous whitespace)
 		e(
 			View,
-			{ style: styles.contentInner },
+			{ style: styles.contentInnerWide },
 
-			// Document title block: thin gold rule  ◆  TITLE  ◆  thin gold rule
-			e(
-				View,
-				{ style: styles.docTitleWrap },
-				e(
-					View,
-					{ style: styles.docTitleRow },
-					e(View, { style: styles.docTitleSideRule }),
-					e(Text, { style: styles.docTitleOrnament }, '◆'),
-					e(Text, { style: styles.docTitle }, docTitle),
-					e(Text, { style: styles.docTitleOrnament }, '◆'),
-					e(View, { style: styles.docTitleSideRule })
-				)
-			),
+			// Single thin gold rule (eyebrow), then the title centered with whitespace
+			e(View, { style: styles.docTitleEyebrowRule }),
+			e(Text, { style: styles.docTitleSerif }, docTitle),
 
-			e(Text, { style: styles.locationsLine }, LOCATIONS),
-			e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
-			e(
-				Text,
-				{ style: styles.contactLine },
-				CONTACT_LINE_LEFT,
-				e(Text, { style: { color: COLORS.gold } }, '  ·  '),
-				CONTACT_LINE_RIGHT
-			),
-
-			e(View, { style: styles.headerRule }),
-
-			// Section: Catering Details (gold diamond ornament + plum text)
-			e(
-				View,
-				{ style: styles.section },
-				e(Text, { style: styles.sectionOrnament }, '◆'),
-				e(Text, { style: styles.sectionText }, 'Catering Details')
-			),
-
-			// Field grid
+			// Field grid: clean two-column, no borders, no tints
 			e(View, null, ...fieldRows),
 
-			// Reference number (small, end of page 1)
+			// Reference number, centered, italic, muted, at the bottom of the field block
 			e(
 				Text,
-				{ style: { ...styles.contactLine, marginTop: 14, fontSize: 8.5 } },
-				`Reference: ${order.reference}`
-			),
-
-			// Closing italic line
-			e(
-				Text,
-				{ style: styles.page1Footer },
-				'Visit Sula Cafe for Breakfast, Brunch & Finger Food Catering'
+				{ style: styles.customerReference },
+				`Reference  ${order.reference}`
 			)
 		),
 

@@ -11,10 +11,6 @@ import type { InvoiceOrder, InvoiceLineItem } from './InvoicePdf.js';
 
 const e = React.createElement;
 
-const LOCATIONS = 'Commercial Drive  ·  Main Street  ·  Davie Street  ·  Sula Cafe';
-const CONTACT_LEFT = 'events.sula@gmail.com';
-const CONTACT_RIGHT = 'sulaindianrestaurant.com';
-
 function fmtMoney(n: number | undefined): string {
 	if (n === undefined || n === null || !Number.isFinite(n)) return '';
 	return '$' + n.toFixed(2);
@@ -171,40 +167,12 @@ export function renderPage2(
 			View,
 			{ style: styles.contentInner },
 
-			// Document title block: thin gold rule  ◆  INVOICE  ◆  thin gold rule
-			e(
-				View,
-				{ style: styles.docTitleWrap },
-				e(
-					View,
-					{ style: styles.docTitleRow },
-					e(View, { style: styles.docTitleSideRule }),
-					e(Text, { style: styles.docTitleOrnament }, '◆'),
-					e(Text, { style: styles.docTitleSmall }, 'INVOICE'),
-					e(Text, { style: styles.docTitleOrnament }, '◆'),
-					e(View, { style: styles.docTitleSideRule })
-				)
-			),
-			e(Text, { style: styles.locationsLine }, LOCATIONS),
-			e(Text, { style: styles.cityLine }, 'Vancouver, BC'),
-			e(
-				Text,
-				{ style: styles.contactLine },
-				CONTACT_LEFT,
-				e(Text, { style: { color: COLORS.gold } }, '  ·  '),
-				CONTACT_RIGHT
-			),
-			e(Text, { style: styles.gstLine }, 'GST: 874529506 RT0001'),
+			// Document title (no flanking ornaments): "INVOICE" centered
+			e(Text, { style: styles.docTitleInvoice }, 'INVOICE'),
+			e(Text, { style: styles.gstLine }, 'GST 874529506 RT0001'),
 
-			e(View, { style: styles.headerRule }),
-
-			// Section + subtotal chip
-			e(
-				View,
-				{ style: styles.section },
-				e(Text, { style: styles.sectionOrnament }, '◆'),
-				e(Text, { style: styles.sectionText }, 'Order')
-			),
+			// Section eyebrow (small caps gold + thin gold underline)
+			e(Text, { style: styles.sectionEyebrow }, 'ORDER'),
 			subStr && e(
 				View,
 				{ style: styles.subtotalChip },
