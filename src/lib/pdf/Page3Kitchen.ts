@@ -37,12 +37,24 @@ function locationLine(loc: InvoiceOrder['location']): string {
 function dietaryFlags(d: InvoiceOrder['dietary']): string[] {
 	if (!d) return [];
 	const flags: string[] = [];
-	if (d.halal) flags.push('HALAL');
+	// NOTE: no HALAL flag — Sula's kitchen is halal-certified by default since 2010,
+	// so every meat dish is already halal. Surfacing it would be noise for the line cooks.
 	if (d.hasJain) flags.push('JAIN PREP');
 	if (d.hasVegan) flags.push('VEGAN');
-	if (d.hasGlutenFree) flags.push('GLUTEN-FREE');
-	if (d.hasNutAllergy) flags.push('⚠ NUT ALLERGY');
 	if (typeof d.vegetarianPct === 'number') flags.push(`VEG ${d.vegetarianPct}%`);
+	return flags;
+}
+
+// Hard allergy/dietary-restriction flags — surfaced in a prominent gold-bordered
+// callout box at the top of the kitchen sheet, separate from the soft dietary
+// flags strip. Cross-contamination risk = needs a chef's eyes on it.
+function allergyFlags(d: InvoiceOrder['dietary']): string[] {
+	if (!d) return [];
+	const flags: string[] = [];
+	if (d.hasNutAllergy) flags.push('NUT ALLERGY');
+	if (d.hasShellfishAllergy) flags.push('SHELLFISH ALLERGY');
+	if (d.hasDairyFree) flags.push('DAIRY-FREE');
+	if (d.hasGlutenFree) flags.push('GLUTEN-FREE');
 	return flags;
 }
 
@@ -50,11 +62,12 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
 	const flags = dietaryFlags(order.dietary);
 	const flagsLine = flags.length ? flags.join(' · ') : 'No special dietary flags';
+	const allergies = allergyFlags(order.dietary);
 	const dietaryNotes = order.dietary?.notes;
 
 	const checklist = [
 		'Confirm guest count with client (24h before)',
-		'Halal / Jain / allergy flags reviewed by lead chef',
+		'Allergy + Jain + dietary flags reviewed by lead chef',
 		'Setup gear loaded (trays / heated / copper)',
 		'Dinnerware + serving spoons packed',
 		'Chutneys + sides portioned per sheet',
@@ -109,6 +122,16 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 					order.timeWindow && e(Text, { style: styles.invertedColLine }, order.timeWindow),
 					locationLine(order.location) && e(Text, { style: styles.invertedColLine }, locationLine(order.location))
 				)
+			),
+
+			// Allergy callout — only renders if any hard allergy/restriction flagged.
+			// Cross-contamination risk; lead chef has to sign off.
+			allergies.length > 0 && e(
+				View,
+				{ style: styles.allergyCallout },
+				e(Text, { style: styles.allergyCalloutLabel }, '⚠ Allergy / restriction flags — chef sign-off required'),
+				e(Text, { style: styles.allergyCalloutBody }, allergies.join(' · ')),
+				e(Text, { style: styles.allergyCalloutNote }, 'Confirm separate prep surface, dedicated utensils, and ingredient check on all sauces. Cross-contamination risk on shared kitchen equipment — flag any uncertainty to the lead chef before service.')
 			),
 
 			// Dietary flags strip

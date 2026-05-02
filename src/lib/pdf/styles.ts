@@ -579,6 +579,41 @@ export const styles = StyleSheet.create({
 		lineHeight: 1.55
 	},
 
+	// Allergy callout — gold-bordered alert box on plum, brighter than the
+	// soft dietary card. Surfaces only when there's an actual allergy/restriction.
+	allergyCallout: {
+		marginBottom: 14,
+		padding: 12,
+		borderWidth: 1.6,
+		borderColor: COLORS.goldShimmer,
+		borderStyle: 'solid',
+		backgroundColor: 'rgba(232, 201, 135, 0.08)'
+	},
+	allergyCalloutLabel: {
+		fontFamily: FONTS.body,
+		fontSize: 9,
+		color: COLORS.goldShimmer,
+		letterSpacing: 1.8,
+		textTransform: 'uppercase',
+		fontWeight: 700,
+		marginBottom: 6
+	},
+	allergyCalloutBody: {
+		fontFamily: FONTS.body,
+		fontSize: 12,
+		color: COLORS.cream,
+		fontWeight: 700,
+		letterSpacing: 0.5,
+		marginBottom: 4
+	},
+	allergyCalloutNote: {
+		fontFamily: FONTS.heading,
+		fontStyle: 'italic',
+		fontSize: 9,
+		color: 'rgba(245, 237, 224, 0.75)',
+		lineHeight: 1.5
+	},
+
 	// Portioning table on plum (cream type, gold portions)
 	portTitle: {
 		fontFamily: FONTS.body,

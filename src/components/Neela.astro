@@ -418,8 +418,9 @@
 		if (d.hasJain) lines.push('Jain prep');
 		if (d.hasVegan) lines.push('Vegan options');
 		if (d.hasGlutenFree) lines.push('Gluten-free');
+		if (d.hasDairyFree) lines.push('Dairy-free');
 		if (d.hasNutAllergy) lines.push('⚠ Nut allergy');
-		if (d.halal) lines.push('Halal');
+		if (d.hasShellfishAllergy) lines.push('⚠ Shellfish allergy');
 		if (d.notes) lines.push(String(d.notes));
 		if (!lines.length) return '';
 		return '<div class="neela-order-row"><span class="neela-order-row-label">Dietary</span><span class="neela-order-row-value">' + lines.map(escapeHtml).join(', ') + '</span></div>';

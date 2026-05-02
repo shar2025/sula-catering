@@ -13,12 +13,13 @@ const e = React.createElement;
 function dietaryLine(d: InvoiceOrder['dietary']): string {
 	if (!d) return '';
 	const parts: string[] = [];
-	if (d.halal) parts.push('Halal');
 	if (typeof d.vegetarianPct === 'number') parts.push(`${d.vegetarianPct}% vegetarian`);
 	if (d.hasJain) parts.push('Jain prep');
 	if (d.hasVegan) parts.push('Vegan options');
 	if (d.hasGlutenFree) parts.push('Gluten-free');
+	if (d.hasDairyFree) parts.push('Dairy-free');
 	if (d.hasNutAllergy) parts.push('Nut allergy flagged');
+	if (d.hasShellfishAllergy) parts.push('Shellfish allergy flagged');
 	if (d.notes) parts.push(d.notes);
 	return parts.join(' · ');
 }

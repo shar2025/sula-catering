@@ -31,10 +31,10 @@ const SAMPLE_ORDER: InvoiceOrder = {
 	timeWindow: '6:00 PM service',
 	dietary: {
 		vegetarianPct: 60,
-		halal: true,
 		hasJain: false,
 		hasGlutenFree: true,
-		notes: '60% vegetarian, halal-only on the meat dishes'
+		hasNutAllergy: true,
+		notes: '60% vegetarian; one guest with a tree-nut allergy at table 3'
 	},
 	menuTier: 'Vegetarian/Vegan ($24.95 + tax per guest)',
 	addOns: ['Onion Bhajia appetizer (+$5/guest)'],

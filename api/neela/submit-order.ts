@@ -54,7 +54,12 @@ interface Dietary {
 	hasVegan?: boolean;
 	hasGlutenFree?: boolean;
 	hasNutAllergy?: boolean;
-	halal?: boolean;
+	hasShellfishAllergy?: boolean;
+	hasDairyFree?: boolean;
+	// Note: halal is intentionally NOT a field. Sula's kitchen has been
+	// halal-certified by default since 2010, so every meat dish IS halal.
+	// Asking the customer is redundant and could feel intrusive; the events
+	// team confirms warmly only if asked.
 	notes?: string;
 }
 interface Contact {
@@ -200,7 +205,9 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 			hasVegan: typeof o.dietary.hasVegan === 'boolean' ? o.dietary.hasVegan : undefined,
 			hasGlutenFree: typeof o.dietary.hasGlutenFree === 'boolean' ? o.dietary.hasGlutenFree : undefined,
 			hasNutAllergy: typeof o.dietary.hasNutAllergy === 'boolean' ? o.dietary.hasNutAllergy : undefined,
-			halal: typeof o.dietary.halal === 'boolean' ? o.dietary.halal : undefined,
+			hasShellfishAllergy: typeof o.dietary.hasShellfishAllergy === 'boolean' ? o.dietary.hasShellfishAllergy : undefined,
+			hasDairyFree: typeof o.dietary.hasDairyFree === 'boolean' ? o.dietary.hasDairyFree : undefined,
+			// halal field is silently ignored if sent — kitchen is halal by default
 			notes: o.dietary.notes ? String(o.dietary.notes).slice(0, 800) : undefined
 		} : undefined,
 		menuTier: o.menuTier ? String(o.menuTier).slice(0, 200) : undefined,
@@ -311,9 +318,10 @@ function dietaryLines(d?: Dietary): string[] {
 	if (typeof d.vegetarianPct === 'number') lines.push(`Vegetarian mix: ~${d.vegetarianPct}%`);
 	if (d.hasJain) lines.push('Jain prep needed');
 	if (d.hasVegan) lines.push('Vegan options needed');
-	if (d.hasGlutenFree) lines.push('Gluten-free options needed');
+	if (d.hasGlutenFree) lines.push('⚠ Gluten-free options needed');
+	if (d.hasDairyFree) lines.push('⚠ Dairy-free options needed');
 	if (d.hasNutAllergy) lines.push('⚠ Nut allergy flagged');
-	if (d.halal) lines.push('Halal-only');
+	if (d.hasShellfishAllergy) lines.push('⚠ Shellfish allergy flagged');
 	if (d.notes) lines.push(`Notes: ${d.notes}`);
 	return lines;
 }

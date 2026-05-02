@@ -34,7 +34,9 @@ export interface InvoiceOrder {
 		hasVegan?: boolean;
 		hasGlutenFree?: boolean;
 		hasNutAllergy?: boolean;
-		halal?: boolean;
+		hasShellfishAllergy?: boolean;
+		hasDairyFree?: boolean;
+		// halal omitted by design — kitchen is halal-certified by default since 2010.
 		notes?: string;
 	};
 	menuTier?: string;
