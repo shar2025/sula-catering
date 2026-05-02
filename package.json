@@ -18,10 +18,13 @@
     "@anthropic-ai/sdk": "^0.92.0",
     "@astrojs/sitemap": "^3.7.2",
     "@neondatabase/serverless": "^1.1.0",
+    "@react-pdf/renderer": "^4.5.1",
     "astro": "^6.1.9",
+    "react": "^19.2.5",
     "resend": "^6.12.2"
   },
   "devDependencies": {
+    "@types/react": "^19.2.14",
     "@vercel/node": "^5.7.15",
     "cheerio": "^1.2.0",
     "mailparser": "^3.9.8"
