@@ -209,11 +209,14 @@ function buildPricingDigest(catering) {
 		dw.choices.forEach((c) => lines.push(`- ${decode(c.text)}`));
 	}
 	lines.push('');
-	lines.push(`**Delivery fees by distance:**`);
-	const df = byId[150];
-	if (df) {
-		df.choices.forEach((c) => lines.push(`- ${decode(c.text)}`));
-	}
+	// Delivery fees: CORRECTED per Shar's spec (Phase B). The Form 27 raw data
+	// in Gravity Forms still shows old $5/$10/$25 tiers; persona has been
+	// updated to override those with the correct tiers below.
+	lines.push(`**Delivery fees by distance (CORRECTED, override raw form data):**`);
+	lines.push(`- 0 to 10 km: FREE`);
+	lines.push(`- 10 to 15 km: $5`);
+	lines.push(`- 15 to 30 km: $15`);
+	lines.push(`- 30+ km: manual review, flag for the events team`);
 	lines.push('');
 	lines.push(`**Early-delivery surcharge:** 11:30 AM delivery slot has a +$35 fee.`);
 	lines.push('');
