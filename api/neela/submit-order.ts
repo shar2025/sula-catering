@@ -23,6 +23,11 @@ const REFERENCE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // I, O, 0, 1 exclud
 
 type EventType = 'wedding' | 'corporate' | 'private' | 'cafe-chai' | 'other';
 type ServiceType = 'drop-off' | 'full-service' | 'live-station' | 'in-restaurant';
+// Mirrors the 3 paths on sulaindianrestaurant.com/sula-catering-order/:
+//   'full'         = "I'm Ready" full quote request
+//   'quick'        = "Still Deciding" lightweight inquiry
+//   'consultation' = "Want Help" Calendly-call routing (no confirm card)
+type Mode = 'full' | 'quick' | 'consultation';
 
 interface Dietary {
 	vegetarianPct?: number;
@@ -39,9 +44,10 @@ interface Contact {
 	phone?: string;
 }
 interface Order {
-	eventType: EventType;
-	eventDate: string;
-	guestCount: number;
+	mode: Mode;
+	eventType?: EventType;
+	eventDate?: string;
+	guestCount?: number | string; // number for 'full', string range allowed for 'quick'
 	serviceType?: ServiceType;
 	location?: { city?: string; venueOrAddress?: string };
 	timeWindow?: string;
@@ -60,6 +66,7 @@ interface SubmitBody {
 
 const VALID_EVENT_TYPES: EventType[] = ['wedding', 'corporate', 'private', 'cafe-chai', 'other'];
 const VALID_SERVICE_TYPES: ServiceType[] = ['drop-off', 'full-service', 'live-station', 'in-restaurant'];
+const VALID_MODES: Mode[] = ['full', 'quick', 'consultation'];
 
 function isValidEmail(s: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -92,25 +99,62 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 	const sessionId = String(body.sessionId || '').trim();
 	if (!sessionId) return { ok: false, error: 'sessionId required' };
 	const o = (body.order || {}) as Partial<Order>;
-	if (!o.eventType || !VALID_EVENT_TYPES.includes(o.eventType as EventType)) {
-		return { ok: false, error: 'order.eventType required (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
-	}
-	const guestCount = Number(o.guestCount);
-	if (!Number.isFinite(guestCount) || guestCount < 1) {
-		return { ok: false, error: 'order.guestCount required (positive integer)' };
-	}
+
+	// Mode (defaults to 'full' for backwards compatibility with the original endpoint).
+	const mode: Mode = VALID_MODES.includes(o.mode as Mode) ? (o.mode as Mode) : 'full';
+
+	// Contact is required in all modes.
 	const c = (o.contact || {}) as Partial<Contact>;
 	const name = String(c.name || '').trim();
 	const email = String(c.email || '').trim();
 	if (!name) return { ok: false, error: 'order.contact.name required' };
 	if (!email || !isValidEmail(email)) return { ok: false, error: 'order.contact.email required (valid email)' };
+
+	// eventType — required for full + quick, optional for consultation.
+	if (mode !== 'consultation') {
+		if (!o.eventType || !VALID_EVENT_TYPES.includes(o.eventType as EventType)) {
+			return { ok: false, error: 'order.eventType required (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
+		}
+	} else if (o.eventType && !VALID_EVENT_TYPES.includes(o.eventType as EventType)) {
+		return { ok: false, error: 'order.eventType invalid (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
+	}
+
+	// guestCount — required for full (number), required for quick (number or "rough range" string),
+	// optional for consultation.
+	let guestCountValue: number | string | undefined;
+	if (mode === 'full') {
+		const n = Number(o.guestCount);
+		if (!Number.isFinite(n) || n < 1) {
+			return { ok: false, error: 'order.guestCount required (positive integer for full mode)' };
+		}
+		guestCountValue = Math.floor(n);
+	} else if (mode === 'quick') {
+		if (typeof o.guestCount === 'number' && Number.isFinite(o.guestCount) && o.guestCount >= 1) {
+			guestCountValue = Math.floor(o.guestCount);
+		} else if (typeof o.guestCount === 'string' && o.guestCount.trim().length > 0) {
+			guestCountValue = o.guestCount.trim().slice(0, 80);
+		} else {
+			return { ok: false, error: 'order.guestCount required for quick mode (number or rough range like "around 50")' };
+		}
+	} else if (o.guestCount !== undefined) {
+		// consultation: optional, accept whatever shape
+		guestCountValue = typeof o.guestCount === 'number' ? Math.floor(o.guestCount) : String(o.guestCount).slice(0, 80);
+	}
+
+	// eventDate — required for full + quick, optional for consultation.
+	const eventDate = String(o.eventDate || '').trim().slice(0, 200);
+	if (mode !== 'consultation' && !eventDate) {
+		return { ok: false, error: 'order.eventDate required (specific date or month for ' + mode + ' mode)' };
+	}
+
 	if (o.serviceType && !VALID_SERVICE_TYPES.includes(o.serviceType as ServiceType)) {
 		return { ok: false, error: 'order.serviceType must be one of: ' + VALID_SERVICE_TYPES.join(', ') };
 	}
 	const order: Order = {
-		eventType: o.eventType as EventType,
-		eventDate: String(o.eventDate || '').trim().slice(0, 200),
-		guestCount: Math.floor(guestCount),
+		mode,
+		eventType: o.eventType as EventType | undefined,
+		eventDate: eventDate || undefined,
+		guestCount: guestCountValue,
 		serviceType: o.serviceType as ServiceType | undefined,
 		location: o.location && typeof o.location === 'object' ? {
 			city: o.location.city ? String(o.location.city).slice(0, 200) : undefined,
@@ -163,16 +207,19 @@ async function persistOrder(args: {
 				ip_hash TEXT,
 				order_json JSONB NOT NULL,
 				status TEXT DEFAULT 'new',
-				emailed_at TIMESTAMPTZ
+				emailed_at TIMESTAMPTZ,
+				mode TEXT NOT NULL DEFAULT 'full'
 			)
 		`;
+		// Idempotent migration for tables created before the mode column existed.
+		await sql`ALTER TABLE neela_orders ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'full'`;
 		await sql`CREATE INDEX IF NOT EXISTS neela_orders_created_at_idx ON neela_orders (created_at DESC)`;
 		await sql`CREATE INDEX IF NOT EXISTS neela_orders_reference_idx ON neela_orders (reference)`;
 		tableEnsured = true;
 	}
 	await sql`
-		INSERT INTO neela_orders (reference, session_id, ip_hash, order_json)
-		VALUES (${args.reference}, ${args.sessionId}, ${args.ipHash}, ${JSON.stringify(args.order)})
+		INSERT INTO neela_orders (reference, session_id, ip_hash, order_json, mode)
+		VALUES (${args.reference}, ${args.sessionId}, ${args.ipHash}, ${JSON.stringify(args.order)}, ${args.order.mode})
 	`;
 }
 
@@ -212,6 +259,35 @@ function row(label: string, value: string | undefined): string {
 	return `<tr><td style="padding:6px 14px 6px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase;vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td><td style="padding:6px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.55">${escapeHtml(value)}</td></tr>`;
 }
 
+function modeEyebrow(mode: Mode): string {
+	if (mode === 'quick') return 'Neela &middot; new inquiry (still deciding)';
+	if (mode === 'consultation') return 'Neela &middot; wants a Calendly call';
+	return 'Neela &middot; new order captured';
+}
+
+function modeSubject(reference: string, order: Order): string {
+	const guestStr = order.guestCount === undefined ? 'TBD' : String(order.guestCount);
+	const dateStr = order.eventDate || 'TBD';
+	const typeStr = order.eventType || 'event';
+	if (order.mode === 'quick') {
+		return `[Neela inquiry ${reference}] Looking at ${typeStr} for ${guestStr} around ${dateStr}`;
+	}
+	if (order.mode === 'consultation') {
+		return `[Neela call request ${reference}] ${order.contact.name} wants a Calendly chat`;
+	}
+	return `[Neela order ${reference}] ${typeStr} for ${guestStr} on ${dateStr}`;
+}
+
+function modeReplyMessage(reference: string, mode: Mode): string {
+	if (mode === 'quick') {
+		return `Sent over for menu ideas. Events team will be back with options within a business day. Reference ${reference} in case you want to follow up.`;
+	}
+	if (mode === 'consultation') {
+		return `Reference ${reference} noted, the events team has your details. Easiest next step: book a 30-min call at calendly.com/sula-catering/30min.`;
+	}
+	return `Got it! Sent over to the events team. They'll be in touch within a business day. Reference ${reference} in case you want to follow up.`;
+}
+
 function buildOrderEmailHtml(reference: string, order: Order): string {
 	const dateLabel = new Date().toLocaleDateString('en-CA', {
 		weekday: 'long',
@@ -241,7 +317,7 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 	<tr><td align="center" style="padding:32px 16px">
 		<table width="640" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid rgba(184,149,106,0.25);max-width:640px">
 			<tr><td style="padding:28px 32px 22px;border-bottom:1px solid rgba(184,149,106,0.25);background:linear-gradient(180deg,#0a1628 0%,#142442 100%)">
-				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#b8956a">Neela &middot; new order captured</p>
+				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#b8956a">${modeEyebrow(order.mode)}</p>
 				<h1 style="margin:8px 0 4px;font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:600;color:#f5ede0;letter-spacing:0.5px">${escapeHtml(reference)}</h1>
 				<p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:rgba(245,237,224,0.78);letter-spacing:0.3px">${escapeHtml(dateLabel)}</p>
 			</td></tr>
@@ -290,9 +366,10 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 function buildOrderEmailText(reference: string, order: Order): string {
 	const lines: string[] = [];
 	lines.push(`Reference: ${reference}`);
-	lines.push(`Event type: ${order.eventType}`);
-	lines.push(`Event date: ${order.eventDate}`);
-	lines.push(`Guest count: ${order.guestCount}`);
+	lines.push(`Mode: ${order.mode}`);
+	if (order.eventType) lines.push(`Event type: ${order.eventType}`);
+	if (order.eventDate) lines.push(`Event date: ${order.eventDate}`);
+	if (order.guestCount !== undefined) lines.push(`Guest count: ${order.guestCount}`);
 	if (order.serviceType) lines.push(`Service: ${order.serviceType}`);
 	if (order.location?.venueOrAddress || order.location?.city) {
 		lines.push(`Location: ${[order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')}`);
@@ -317,7 +394,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 	}
 	try {
 		const resend = new Resend(apiKey);
-		const subject = `[Neela order ${reference}] ${order.eventType} for ${order.guestCount} on ${order.eventDate}`;
+		const subject = modeSubject(reference, order);
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 		const result = await resend.emails.send({
@@ -376,6 +453,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 	console.log('[neela-order] complete', {
 		reference,
+		mode: v.order.mode,
 		emailed: sent,
 		eventType: v.order.eventType,
 		guestCount: v.order.guestCount
@@ -384,7 +462,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	return res.status(200).json({
 		ok: true,
 		reference,
+		mode: v.order.mode,
 		emailed: sent,
-		message: `Got it! Sent over to the events team. They'll be in touch within a business day. Reference ${reference} in case you want to follow up.`
+		message: modeReplyMessage(reference, v.order.mode)
 	});
 }
