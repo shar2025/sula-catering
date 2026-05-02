@@ -419,12 +419,28 @@
 				return;
 			}
 			if (!resp.ok) throw new Error('api ' + resp.status);
-			const data = await resp.json();
-			const reply = data && data.reply ? String(data.reply) : FALLBACK_MSG;
+
+			const contentType = resp.headers.get('content-type') || '';
+			let reply = '';
+
+			if (contentType.includes('text/event-stream') && resp.body) {
+				reply = await consumeStream(resp);
+			} else {
+				// JSON fallback (conversation cap, missing key, etc.)
+				const data = await resp.json().catch(() => ({}));
+				reply = data && data.reply ? String(data.reply) : FALLBACK_MSG;
+				showTyping(false);
+				renderMessage('bot', reply);
+			}
+
+			if (!reply) {
+				showTyping(false);
+				renderMessage('bot', FALLBACK_MSG);
+				reply = FALLBACK_MSG;
+			}
+
 			conversation.push({ role: 'assistant', content: reply });
 			saveConversation();
-			showTyping(false);
-			renderMessage('bot', reply);
 
 			if (speakerOn && reply) {
 				playSpokenReply(reply);
@@ -433,12 +449,97 @@
 			const newUserCount = conversation.filter(m => m.role === 'user').length;
 			if (newUserCount >= LEAD_PROMPT_AT && !leadShown) showLeadForm();
 		} catch (err) {
+			finalizeStreamingBubble();
 			showTyping(false);
 			renderMessage('bot', FALLBACK_MSG);
 		} finally {
 			sendBtn.disabled = false;
 			inputEl.focus();
 		}
+	}
+
+	// Streaming bubble — created on first chunk, finalized with linkified HTML
+	// once the full reply has arrived (or the stream ends). Plain text content
+	// during streaming so URLs/emails don't render as raw markup mid-flight.
+	let streamingBubble = null;
+	let streamingTextEl = null;
+	let streamingText = '';
+
+	function startStreamingBubble() {
+		if (streamingBubble) return;
+		showTyping(false);
+		streamingBubble = document.createElement('div');
+		streamingBubble.className = 'neela-msg neela-msg-bot';
+		streamingTextEl = document.createElement('p');
+		streamingBubble.appendChild(streamingTextEl);
+		messagesEl.appendChild(streamingBubble);
+	}
+	function appendStreamingChunk(text) {
+		if (!text) return;
+		if (!streamingBubble) startStreamingBubble();
+		streamingText += text;
+		streamingTextEl.textContent = streamingText;
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+	}
+	function finalizeStreamingBubble() {
+		if (!streamingBubble) return '';
+		const finalText = streamingText;
+		streamingBubble.innerHTML = '';
+		const paragraphs = finalText.split(/\n\n+/);
+		paragraphs.forEach(para => {
+			const p = document.createElement('p');
+			p.innerHTML = linkify(para).replace(/\n/g, '<br/>');
+			streamingBubble.appendChild(p);
+		});
+		messagesEl.scrollTop = messagesEl.scrollHeight;
+		streamingBubble = null;
+		streamingTextEl = null;
+		streamingText = '';
+		return finalText;
+	}
+
+	async function consumeStream(resp) {
+		const reader = resp.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+		let sawError = false;
+		let errorFallback = '';
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
+				let idx;
+				while ((idx = buffer.indexOf('\n\n')) !== -1) {
+					const rawEvent = buffer.slice(0, idx);
+					buffer = buffer.slice(idx + 2);
+					const lines = rawEvent.split('\n');
+					for (const line of lines) {
+						if (!line.startsWith('data:')) continue;
+						const payload = line.slice(5).trim();
+						if (!payload || payload === '[DONE]') continue;
+						let obj;
+						try { obj = JSON.parse(payload); } catch (e) { continue; }
+						if (obj && obj.error) {
+							sawError = true;
+							if (typeof obj.fallback === 'string') errorFallback = obj.fallback;
+							continue;
+						}
+						if (obj && typeof obj.text === 'string') {
+							appendStreamingChunk(obj.text);
+						}
+					}
+				}
+			}
+		} catch (err) {
+			// Network drop or reader cancel — finalize what we have.
+		}
+		const finalText = finalizeStreamingBubble();
+		if (!finalText && sawError) {
+			renderMessage('bot', errorFallback || FALLBACK_MSG);
+			return errorFallback || FALLBACK_MSG;
+		}
+		return finalText;
 	}
 })();
 </script>

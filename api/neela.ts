@@ -6,12 +6,18 @@
  *
  * Notes:
  * - Uses claude-sonnet-4-6 with prompt caching on the system prompt.
+ * - Streams responses via SSE so the first token reaches the user in 1–2s
+ *   (Vercel Hobby's 10s default function timeout was killing long replies).
+ * - Early-exit cases (rate limit, conversation cap, missing key) still return
+ *   JSON; the streaming path only kicks in once we actually call Anthropic.
  * - In-memory rate limit: 10 user messages per IP per 24h. Resets when the
  *   serverless container cycles. Acceptable for now; upgrade to Vercel KV
  *   for hard guarantees if abuse becomes an issue.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+
+export const maxDuration = 60;
 
 type Role = 'user' | 'assistant';
 interface ChatMessage {
@@ -142,30 +148,62 @@ export default async function handler(req: Request): Promise<Response> {
 		.filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim().length > 0)
 		.map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
 
-	try {
-		const client = new Anthropic({ apiKey });
-		const response = await client.messages.create({
-			model: 'claude-sonnet-4-6',
-			max_tokens: 600,
-			system: [
-				{
-					type: 'text',
-					text: SYSTEM_PROMPT,
-					cache_control: { type: 'ephemeral' }
+	const client = new Anthropic({ apiKey });
+	const encoder = new TextEncoder();
+
+	const responseStream = new ReadableStream<Uint8Array>({
+		async start(controller) {
+			const enqueue = (obj: unknown) => {
+				try {
+					controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+				} catch (e) {
+					// Controller already closed; ignore.
 				}
-			],
-			messages: cleanedMessages
-		});
+			};
 
-		const reply = response.content
-			.filter((block): block is Anthropic.TextBlock => block.type === 'text')
-			.map((block) => block.text)
-			.join('\n')
-			.trim();
+			try {
+				const stream = client.messages.stream({
+					model: 'claude-sonnet-4-6',
+					max_tokens: 1024,
+					system: [
+						{
+							type: 'text',
+							text: SYSTEM_PROMPT,
+							cache_control: { type: 'ephemeral' }
+						}
+					],
+					messages: cleanedMessages
+				});
 
-		return jsonResponse({ reply: reply || FALLBACK_MSG, remaining: rate.remaining });
-	} catch (err) {
-		console.error('[neela] anthropic error', err);
-		return jsonResponse({ reply: FALLBACK_MSG }, 502);
-	}
+				for await (const event of stream) {
+					if (
+						event.type === 'content_block_delta' &&
+						event.delta.type === 'text_delta'
+					) {
+						enqueue({ text: event.delta.text });
+					}
+				}
+
+				try {
+					controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+				} catch (e) { /* ignore */ }
+			} catch (err) {
+				console.error('[neela] stream error', err);
+				enqueue({ error: 'stream', fallback: FALLBACK_MSG });
+			} finally {
+				try { controller.close(); } catch (e) { /* already closed */ }
+			}
+		}
+	});
+
+	return new Response(responseStream, {
+		status: 200,
+		headers: {
+			'Content-Type': 'text/event-stream; charset=utf-8',
+			'Cache-Control': 'no-cache, no-transform',
+			Connection: 'keep-alive',
+			'X-Accel-Buffering': 'no',
+			'X-Neela-Remaining': String(rate.remaining)
+		}
+	});
 }

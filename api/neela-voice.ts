@@ -11,6 +11,8 @@
  * If keys are missing, returns 503 and the frontend silently skips audio playback.
  */
 
+export const maxDuration = 60;
+
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — warm, refined female voice
 const MAX_TEXT_LENGTH = 1200;
 
