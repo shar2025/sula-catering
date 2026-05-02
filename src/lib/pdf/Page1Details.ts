@@ -24,10 +24,23 @@ function dietaryLine(d: InvoiceOrder['dietary']): string {
 	return parts.join(' · ');
 }
 
-function locationLine(loc: InvoiceOrder['location']): string {
+function locationLine(order: InvoiceOrder): string {
+	if (order.deliveryAddress) return order.deliveryAddress;
+	const loc = order.location;
 	if (!loc) return '';
 	if (loc.venueOrAddress && loc.city) return `${loc.venueOrAddress}, ${loc.city}`;
 	return loc.venueOrAddress || loc.city || '';
+}
+
+function rentalsLine(order: InvoiceOrder): string {
+	const parts: string[] = [];
+	if (order.rentalsRequired === true) parts.push('Rentals: required');
+	else if (order.rentalsRequired === false) parts.push('Rentals: not required');
+	if (order.platesAndCutlery === 'required') parts.push('Plates + cutlery: required');
+	else if (order.platesAndCutlery === 'not_required') parts.push('Plates + cutlery: not required');
+	if (order.servingSpoons === 'required') parts.push('Serving spoons: required');
+	else if (order.servingSpoons === 'not_required') parts.push('Serving spoons: not required');
+	return parts.join(' · ');
 }
 
 function field(label: string, value: string | undefined, hero = false) {
@@ -79,17 +92,19 @@ export function renderPage1(
 	const leftCol = [
 		field('Event type', eventTypeDisplay, true),
 		field('Date', order.eventDate, true),
-		field('Time', order.timeWindow, true),
+		field('Delivery time', order.deliveryTime || order.timeWindow, true),
 		field('Guests', guestStr, true),
 		field('Service', order.serviceType, true),
-		field('Location', locationLine(order.location), true)
+		field('Delivery address', locationLine(order), true)
 	].filter(Boolean);
 
 	const rightCol = [
 		field('Menu tier', order.menuTier, true),
 		order.addOns && order.addOns.length ? field('Add-ons', order.addOns.join(' · ')) : null,
 		field('Setup style', order.setupStyle),
+		field('Rentals + service items', rentalsLine(order)),
 		field('Dietary', dietaryLine(order.dietary)),
+		order.customMenuDetails ? field('Custom menu details', order.customMenuDetails) : null,
 		order.notes ? field('Customer notes', order.notes) : null
 	].filter(Boolean);
 

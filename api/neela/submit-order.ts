@@ -80,6 +80,19 @@ interface Quote {
 	currency?: string;
 	disclaimer?: string;
 }
+// Setup type aligns with the Catering Inquiry form (Form 27): aluminium trays
+// (free), reusable plastic bowls, non-heated bowl setup, heated stainless,
+// premium hammered copper. Free-text fallback if Neela captures a phrasing
+// that doesn't snap cleanly to one of these.
+type SetupType =
+	| 'aluminium_trays'
+	| 'reusable_plastic_bowls'
+	| 'non_heated_bowl_setup'
+	| 'heated_stainless'
+	| 'hammered_copper'
+	| string;
+type RequirementChoice = 'required' | 'not_required';
+
 interface Order {
 	mode: Mode;
 	eventType?: EventType;
@@ -87,11 +100,18 @@ interface Order {
 	guestCount?: number | string; // number for 'full', string range allowed for 'quick'
 	serviceType?: ServiceType;
 	location?: { city?: string; venueOrAddress?: string };
-	timeWindow?: string;
+	deliveryAddress?: string; // full street address; primary location field for delivery jobs
+	deliveryTime?: string;    // e.g. "12:00 PM", "evening reception ~6 PM"
+	timeWindow?: string;      // legacy field, kept for back-compat with older order JSONs
 	dietary?: Dietary;
 	menuTier?: string;
 	addOns?: string[];
-	setupStyle?: string;
+	setupStyle?: string;      // legacy free-text version of setupType
+	setupType?: SetupType;
+	rentalsRequired?: boolean;
+	platesAndCutlery?: RequirementChoice;
+	servingSpoons?: RequirementChoice;
+	customMenuDetails?: string; // free-text capture of dish requests + style preference
 	contact: Contact;
 	notes?: string;
 	quote?: Quote;
@@ -188,6 +208,7 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 	if (o.serviceType && !VALID_SERVICE_TYPES.includes(o.serviceType as ServiceType)) {
 		return { ok: false, error: 'order.serviceType must be one of: ' + VALID_SERVICE_TYPES.join(', ') };
 	}
+	const oo = o as Partial<Order>;
 	const order: Order = {
 		mode,
 		eventType: o.eventType as EventType | undefined,
@@ -198,6 +219,8 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 			city: o.location.city ? String(o.location.city).slice(0, 200) : undefined,
 			venueOrAddress: o.location.venueOrAddress ? String(o.location.venueOrAddress).slice(0, 400) : undefined
 		} : undefined,
+		deliveryAddress: oo.deliveryAddress ? String(oo.deliveryAddress).slice(0, 400) : undefined,
+		deliveryTime: oo.deliveryTime ? String(oo.deliveryTime).slice(0, 80) : undefined,
 		timeWindow: o.timeWindow ? String(o.timeWindow).slice(0, 200) : undefined,
 		dietary: o.dietary && typeof o.dietary === 'object' ? {
 			vegetarianPct: typeof o.dietary.vegetarianPct === 'number' ? o.dietary.vegetarianPct : undefined,
@@ -213,6 +236,11 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		menuTier: o.menuTier ? String(o.menuTier).slice(0, 200) : undefined,
 		addOns: Array.isArray(o.addOns) ? o.addOns.map((s) => String(s).slice(0, 200)).slice(0, 30) : undefined,
 		setupStyle: o.setupStyle ? String(o.setupStyle).slice(0, 200) : undefined,
+		setupType: oo.setupType ? String(oo.setupType).slice(0, 60) : undefined,
+		rentalsRequired: typeof oo.rentalsRequired === 'boolean' ? oo.rentalsRequired : undefined,
+		platesAndCutlery: oo.platesAndCutlery === 'required' || oo.platesAndCutlery === 'not_required' ? oo.platesAndCutlery : undefined,
+		servingSpoons: oo.servingSpoons === 'required' || oo.servingSpoons === 'not_required' ? oo.servingSpoons : undefined,
+		customMenuDetails: oo.customMenuDetails ? String(oo.customMenuDetails).slice(0, 2000) : undefined,
 		contact: {
 			name: name.slice(0, 200),
 			email: email.slice(0, 200),
@@ -303,6 +331,17 @@ async function markEmailed(reference: string): Promise<void> {
 	} catch (err) {
 		console.warn('[neela-order] markEmailed failed', err instanceof Error ? err.message : err);
 	}
+}
+
+function formatSetupType(s: string): string {
+	const map: Record<string, string> = {
+		aluminium_trays: 'Aluminium catering trays (free)',
+		reusable_plastic_bowls: 'Reusable plastic bowls',
+		non_heated_bowl_setup: 'Non-heated bowl setup',
+		heated_stainless: 'Heated stainless steel chafing dishes',
+		hammered_copper: 'Premium hammered copper'
+	};
+	return map[s] || s;
 }
 
 function escapeHtml(s: string): string {
@@ -420,10 +459,20 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 		year: 'numeric',
 		timeZone: 'America/Vancouver'
 	});
+	// Prefer deliveryAddress (the new full-street-address field) over the legacy
+	// location.venueOrAddress / .city pair when present. Falls back gracefully so
+	// older order JSONs still render.
 	const locStr =
-		order.location?.venueOrAddress && order.location?.city
-			? `${order.location.venueOrAddress}, ${order.location.city}`
-			: order.location?.venueOrAddress || order.location?.city || undefined;
+		order.deliveryAddress
+			? order.deliveryAddress
+			: order.location?.venueOrAddress && order.location?.city
+				? `${order.location.venueOrAddress}, ${order.location.city}`
+				: order.location?.venueOrAddress || order.location?.city || undefined;
+	const setupLabel = order.setupType ? formatSetupType(order.setupType) : order.setupStyle || undefined;
+	const deliveryTimeLabel = order.deliveryTime || order.timeWindow || undefined;
+	const rentalsLabel = order.rentalsRequired === true ? 'Required' : order.rentalsRequired === false ? 'Not required' : undefined;
+	const platesLabel = order.platesAndCutlery === 'required' ? 'Required' : order.platesAndCutlery === 'not_required' ? 'Not required' : undefined;
+	const servingSpoonsLabel = order.servingSpoons === 'required' ? 'Required' : order.servingSpoons === 'not_required' ? 'Not required' : undefined;
 	const dietary = dietaryLines(order.dietary);
 	const dietaryHtml = dietary.length
 		? `<ul style="margin:4px 0 0 18px;padding:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${dietary.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul>`
@@ -451,10 +500,10 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 				<table cellpadding="0" cellspacing="0" style="width:100%">
 					${row('Event type', order.eventType)}
 					${row('Event date', order.eventDate)}
+					${row('Delivery time', deliveryTimeLabel)}
 					${row('Guest count', String(order.guestCount))}
 					${row('Service', order.serviceType)}
-					${row('Location', locStr)}
-					${row('Time', order.timeWindow)}
+					${row('Delivery address', locStr)}
 					${row('Contact', order.contact.name)}
 					${row('Email', order.contact.email)}
 					${row('Phone', order.contact.phone)}
@@ -466,10 +515,14 @@ function buildOrderEmailHtml(reference: string, order: Order): string {
 				<table cellpadding="0" cellspacing="0" style="width:100%">
 					${row('Menu tier', order.menuTier)}
 					${row('Add-ons', addOnsHtml)}
-					${row('Setup', order.setupStyle)}
+					${row('Setup', setupLabel)}
+					${row('Rentals', rentalsLabel)}
+					${row('Plates + cutlery', platesLabel)}
+					${row('Serving spoons', servingSpoonsLabel)}
 				</table>
 				<div style="margin-top:14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase">Dietary</div>
 				<div style="margin:6px 0 0">${dietaryHtml}</div>
+				${order.customMenuDetails ? `<div style="margin-top:14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase">Custom menu details</div><p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${escapeHtml(order.customMenuDetails)}</p>` : ''}
 				${order.notes ? `<div style="margin-top:14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:#666;letter-spacing:0.4px;text-transform:uppercase">Customer notes</div><p style="margin:6px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.6">${escapeHtml(order.notes)}</p>` : ''}
 			</td></tr>
 
@@ -495,18 +548,22 @@ function buildOrderEmailText(reference: string, order: Order): string {
 	lines.push(`Mode: ${order.mode}`);
 	if (order.eventType) lines.push(`Event type: ${order.eventType}`);
 	if (order.eventDate) lines.push(`Event date: ${order.eventDate}`);
+	if (order.deliveryTime || order.timeWindow) lines.push(`Delivery time: ${order.deliveryTime || order.timeWindow}`);
 	if (order.guestCount !== undefined) lines.push(`Guest count: ${order.guestCount}`);
 	if (order.serviceType) lines.push(`Service: ${order.serviceType}`);
-	if (order.location?.venueOrAddress || order.location?.city) {
-		lines.push(`Location: ${[order.location.venueOrAddress, order.location.city].filter(Boolean).join(', ')}`);
-	}
-	if (order.timeWindow) lines.push(`Time: ${order.timeWindow}`);
+	const addr = order.deliveryAddress || [order.location?.venueOrAddress, order.location?.city].filter(Boolean).join(', ');
+	if (addr) lines.push(`Delivery address: ${addr}`);
 	lines.push(`Contact: ${order.contact.name} <${order.contact.email}>${order.contact.phone ? ' / ' + order.contact.phone : ''}`);
 	if (order.menuTier) lines.push(`Menu tier: ${order.menuTier}`);
 	if (order.addOns?.length) lines.push(`Add-ons: ${order.addOns.join(', ')}`);
-	if (order.setupStyle) lines.push(`Setup: ${order.setupStyle}`);
+	const setupLabel = order.setupType ? formatSetupType(order.setupType) : order.setupStyle;
+	if (setupLabel) lines.push(`Setup: ${setupLabel}`);
+	if (order.rentalsRequired !== undefined) lines.push(`Rentals: ${order.rentalsRequired ? 'Required' : 'Not required'}`);
+	if (order.platesAndCutlery) lines.push(`Plates + cutlery: ${order.platesAndCutlery === 'required' ? 'Required' : 'Not required'}`);
+	if (order.servingSpoons) lines.push(`Serving spoons: ${order.servingSpoons === 'required' ? 'Required' : 'Not required'}`);
 	const dietary = dietaryLines(order.dietary);
 	if (dietary.length) lines.push('Dietary:\n  ' + dietary.join('\n  '));
+	if (order.customMenuDetails) lines.push(`Custom menu details: ${order.customMenuDetails}`);
 	if (order.notes) lines.push(`Notes: ${order.notes}`);
 	if (order.quote && order.quote.line_items && order.quote.line_items.length) {
 		lines.push('\n--- preliminary estimate ---');
@@ -564,6 +621,7 @@ function inferMenuForOrder(order: Order): { appetizers: MenuItem[]; curries: Men
 }
 
 function orderToInvoiceOrder(reference: string, order: Order, createdAt: string): InvoiceOrder {
+	const setupLabel = order.setupType ? formatSetupType(order.setupType) : order.setupStyle;
 	return {
 		reference,
 		createdAt,
@@ -573,11 +631,18 @@ function orderToInvoiceOrder(reference: string, order: Order, createdAt: string)
 		guestCount: order.guestCount,
 		serviceType: order.serviceType,
 		location: order.location,
+		deliveryAddress: order.deliveryAddress,
+		deliveryTime: order.deliveryTime,
 		timeWindow: order.timeWindow,
 		dietary: order.dietary,
 		menuTier: order.menuTier,
 		addOns: order.addOns,
-		setupStyle: order.setupStyle,
+		setupStyle: setupLabel,
+		setupType: order.setupType,
+		rentalsRequired: order.rentalsRequired,
+		platesAndCutlery: order.platesAndCutlery,
+		servingSpoons: order.servingSpoons,
+		customMenuDetails: order.customMenuDetails,
 		contact: order.contact,
 		notes: order.notes,
 		quote: order.quote
@@ -745,7 +810,7 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">${escapeHtml(body)}</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">Reply to this email if anything in the attached needs adjusting before we put together the quote.</p>
-				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
+				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events.sula@gmail.com &middot; 604-215-1130</p>
 			</td></tr>
 			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
 				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>

@@ -28,7 +28,9 @@ function pageFooterDark() {
 	);
 }
 
-function locationLine(loc: InvoiceOrder['location']): string {
+function locationLine(order: InvoiceOrder): string {
+	if (order.deliveryAddress) return order.deliveryAddress;
+	const loc = order.location;
 	if (!loc) return '';
 	if (loc.venueOrAddress && loc.city) return `${loc.venueOrAddress}, ${loc.city}`;
 	return loc.venueOrAddress || loc.city || '';
@@ -120,7 +122,7 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 					e(Text, { style: styles.invertedColLineHero }, guestStr + ' guests · ' + (order.eventType || 'event')),
 					e(Text, { style: styles.invertedColLine }, order.eventDate || 'Date TBD'),
 					order.timeWindow && e(Text, { style: styles.invertedColLine }, order.timeWindow),
-					locationLine(order.location) && e(Text, { style: styles.invertedColLine }, locationLine(order.location))
+					locationLine(order) && e(Text, { style: styles.invertedColLine }, locationLine(order))
 				)
 			),
 
@@ -178,7 +180,7 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 				View,
 				{ style: styles.plumCard },
 				e(Text, { style: styles.plumCardLabel }, 'Delivery / Service'),
-				e(Text, { style: styles.plumCardLine }, locationLine(order.location) || 'Address TBD'),
+				e(Text, { style: styles.plumCardLine }, locationLine(order) || 'Address TBD'),
 				order.timeWindow && e(Text, { style: styles.plumCardLineMuted }, 'Time: ' + order.timeWindow),
 				order.serviceType && e(Text, { style: styles.plumCardLineMuted }, 'Service: ' + order.serviceType)
 			),

@@ -33,6 +33,8 @@ export interface InvoiceOrder {
 	guestCount?: number | string;
 	serviceType?: string;
 	location?: { city?: string; venueOrAddress?: string };
+	deliveryAddress?: string;
+	deliveryTime?: string;
 	timeWindow?: string;
 	dietary?: {
 		vegetarianPct?: number;
@@ -48,6 +50,11 @@ export interface InvoiceOrder {
 	menuTier?: string;
 	addOns?: string[];
 	setupStyle?: string;
+	setupType?: string;
+	rentalsRequired?: boolean;
+	platesAndCutlery?: 'required' | 'not_required';
+	servingSpoons?: 'required' | 'not_required';
+	customMenuDetails?: string;
 	contact: { name: string; email: string; phone?: string };
 	notes?: string;
 	quote?: {
