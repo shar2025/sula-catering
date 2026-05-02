@@ -24,7 +24,7 @@
 				<span class="neela-avatar"><img src="/apple-touch-icon.png" alt="" width="36" height="36" /></span>
 				<div class="neela-header-text">
 					<h2 id="neela-title">Neela</h2>
-					<p>Your event planning helper</p>
+					<p>Plans your event &middot; takes your order</p>
 				</div>
 			</div>
 			<div class="neela-header-actions">
@@ -65,16 +65,6 @@
 			<button type="button" class="neela-chip" data-neela-prompt="Book a 30-min call">Book a 30-min call</button>
 			<button type="button" class="neela-chip" data-neela-prompt="Just browsing">Just browsing</button>
 		</div>
-
-		<form class="neela-lead-form" id="neela-lead-form" hidden>
-			<p class="neela-lead-intro">If you'd like, drop your name and email and I'll make sure our events team follows up on anything I can't fully handle here.</p>
-			<input type="text" name="name" placeholder="Your name" autocomplete="name" required />
-			<input type="email" name="email" placeholder="you@email.com" autocomplete="email" required />
-			<div class="neela-lead-actions">
-				<button type="submit" class="neela-lead-submit">Send to events team</button>
-				<button type="button" class="neela-lead-skip" data-neela-lead-skip>Maybe later</button>
-			</div>
-		</form>
 
 		<form class="neela-input-row" id="neela-input-row" autocomplete="off">
 			<button type="button" class="neela-icon-btn neela-mic" id="neela-mic" aria-label="Tap to record" title="Tap to record" hidden>
@@ -162,18 +152,6 @@
 	.neela-chip:hover{background:rgba(184,149,106,0.12);border-color:var(--gold-shimmer);color:var(--gold-shimmer);transform:translateY(-1px)}
 
 	/* LEAD FORM */
-	.neela-lead-form{display:flex;flex-direction:column;gap:8px;margin:6px 18px 10px;padding:14px;background:rgba(20,36,66,0.55);border:1px solid rgba(184,149,106,0.3);border-radius:12px;animation:neela-fade-up 0.4s cubic-bezier(0.4,0,0.2,1) both}
-	.neela-lead-form[hidden]{display:none}
-	.neela-lead-intro{font-family:'Cormorant Garamond',Georgia,serif;font-size:14.5px;color:var(--cream);font-style:italic;line-height:1.5;margin:0 0 4px;letter-spacing:0.2px}
-	.neela-lead-form input{background:rgba(5,11,21,0.55);border:1px solid rgba(184,149,106,0.28);border-radius:8px;padding:10px 12px;color:var(--cream);font-family:'Montserrat',sans-serif;font-size:14px;letter-spacing:0.2px;transition:border-color 0.3s ease,box-shadow 0.3s ease;outline:none}
-	.neela-lead-form input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,149,106,0.18)}
-	.neela-lead-form input::placeholder{color:rgba(245,237,224,0.42)}
-	.neela-lead-actions{display:flex;gap:8px;align-items:center;margin-top:4px}
-	.neela-lead-submit{background:linear-gradient(135deg,var(--gold-deep),var(--gold) 50%,var(--gold-light));color:var(--midnight);border:none;border-radius:8px;padding:10px 14px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;flex:1;transition:transform 0.3s ease,box-shadow 0.3s ease}
-	.neela-lead-submit:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(184,149,106,0.4)}
-	.neela-lead-skip{background:transparent;border:none;color:rgba(245,237,224,0.6);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;cursor:pointer;padding:8px 4px;letter-spacing:0.3px;transition:color 0.3s ease}
-	.neela-lead-skip:hover{color:var(--gold-light)}
-
 	/* INPUT ROW */
 	.neela-input-row{display:flex;align-items:center;gap:8px;padding:14px 16px 16px;border-top:1px solid rgba(184,149,106,0.18);background:rgba(10,22,40,0.4)}
 	.neela-input-row input{flex:1;background:rgba(5,11,21,0.6);border:1px solid rgba(184,149,106,0.25);border-radius:999px;padding:11px 16px;color:var(--cream);font-family:'Montserrat',sans-serif;font-size:14.5px;letter-spacing:0.2px;outline:none;transition:border-color 0.3s ease,box-shadow 0.3s ease}
@@ -246,7 +224,6 @@
 		.neela-messages{padding:14px 14px 6px}
 		.neela-suggested{padding:6px 14px 8px}
 		.neela-input-row{padding:12px 12px 14px}
-		.neela-lead-form{margin:6px 14px 8px}
 	}
 </style>
 
@@ -262,20 +239,16 @@
 	const sendBtn = inputForm.querySelector('.neela-send');
 	const speakerBtn = document.getElementById('neela-speaker');
 	const micBtn = document.getElementById('neela-mic');
-	const leadForm = document.getElementById('neela-lead-form');
 	if (!fab || !modal) return;
 
 	const SESSION_KEY = 'neela-conv-v1';
 	const SESSION_ID_KEY = 'neela-session-id';
-	const LEAD_DONE_KEY = 'neela-lead-done';
 	const FALLBACK_MSG = "I'm taking a quick break right now. Email events@sulaindianrestaurant.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
 	const MAX_USER_MESSAGES = 15;
-	const LEAD_PROMPT_AT = 3;
 
 	let conversation = [];
 	let sessionId = '';
 	let speakerOn = false;
-	let leadShown = sessionStorage.getItem(LEAD_DONE_KEY) === '1';
 
 	try { conversation = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]'); } catch (e) { conversation = []; }
 	try {
@@ -632,30 +605,9 @@
 		});
 	}
 
-	// Lead form
-	function showLeadForm() {
-		if (leadShown) return;
-		leadShown = true;
-		try { sessionStorage.setItem(LEAD_DONE_KEY, '1'); } catch (e) {}
-		leadForm.hidden = false;
-		messagesEl.scrollTop = messagesEl.scrollHeight;
-	}
-	leadForm.addEventListener('submit', async (e) => {
-		e.preventDefault();
-		const fd = new FormData(leadForm);
-		const payload = { name: fd.get('name'), email: fd.get('email'), sessionId, conversation };
-		leadForm.querySelector('.neela-lead-submit').disabled = true;
-		try {
-			await fetch('/api/neela-lead', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify(payload)
-			});
-		} catch (err) { /* silent — endpoint not online yet */ }
-		leadForm.hidden = true;
-		renderMessage('bot', "Thanks, " + (payload.name || 'friend') + ". Our events team will be in touch within a business day. In the meantime, ask me anything else.");
-	});
-	leadForm.querySelector('[data-neela-lead-skip]').addEventListener('click', () => { leadForm.hidden = true; });
+	// (Lead form auto-trigger removed: the new ORDER CAPTURE MODE marker flow
+	// handles contact capture inside the structured order summary card. Auto-
+	// popping a lead form by message count was interrupting active walkthroughs.)
 
 	// Submit handler
 	inputForm.addEventListener('submit', (e) => { e.preventDefault(); submitMessage(); });
@@ -702,9 +654,6 @@
 			if (speakerOn && reply) {
 				playSpokenReply(reply);
 			}
-
-			const newUserCount = conversation.filter(m => m.role === 'user').length;
-			if (newUserCount >= LEAD_PROMPT_AT && !leadShown) showLeadForm();
 		} catch (err) {
 			showTyping(false);
 			renderMessage('bot', FALLBACK_MSG);
