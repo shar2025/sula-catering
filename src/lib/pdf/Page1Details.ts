@@ -20,14 +20,19 @@ import type { InvoiceOrder, MenuLine } from './InvoicePdf.js';
 
 const e = React.createElement;
 
+// Day-first format with 3-letter month name. Numeric DD/MM vs MM/DD is
+// ambiguous to US readers (Sula's customer base spans Canada and the US),
+// so the body of the PDF spells the month out alongside the day.
+const MONTH_ABBREV = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 function formatEventDate(s: string | undefined): string {
 	if (!s) return '';
 	const d = new Date(s);
 	if (isNaN(d.getTime())) return s;
 	const dd = String(d.getDate()).padStart(2, '0');
-	const mm = String(d.getMonth() + 1).padStart(2, '0');
+	const mmm = MONTH_ABBREV[d.getMonth()];
 	const yyyy = d.getFullYear();
-	return `${dd}/${mm}/${yyyy}`;
+	return `${dd} ${mmm} ${yyyy}`;
 }
 
 function locationLine(order: InvoiceOrder): string {

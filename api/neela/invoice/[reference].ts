@@ -26,6 +26,7 @@ import { neon } from '@neondatabase/serverless';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type Audience, type InvoiceOrder } from '../../../src/lib/pdf/InvoicePdf.js';
 import { loadLogo, loadCormorant } from '../../../src/lib/pdf/styles.js';
+import { buildPdfFilename } from '../../../src/lib/pdf/filename.js';
 import { calculatePortions, type MenuItem } from '../../../src/lib/portioning.js';
 
 export const config = { maxDuration: 60 };
@@ -180,11 +181,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		// renderToBuffer wants ReactElement<DocumentProps>; the typed createElement
 		// chain produces a structural match but TypeScript can't narrow without help.
 		const buffer = await renderToBuffer(pdfDoc as unknown as Parameters<typeof renderToBuffer>[0]);
-		const filename = audience === 'kitchen'
-			? `${order.reference}-kitchen.pdf`
-			: audience === 'customer'
-				? `Sula-Catering-${order.reference}.pdf`
-				: `${order.reference}-full.pdf`;
+		// Suggested download filename. Reference is intentionally NOT in the
+		// filename anymore (customers found the SC-XXXX code confusing) but it
+		// still appears in the email body and inside the PDF for team tracking.
+		// 'all' (legacy diagnostic) gets the team invoice naming.
+		const suffix: 'invoice' | 'kitchen' | '' =
+			audience === 'kitchen' ? 'kitchen'
+			: audience === 'customer' ? ''
+			: 'invoice';
+		const filename = buildPdfFilename({
+			customerName: order.contact?.name,
+			eventDate: order.eventDate,
+			suffix
+		});
 		res.setHeader('Content-Type', 'application/pdf');
 		res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
 		res.setHeader('Cache-Control', 'private, no-cache');

@@ -1,9 +1,10 @@
 // scripts/smoke-test-team-attachments.mjs
 //
 // Verifies that the team-email attachment composition in
-// api/neela/submit-order.ts produces TWO attachments:
-//   1) Sula-Catering-{ref}-invoice.pdf  (audience=internal, 2 pages)
-//   2) Sula-Catering-{ref}-kitchen.pdf  (audience=kitchen,  1 page)
+// api/neela/submit-order.ts produces TWO attachments built via
+// buildPdfFilename({ customerName, eventDate, suffix }):
+//   1) Sula-Catering-{Customer}-{DD-MMM-YYYY}-invoice.pdf  (audience=internal, 2 pages)
+//   2) Sula-Catering-{Customer}-{DD-MMM-YYYY}-kitchen.pdf  (audience=kitchen,  1 page)
 //
 // Reproduces the exact rendering primitives sendOrderEmail uses so we
 // catch attachment-composition regressions without actually calling
@@ -17,6 +18,7 @@ import { resolve } from 'node:path';
 
 const { buildInvoicePdf } = await import('../src/lib/pdf/InvoicePdf.ts');
 const { loadLogo, loadCormorant } = await import('../src/lib/pdf/styles.ts');
+const { buildPdfFilename } = await import('../src/lib/pdf/filename.ts');
 const { calculatePortions } = await import('../src/lib/portioning.ts');
 
 const REFERENCE = 'SC-SMOKE-TEAM';
@@ -89,17 +91,32 @@ const [teamBuffer, customerBuffer, kitchenBuffer] = await Promise.all([
 console.log(`[smoke-team] all 3 rendered in ${Date.now() - t0}ms`);
 
 // Reproduce the exact attachment composition from sendOrderEmail.
+const customerName = order.contact.name;
+const eventDate = order.eventDate;
 const teamAttachments = [];
 if (teamBuffer) {
-	teamAttachments.push({ filename: `Sula-Catering-${REFERENCE}-invoice.pdf`, content: teamBuffer });
+	teamAttachments.push({
+		filename: buildPdfFilename({ customerName, eventDate, suffix: 'invoice' }),
+		content: teamBuffer
+	});
 }
 if (kitchenBuffer) {
-	teamAttachments.push({ filename: `Sula-Catering-${REFERENCE}-kitchen.pdf`, content: kitchenBuffer });
+	teamAttachments.push({
+		filename: buildPdfFilename({ customerName, eventDate, suffix: 'kitchen' }),
+		content: kitchenBuffer
+	});
 }
 
 const customerAttachments = customerBuffer
-	? [{ filename: `Sula-Catering-${REFERENCE}.pdf`, content: customerBuffer }]
+	? [{
+		filename: buildPdfFilename({ customerName, eventDate }),
+		content: customerBuffer
+	}]
 	: [];
+
+const expectedInvoice = buildPdfFilename({ customerName, eventDate, suffix: 'invoice' });
+const expectedKitchen = buildPdfFilename({ customerName, eventDate, suffix: 'kitchen' });
+const expectedCustomer = buildPdfFilename({ customerName, eventDate });
 
 console.log('\n[smoke-team] TEAM email attachments:');
 for (const a of teamAttachments) {
@@ -120,11 +137,14 @@ function assert(cond, msg) {
 
 console.log('\n[smoke-team] assertions:');
 assert(teamAttachments.length === 2, 'team email has exactly 2 attachments');
-assert(teamAttachments[0]?.filename === `Sula-Catering-${REFERENCE}-invoice.pdf`, 'attachment[0] is the invoice PDF');
-assert(teamAttachments[1]?.filename === `Sula-Catering-${REFERENCE}-kitchen.pdf`, 'attachment[1] is the kitchen PDF');
+assert(teamAttachments[0]?.filename === expectedInvoice, `attachment[0] is the invoice PDF (${expectedInvoice})`);
+assert(teamAttachments[1]?.filename === expectedKitchen, `attachment[1] is the kitchen PDF (${expectedKitchen})`);
+assert(/^Sula-Catering-Smoke-Test-22-Apr-2026/.test(teamAttachments[0]?.filename || ''), 'invoice filename uses DD-MMM-YYYY format with sanitized customer name');
+assert(!/SC-SMOKE-TEAM/.test(teamAttachments[0]?.filename || ''), 'invoice filename no longer contains the SC-XXXX reference');
 assert(teamAttachments[0]?.content.length > 50_000, 'invoice PDF is reasonably sized (>50KB)');
 assert(teamAttachments[1]?.content.length > 50_000, 'kitchen PDF is reasonably sized (>50KB)');
 assert(customerAttachments.length === 1, 'customer email has exactly 1 attachment');
+assert(customerAttachments[0]?.filename === expectedCustomer, `customer attachment is named ${expectedCustomer}`);
 assert(customerAttachments[0]?.content.length < teamAttachments[0]?.content.length, 'customer PDF (1 page) is smaller than team invoice PDF (2 pages)');
 
 if (!pass) {

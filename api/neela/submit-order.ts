@@ -28,12 +28,14 @@ import { Resend } from 'resend';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { buildInvoicePdf, type InvoiceOrder, type Audience } from '../../src/lib/pdf/InvoicePdf.js';
 import { loadLogo, loadCormorant } from '../../src/lib/pdf/styles.js';
+import { buildPdfFilename } from '../../src/lib/pdf/filename.js';
 import { calculatePortions, type MenuItem } from '../../src/lib/portioning.js';
 
 export const config = { maxDuration: 30 };
 
 // Recipient + sender resolution.
-//   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject prefixed [TEST MODE])
+//   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject is
+//                      NOT decorated; the redirect itself is the test signal)
 //   NEELA_FROM_EMAIL → override sender; defaults to neela@sulacatering.com (verified)
 const EMAIL_TO_PROD = 'mail.sharathvittal@gmail.com';
 const FROM_TEAM = 'Neela <neela@sulacatering.com>';
@@ -46,9 +48,6 @@ function emailFrom(): string {
 }
 function isTestMode(): boolean {
 	return !!process.env.NEELA_TEST_EMAIL;
-}
-function withTestPrefix(subject: string): string {
-	return isTestMode() ? `[TEST MODE] ${subject}` : subject;
 }
 const REFERENCE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // I, O, 0, 1 excluded for readability
 
@@ -790,7 +789,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const fromAddr = emailFrom();
 		const teamRecipient = recipient();
 		const testMode = isTestMode();
-		const subject = withTestPrefix(modeSubject(reference, order));
+		const subject = modeSubject(reference, order);
 		const html = buildOrderEmailHtml(reference, order);
 		const text = buildOrderEmailText(reference, order);
 
@@ -800,10 +799,16 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		// to NEELA_TEST_EMAIL.
 		const teamAttachments: { filename: string; content: Buffer }[] = [];
 		if (teamBuffer) {
-			teamAttachments.push({ filename: `Sula-Catering-${reference}-invoice.pdf`, content: teamBuffer });
+			teamAttachments.push({
+				filename: buildPdfFilename({ customerName: order.contact.name, eventDate: order.eventDate, suffix: 'invoice' }),
+				content: teamBuffer
+			});
 		}
 		if (kitchenBuffer) {
-			teamAttachments.push({ filename: `Sula-Catering-${reference}-kitchen.pdf`, content: kitchenBuffer });
+			teamAttachments.push({
+				filename: buildPdfFilename({ customerName: order.contact.name, eventDate: order.eventDate, suffix: 'kitchen' }),
+				content: kitchenBuffer
+			});
 		}
 		const teamTo = testMode ? teamRecipient : 'events@sulaindianrestaurant.com';
 		const teamResult = await resend.emails.send({
@@ -844,17 +849,17 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		// reply-to points at the events team so customer replies land there.
 		if (customerBuffer && order.contact.email) {
 			try {
-				const customerSubjectBase = `Sula Catering, your event details (for your records) ${reference}`;
-				const customerSubject = withTestPrefix(customerSubjectBase);
+				const customerSubject = `Sula Catering, your event details (for your records) ${reference}`;
 				const customerTo = testMode ? teamRecipient : order.contact.email;
 				const customerHtml = buildCustomerEmailHtml(reference, order);
+				const customerFilename = buildPdfFilename({ customerName: order.contact.name, eventDate: order.eventDate });
 				const customerResult = await resend.emails.send({
 					from: FROM_CUSTOMER,
 					to: [customerTo],
 					replyTo: EMAIL_TO_PROD,
 					subject: customerSubject,
 					html: customerHtml,
-					attachments: [{ filename: `Sula-Catering-${reference}.pdf`, content: customerBuffer }]
+					attachments: [{ filename: customerFilename, content: customerBuffer }]
 				});
 				if (customerResult.error) {
 					const e = customerResult.error as { message?: string; statusCode?: number; name?: string };
@@ -874,12 +879,14 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		if (kitchenBuffer && process.env.KITCHEN_EMAIL) {
 			try {
 				const kitchenTo = testMode ? teamRecipient : process.env.KITCHEN_EMAIL;
+				const kitchenSubject = `[Neela kitchen sheet ${reference}] ${order.eventDate || ''}`.trim();
+				const kitchenFilename = buildPdfFilename({ customerName: order.contact.name, eventDate: order.eventDate, suffix: 'kitchen' });
 				const kitchenResult = await resend.emails.send({
 					from: fromAddr,
 					to: [kitchenTo],
-					subject: withTestPrefix(`[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim()),
+					subject: kitchenSubject,
 					html: `<p style="font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">Kitchen prep sheet for reference <strong>${reference}</strong> attached. ${order.guestCount || ''} guests, ${order.eventDate || 'date TBD'}.</p>`,
-					attachments: [{ filename: `Sula-Catering-${reference}-kitchen.pdf`, content: kitchenBuffer }]
+					attachments: [{ filename: kitchenFilename, content: kitchenBuffer }]
 				});
 				if (kitchenResult.error) {
 					const e = kitchenResult.error as { message?: string; statusCode?: number; name?: string };
