@@ -12,14 +12,13 @@
  * Email diagnostics: the Resend SDK does NOT throw on rejected sends, it
  * returns { data: null, error: ResendError }. We surface that error string
  * back through the handler response as `emailError` so a silent rejection
- * (invalid api key, unverified domain, free-tier sender restriction, etc.)
- * does not produce a misleading `emailed: true`. If you ever see emailed
- * stay false in production, the most common causes are:
+ * (invalid api key, unverified sender, etc.) does not produce a misleading
+ * `emailed: true`. If you ever see emailed stay false in production, the most
+ * common causes are:
  *   1. RESEND_API_KEY env var unset, rotated, or pointing at a different
  *      Resend account than the one whose dashboard you are checking,
- *   2. sulacatering.com domain not verified in Resend (the only addresses
- *      onboarding@resend.dev can deliver to are the team-owner inbox),
- *   3. NEELA_FROM_EMAIL set to an unverified custom sender.
+ *   2. NEELA_FROM_EMAIL set to a sender outside sulacatering.com,
+ *   3. sulacatering.com DNS regressed and the domain is no longer Verified.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -35,14 +34,15 @@ export const config = { maxDuration: 30 };
 
 // Recipient + sender resolution.
 //   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject prefixed [TEST MODE])
-//   NEELA_FROM_EMAIL → custom sender; falls back to Resend's onboarding@resend.dev
-//                       (the only sender that works without verified domain DNS)
+//   NEELA_FROM_EMAIL → override sender; defaults to neela@sulacatering.com (verified)
 const EMAIL_TO_PROD = 'mail.sharathvittal@gmail.com';
+const FROM_TEAM = 'Neela <neela@sulacatering.com>';
+const FROM_CUSTOMER = 'Sula Catering <neela@sulacatering.com>';
 function recipient(): string {
 	return process.env.NEELA_TEST_EMAIL || EMAIL_TO_PROD;
 }
 function emailFrom(): string {
-	return process.env.NEELA_FROM_EMAIL || 'Neela <onboarding@resend.dev>';
+	return process.env.NEELA_FROM_EMAIL || FROM_TEAM;
 }
 function isTestMode(): boolean {
 	return !!process.env.NEELA_TEST_EMAIL;
@@ -729,12 +729,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const teamAttachments = fullBuffer
 			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
 			: undefined;
-		// TEMP: Resend free tier requires sending to the team-owner inbox until
-		// sulacatering.com domain is verified at resend.com/domains. Hardcoded
-		// (no NEELA_TEST_EMAIL override) because Resend rejects any other
-		// recipient with 403. After verification, switch FROM to
-		// neela@sulacatering.com and revert this back to events@sulaindianrestaurant.com.
-		const teamTo = 'sulaindianrestaurant@gmail.com';
+		const teamTo = testMode ? teamRecipient : 'events@sulaindianrestaurant.com';
 		const teamResult = await resend.emails.send({
 			from: fromAddr,
 			to: [teamTo],
@@ -773,7 +768,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 				const customerTo = testMode ? teamRecipient : order.contact.email;
 				const customerHtml = buildCustomerEmailHtml(reference, order);
 				const customerResult = await resend.emails.send({
-					from: fromAddr,
+					from: FROM_CUSTOMER,
 					to: [customerTo],
 					replyTo: EMAIL_TO_PROD,
 					subject: customerSubject,
