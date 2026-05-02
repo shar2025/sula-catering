@@ -1,0 +1,80 @@
+---
+// CopyProtect: friction layer against casual content copying.
+// Mounted once in Layout.astro so it loads on every page.
+// Critical: must NOT block typing, paste, or right-click inside Neela chat
+// (any element matching [class*="neela-"]) or inside form inputs.
+---
+<style is:global>
+	body {
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+	input,
+	textarea,
+	select,
+	button,
+	[contenteditable="true"],
+	[contenteditable=""],
+	.selectable,
+	.selectable *,
+	[class*="neela-"],
+	[class*="neela-"] * {
+		-webkit-user-select: text;
+		-ms-user-select: text;
+		user-select: text;
+	}
+	img {
+		-webkit-user-drag: none;
+		-webkit-touch-callout: none;
+	}
+</style>
+<script is:inline>
+	(function () {
+		var EXEMPT_SELECTOR = 'input, textarea, select, [contenteditable="true"], [contenteditable=""], .selectable, [class*="neela-"]';
+
+		function isExempt(target) {
+			if (!target || !target.closest) return false;
+			return !!target.closest(EXEMPT_SELECTOR);
+		}
+
+		// 1. Right-click context menu, allowed inside Neela + inputs + .selectable
+		document.addEventListener('contextmenu', function (e) {
+			if (!isExempt(e.target)) e.preventDefault();
+		});
+
+		// 2. Block image drag globally (cheap, no need to rewrite img tags)
+		document.addEventListener('dragstart', function (e) {
+			if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+		});
+
+		// 3. Keyboard shortcut friction (theater, but stops casual snoopers).
+		// Never interfere when the user is typing into a field.
+		document.addEventListener('keydown', function (e) {
+			if (isExempt(e.target)) return;
+			var key = (e.key || '').toLowerCase();
+			var mod = e.ctrlKey || e.metaKey;
+			if (mod && (key === 's' || key === 'p' || key === 'u')) {
+				e.preventDefault();
+			} else if (key === 'f12') {
+				e.preventDefault();
+			} else if (mod && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) {
+				e.preventDefault();
+			}
+		});
+
+		// 4. Stylized console notice on every page load. Does not prevent
+		// anything but signals intent for anyone opening devtools.
+		try {
+			var bigStyle = 'color:#b8001f;font-size:28px;font-weight:700;font-family:Georgia,serif;';
+			var smallStyle = 'color:#1a1a1a;font-size:13px;font-family:Helvetica,Arial,sans-serif;line-height:1.5;';
+			console.log('%cStop.', bigStyle);
+			console.log(
+				'%cThis is a private development area. Unauthorized scraping or content theft will be reported under DMCA.\nReach out to events.sula@gmail.com if you would like to discuss licensing.',
+				smallStyle
+			);
+		} catch (err) {
+			/* console may be unavailable, ignore */
+		}
+	})();
+</script>

@@ -1,5 +1,6 @@
 ---
 import Neela from '../components/Neela.astro';
+import CopyProtect from '../components/CopyProtect.astro';
 const {
 	title = "Sula Catering Vancouver | Award-Winning Indian Catering for Weddings, Corporate & Events",
 	description = "Vancouver's most trusted Indian catering since 2010. Wedding, corporate, and private party catering across Vancouver, Burnaby, Richmond, and Surrey. Halal, vegetarian, vegan options.",
@@ -65,7 +66,7 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
-		<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+		<meta name="robots" content="index, follow, noarchive, nosnippet, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 		<meta name="geo.region" content="CA-BC" />
 		<meta name="geo.placename" content="Vancouver" />
 		<title>{title}</title>
@@ -232,10 +233,14 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 					<a href="https://sulaindianrestaurant.com/sula-catering-order/" target="_blank" rel="noopener" class="footer-cta">Request a Quote →</a>
 				</div>
 			</div>
-			<div class="footer-bottom"><p>© 2026 Sula Indian Restaurant · All Rights Reserved</p></div>
+			<div class="footer-bottom">
+				<p>© 2026 Sula Indian Restaurant · All Rights Reserved</p>
+				<p class="footer-dmca">© 2026 Sula Indian Restaurant. All content, photographs, and recipes are property of Sula Indian Restaurant. Unauthorized use, reproduction, or distribution is prohibited.</p>
+			</div>
 		</footer>
 
 		<Neela />
+		<CopyProtect />
 
 		<style is:global>
 			:root {
@@ -688,6 +693,7 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 
 			.footer-bottom{border-top:1px solid rgba(184,149,106,0.15);padding:28px 0;text-align:center;margin-top:8px}
 			.footer-bottom p{color:rgba(245,237,224,0.55);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400}
+			.footer-bottom .footer-dmca{margin-top:14px;max-width:780px;margin-left:auto;margin-right:auto;padding:0 24px;color:rgba(245,237,224,0.4);font-size:10.5px;letter-spacing:0.4px;text-transform:none;line-height:1.6;font-style:italic}
 
 			/* FOOTER MOBILE - tighter letter-spacing on labels to avoid crop, center align */
 			@media (max-width:600px){
