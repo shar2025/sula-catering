@@ -9,50 +9,39 @@
  *
  * Returns audio/mpeg bytes. Frontend wraps in Blob URL and plays.
  * If keys are missing, returns 503 and the frontend silently skips audio playback.
+ *
+ * Vercel Node runtime, Express-style (req, res) handler.
  */
 
-export const maxDuration = 60;
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export const config = { maxDuration: 60 };
 
 const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — warm, refined female voice
 const MAX_TEXT_LENGTH = 1200;
 
 interface VoiceRequest {
-	text: string;
+	text?: string;
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+	console.log('[neela-voice] hit', req.method);
+
 	if (req.method !== 'POST') {
-		return new Response(JSON.stringify({ error: 'method not allowed' }), {
-			status: 405,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return res.status(405).json({ error: 'method not allowed' });
 	}
 
-	let body: VoiceRequest;
-	try {
-		body = (await req.json()) as VoiceRequest;
-	} catch {
-		return new Response(JSON.stringify({ error: 'invalid json' }), {
-			status: 400,
-			headers: { 'Content-Type': 'application/json' }
-		});
-	}
-
-	const text = (body.text || '').trim().slice(0, MAX_TEXT_LENGTH);
+	const body = (req.body || {}) as VoiceRequest;
+	const text = (body.text || '').toString().trim().slice(0, MAX_TEXT_LENGTH);
 	if (!text) {
-		return new Response(JSON.stringify({ error: 'no text' }), {
-			status: 400,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return res.status(400).json({ error: 'no text' });
 	}
 
 	const apiKey = process.env.ELEVENLABS_API_KEY;
 	const voiceId = process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID;
 	if (!apiKey) {
-		return new Response(JSON.stringify({ error: 'tts unavailable' }), {
-			status: 503,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		console.warn('[neela-voice] ELEVENLABS_API_KEY not set');
+		return res.status(503).json({ error: 'tts unavailable' });
 	}
 
 	try {
@@ -76,26 +65,18 @@ export default async function handler(req: Request): Promise<Response> {
 		});
 
 		if (!elevenResp.ok) {
-			console.error('[neela-voice] elevenlabs error', elevenResp.status, await elevenResp.text().catch(() => ''));
-			return new Response(JSON.stringify({ error: 'tts upstream error' }), {
-				status: 502,
-				headers: { 'Content-Type': 'application/json' }
-			});
+			const errBody = await elevenResp.text().catch(() => '');
+			console.error('[neela-voice] elevenlabs error', elevenResp.status, errBody.slice(0, 200));
+			return res.status(502).json({ error: 'tts upstream error' });
 		}
 
-		const audio = await elevenResp.arrayBuffer();
-		return new Response(audio, {
-			status: 200,
-			headers: {
-				'Content-Type': 'audio/mpeg',
-				'Cache-Control': 'no-store'
-			}
-		});
+		const buffer = Buffer.from(await elevenResp.arrayBuffer());
+		console.log('[neela-voice] ok', { bytes: buffer.length });
+		res.setHeader('Content-Type', 'audio/mpeg');
+		res.setHeader('Cache-Control', 'no-store');
+		return res.status(200).send(buffer);
 	} catch (err) {
 		console.error('[neela-voice] error', err);
-		return new Response(JSON.stringify({ error: 'tts error' }), {
-			status: 502,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return res.status(502).json({ error: 'tts error' });
 	}
 }

@@ -4,11 +4,17 @@
  * For now, logs to Vercel function logs and returns 200. Later, wire to
  * the events team's email or CRM (Resend, Zapier, HubSpot, etc.) by adding
  * a transport block below. Env vars for that transport go in NEELA-SETUP.md.
+ *
+ * Vercel Node runtime, Express-style (req, res) handler.
  */
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export const config = { maxDuration: 10 };
+
 interface LeadRequest {
-	name: string;
-	email: string;
+	name?: string;
+	email?: string;
 	sessionId?: string;
 	conversation?: { role: string; content: string }[];
 }
@@ -17,31 +23,18 @@ function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+	console.log('[neela-lead] hit', req.method);
+
 	if (req.method !== 'POST') {
-		return new Response(JSON.stringify({ error: 'method not allowed' }), {
-			status: 405,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return res.status(405).json({ error: 'method not allowed' });
 	}
 
-	let body: LeadRequest;
-	try {
-		body = (await req.json()) as LeadRequest;
-	} catch {
-		return new Response(JSON.stringify({ error: 'invalid json' }), {
-			status: 400,
-			headers: { 'Content-Type': 'application/json' }
-		});
-	}
-
+	const body = (req.body || {}) as LeadRequest;
 	const name = (body.name || '').toString().trim().slice(0, 200);
 	const email = (body.email || '').toString().trim().slice(0, 200);
 	if (!name || !email || !isValidEmail(email)) {
-		return new Response(JSON.stringify({ error: 'name and valid email required' }), {
-			status: 400,
-			headers: { 'Content-Type': 'application/json' }
-		});
+		return res.status(400).json({ error: 'name and valid email required' });
 	}
 
 	const transcript = Array.isArray(body.conversation)
@@ -56,10 +49,7 @@ export default async function handler(req: Request): Promise<Response> {
 		at: new Date().toISOString()
 	}));
 
-	// TODO: wire transport (Resend / Zapier / HubSpot) once Shar provides the destination.
+	// TODO: wire transport (Resend / Zapier / HubSpot) once a destination is provided.
 
-	return new Response(JSON.stringify({ ok: true }), {
-		status: 200,
-		headers: { 'Content-Type': 'application/json' }
-	});
+	return res.status(200).json({ ok: true });
 }
