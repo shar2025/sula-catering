@@ -35,6 +35,7 @@ const SAMPLE_ORDER: InvoiceOrder = {
 	dietary: {
 		vegetarianPct: 100,
 		hasGlutenFree: true,
+		hasNutAllergy: true,
 		notes: 'Two guests gluten-free; one tree-nut allergy at table 3.'
 	},
 	menuTier: 'Vegetarian/Vegan ($22.95 + tax per guest)',

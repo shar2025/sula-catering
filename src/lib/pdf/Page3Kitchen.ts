@@ -109,6 +109,60 @@ function sectionHeader(label: string) {
 	return e(Text, { style: styles.sectionEyebrowCompact }, label);
 }
 
+// Allergies & dietary flags callout. Sits at the top of the kitchen body so
+// prep cooks see allergens before anything else. Severe allergens (nut,
+// shellfish) render as solid red chips; dietary preferences (gluten-free,
+// dairy-free, jain, vegan) render as gold-outlined chips with plum text.
+// Free-text notes from the customer follow in italic. When nothing is
+// flagged and notes are empty, a muted line states that explicitly so a
+// cook can't mistake an empty section for a missing one.
+function allergiesSection(order: InvoiceOrder) {
+	const d = order.dietary;
+	const severe: string[] = [];
+	const dietary: string[] = [];
+	if (d?.hasNutAllergy) severe.push('NUT ALLERGY');
+	if (d?.hasShellfishAllergy) severe.push('SHELLFISH ALLERGY');
+	if (d?.hasGlutenFree) dietary.push('GLUTEN-FREE');
+	if (d?.hasDairyFree) dietary.push('DAIRY-FREE');
+	if (d?.hasJain) dietary.push('JAIN');
+	if (d?.hasVegan) dietary.push('VEGAN');
+	const notes = (d?.notes || '').trim();
+	const hasFlags = severe.length + dietary.length > 0;
+
+	return e(
+		React.Fragment,
+		null,
+		sectionHeader('ALLERGIES & DIETARY FLAGS'),
+		e(
+			View,
+			{ style: styles.allergiesCallout },
+			hasFlags
+				? e(
+					View,
+					{ style: styles.allergiesFlagsRow },
+					...severe.map((flag, i) =>
+						e(
+							View,
+							{ style: styles.allergiesSevereChip, key: `severe-${i}` },
+							e(Text, { style: styles.allergiesSevereChipText }, flag)
+						)
+					),
+					...dietary.map((flag, i) =>
+						e(
+							View,
+							{ style: styles.allergiesDietaryChip, key: `dietary-${i}` },
+							e(Text, { style: styles.allergiesDietaryChipText }, flag)
+						)
+					)
+				)
+				: !notes
+					? e(Text, { style: styles.allergiesEmpty }, 'No allergies or dietary flags noted.')
+					: null,
+			notes ? e(Text, { style: styles.allergiesNotes }, notes) : null
+		)
+	);
+}
+
 export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { logoBuffer?: Buffer | null } = {}) {
 	const guests = typeof order.guestCount === 'number' ? order.guestCount : parseInt(String(order.guestCount || '0'), 10) || sheet.guestCount;
 	const address = locationLine(order) || 'To be confirmed with customer';
@@ -129,6 +183,8 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 	right.push(kitchenField('Payment', payment));
 
 	const checklist = [
+		'Allergy + dietary flags reviewed by lead chef',
+		'Allergens cross-checked at quality station',
 		'Take business cards',
 		'All items packed & counted',
 		'Chutneys & sauces sealed',
@@ -167,6 +223,10 @@ export function renderPage3(order: InvoiceOrder, sheet: KitchenSheet, opts: { lo
 				e(View, { style: styles.twoColCell }, ...left.filter(Boolean)),
 				e(View, { style: styles.twoColCell }, ...right.filter(Boolean))
 			),
+
+			// Allergies & dietary flags, top-of-body callout so line cooks see
+			// allergens before they read portioning, setup, or delivery.
+			allergiesSection(order),
 
 			// Portioning section
 			sectionHeader(`PORTIONING (${guests || sheet.guestCount} Guests)`),

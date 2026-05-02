@@ -58,7 +58,12 @@ export const COLORS = {
 	goldFaint: 'rgba(184,149,106,0.32)',
 	cream: '#f5ede0',
 	creamMuted: 'rgba(245,237,224,0.78)',
-	creamDim: 'rgba(245,237,224,0.55)'
+	creamDim: 'rgba(245,237,224,0.55)',
+
+	// Severe-allergy callout colour. Used ONLY on the Page 3 (kitchen) allergies
+	// chip background so a busy line cook can't miss a nut/shellfish flag.
+	severe: '#a63226',
+	severeBg: '#fbebe8'
 };
 
 // ---------- Logo ----------
@@ -389,8 +394,8 @@ export const styles = StyleSheet.create({
 		borderBottomWidth: 0.6,
 		borderBottomColor: COLORS.gold,
 		borderBottomStyle: 'solid',
-		marginTop: 5,
-		marginBottom: 3
+		marginTop: 3,
+		marginBottom: 2
 	},
 
 	// ---------- Section opener (eyebrow + headline + diamond divider) ----------
@@ -589,7 +594,7 @@ export const styles = StyleSheet.create({
 	twoColCell: { flex: 1 },
 	kitchenFieldRow: {
 		flexDirection: 'row',
-		paddingVertical: 2,
+		paddingVertical: 1.5,
 		alignItems: 'flex-start'
 	},
 	kitchenFieldLabel: {
@@ -610,7 +615,7 @@ export const styles = StyleSheet.create({
 	// Portioning table (3 cols: Item | Portions | Notes)
 	portTableHeaderRow: {
 		flexDirection: 'row',
-		paddingVertical: 7,
+		paddingVertical: 5,
 		paddingHorizontal: 10,
 		backgroundColor: COLORS.plum
 	},
@@ -636,7 +641,7 @@ export const styles = StyleSheet.create({
 	},
 	portRow: {
 		flexDirection: 'row',
-		paddingVertical: 3,
+		paddingVertical: 1.5,
 		paddingHorizontal: 10,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.goldFaint,
@@ -678,17 +683,83 @@ export const styles = StyleSheet.create({
 		lineHeight: 1.35
 	},
 	portFootnote: {
-		marginTop: 8,
+		marginTop: 4,
 		fontFamily: FONTS.italic,
 		fontSize: 9,
 		color: COLORS.muted,
-		lineHeight: 1.4
+		lineHeight: 1.35
+	},
+
+	// ---------- Allergies & dietary flags callout (Page 3 only) ----------
+	// Boxed callout with a thick gold border + cream tint background sits at
+	// the top of the kitchen body so prep cooks see allergens before anything
+	// else. Flags render as chips: severe (nut, shellfish) get a solid red
+	// chip, dietary preferences (gluten-free, dairy-free, jain, vegan) get a
+	// gold-outlined chip with plum text. Free-text notes follow in italic.
+	allergiesCallout: {
+		marginTop: 2,
+		marginBottom: 4,
+		paddingTop: 5,
+		paddingBottom: 5,
+		paddingHorizontal: 10,
+		backgroundColor: COLORS.creamSoft,
+		borderWidth: 1.5,
+		borderStyle: 'solid',
+		borderColor: COLORS.gold,
+		borderRadius: 2
+	},
+	allergiesFlagsRow: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		alignItems: 'flex-start'
+	},
+	allergiesSevereChip: {
+		backgroundColor: COLORS.severe,
+		paddingHorizontal: 8,
+		paddingVertical: 3,
+		marginRight: 8,
+		marginBottom: 3,
+		borderRadius: 2
+	},
+	allergiesSevereChipText: {
+		fontFamily: FONTS.bold,
+		fontSize: 11,
+		color: COLORS.cream,
+		letterSpacing: 0.6
+	},
+	allergiesDietaryChip: {
+		borderWidth: 1,
+		borderColor: COLORS.gold,
+		borderStyle: 'solid',
+		paddingHorizontal: 8,
+		paddingVertical: 3,
+		marginRight: 8,
+		marginBottom: 3,
+		borderRadius: 2
+	},
+	allergiesDietaryChipText: {
+		fontFamily: FONTS.bold,
+		fontSize: 10.5,
+		color: COLORS.plum,
+		letterSpacing: 0.4
+	},
+	allergiesNotes: {
+		marginTop: 4,
+		fontFamily: FONTS.italic,
+		fontSize: 9.5,
+		color: COLORS.text,
+		lineHeight: 1.35
+	},
+	allergiesEmpty: {
+		fontFamily: FONTS.italic,
+		fontSize: 9.5,
+		color: COLORS.muted
 	},
 
 	// Setup / Delivery 3-col rows
 	threeColRow: {
 		flexDirection: 'row',
-		paddingVertical: 2.5,
+		paddingVertical: 1.5,
 		paddingHorizontal: 4,
 		borderBottomWidth: 0.4,
 		borderBottomColor: COLORS.goldFaint,
@@ -719,7 +790,7 @@ export const styles = StyleSheet.create({
 	checklistItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		paddingVertical: 2,
+		paddingVertical: 0.8,
 		gap: 8
 	},
 	checkbox: {
