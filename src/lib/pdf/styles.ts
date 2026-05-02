@@ -393,6 +393,44 @@ export const styles = StyleSheet.create({
 		marginBottom: 3
 	},
 
+	// ---------- Section opener (eyebrow + headline + diamond divider) ----------
+	// Mirrors the live site's "FROM IDEA TO CELEBRATION" + "Build Your Menu"
+	// + ─── ◆ ─── pattern. Used on Page 2 to introduce the order/totals
+	// block as a confident section opener instead of a thin underlined word.
+	sectionOpener: {
+		alignItems: 'center',
+		marginTop: 12,
+		marginBottom: 10
+	},
+	sectionOpenerEyebrow: {
+		fontFamily: FONTS.bold,
+		fontSize: 8.5,
+		color: COLORS.gold,
+		textAlign: 'center',
+		letterSpacing: 2.5,
+		marginBottom: 8
+	},
+	sectionOpenerHeadline: {
+		fontFamily: FONTS.bold,
+		fontSize: 17,
+		color: COLORS.plum,
+		textAlign: 'center',
+		letterSpacing: 2,
+		marginBottom: 8
+	},
+	sectionOpenerHeadlineAccent: {
+		fontFamily: FONTS.boldItalic,
+		fontSize: 17,
+		color: COLORS.gold,
+		letterSpacing: 2
+	},
+	// Wrapper for the SVG goldDiamondDivider; just centers the SVG and
+	// reserves a little whitespace before the next block.
+	sectionDividerWrap: {
+		alignItems: 'center',
+		marginBottom: 4
+	},
+
 	// ---------- Page 2 invoice meta ----------
 	gstLine: {
 		fontSize: 9,
@@ -438,7 +476,16 @@ export const styles = StyleSheet.create({
 	colPrice: { flex: 1.1, textAlign: 'right' },
 	cellText: { fontFamily: FONTS.body, fontSize: 10, color: COLORS.midnight },
 	cellTextBold: { fontFamily: FONTS.bold, fontSize: 10, color: COLORS.midnight },
-	priceCell: { fontFamily: FONTS.body, fontSize: 10, color: COLORS.midnight },
+	priceCell: { fontFamily: FONTS.body, fontSize: 10.5, color: COLORS.midnight },
+	// Product-name cell carries a touch more body presence than the other
+	// columns so the totals feel weighty. Slightly bigger (11pt) and a bit
+	// heavier visually via the deeper midnight ink, no full-bold treatment.
+	productCell: {
+		fontFamily: FONTS.body,
+		fontSize: 11,
+		color: COLORS.midnight,
+		lineHeight: 1.35
+	},
 
 	// ---------- Totals block (Page 2, minimal) ----------
 	// Right-aligned subtotal/tax/total. Subtotal + tax in muted small-caps

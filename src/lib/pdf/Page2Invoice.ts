@@ -12,7 +12,7 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { styles, COLORS, LETTER_PAGE_WIDTH, BRAND_BAND_HEIGHT_FULL, FOOTER_BAND_HEIGHT } from './styles.js';
-import { brandBackdrop } from './brandBackdrop.js';
+import { brandBackdrop, goldDiamondDivider } from './brandBackdrop.js';
 import type { InvoiceOrder, InvoiceLineItem } from './InvoicePdf.js';
 
 const e = React.createElement;
@@ -183,8 +183,23 @@ export function renderPage2(
 			e(View, { style: styles.docTitleEyebrowRule }),
 			e(Text, { style: styles.gstLine }, 'GST 874529506 RT0001'),
 
-			// Section eyebrow (small caps gold + thin gold underline)
-			e(Text, { style: styles.sectionEyebrow }, 'ORDER'),
+			// Section opener: small-caps gold eyebrow above + tracked plum
+			// headline with italic gold accent on the closing word, mirroring
+			// the website's "FROM IDEA TO CELEBRATION" + "Build Your Menu"
+			// pattern. Centered diamond divider closes the opener so the
+			// table flows in below as a clear next block.
+			e(
+				View,
+				{ style: styles.sectionOpener },
+				e(Text, { style: styles.sectionOpenerEyebrow }, 'YOUR ORDER'),
+				e(
+					Text,
+					{ style: styles.sectionOpenerHeadline },
+					'Order ',
+					e(Text, { style: styles.sectionOpenerHeadlineAccent }, 'Summary')
+				),
+				e(View, { style: styles.sectionDividerWrap }, goldDiamondDivider(80, 12))
+			),
 
 			// Table header (small-caps gold column titles, gold rule top + bottom)
 			e(
@@ -196,12 +211,15 @@ export function renderPage2(
 				e(Text, { style: { ...styles.tableHeaderCell, ...styles.colPrice } }, 'PRICE')
 			),
 
-			// Line item rows (no alt-row tints, faint gold rule between rows)
+			// Line item rows (no alt-row tints, faint gold rule between rows).
+			// Product name uses productCell (11pt) so dish names land with a
+			// touch more weight than the qty/unit columns and the totals
+			// don't read thin.
 			...items.map((li, i) =>
 				e(
 					View,
 					{ style: styles.tableRow, key: `li-${i}` },
-					e(Text, { style: { ...styles.cellText, ...styles.colProduct } }, li.label),
+					e(Text, { style: { ...styles.productCell, ...styles.colProduct } }, li.label),
 					e(Text, { style: { ...styles.cellText, ...styles.colQty } }, fmtQty(li.qty)),
 					e(Text, { style: { ...styles.cellText, ...styles.colUnit } }, fmtMoney(li.unit_price)),
 					e(Text, { style: { ...styles.priceCell, ...styles.colPrice } }, fmtMoney(li.amount))

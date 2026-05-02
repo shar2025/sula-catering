@@ -44,6 +44,26 @@ function eventTypeLabel(order: InvoiceOrder): string {
 	return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
+// Synthesize a single human-readable allergies / dietary string from the
+// structured Dietary fields Neela captures. Always returns a non-empty value
+// so the field renders unconditionally on Page 1 (allergies are critical
+// info; the field must be present even when nothing was reported).
+function allergiesLine(order: InvoiceOrder): string {
+	const d = order.dietary;
+	if (!d) return 'None noted';
+	const flags: string[] = [];
+	if (d.hasNutAllergy) flags.push('Nut allergy');
+	if (d.hasShellfishAllergy) flags.push('Shellfish allergy');
+	if (d.hasGlutenFree) flags.push('Gluten-free needed');
+	if (d.hasDairyFree) flags.push('Dairy-free needed');
+	if (d.hasJain) flags.push('Jain prep needed');
+	const notes = (d.notes || '').trim();
+	if (flags.length === 0 && !notes) return 'None noted';
+	if (flags.length === 0) return notes;
+	if (!notes) return flags.join('; ');
+	return `${flags.join('; ')}. ${notes}`;
+}
+
 const STANDARD_INCLUDES = 'Tandoori Naan, Garlic Naan, Basmati Rice, Mango Chutney, Hot Sauce & Lentil Wafers';
 
 function menuItemRows(items: MenuLine[] | undefined): { label: string; value: string; diet?: string }[] {
@@ -170,7 +190,14 @@ export function renderPage1(
 	} else if (order.addOns && order.addOns.length) {
 		rawRows.push({ label: 'Additional Items', value: order.addOns.join(', ') });
 	}
+	// Allergies / Dietary Notes is critical info, always render the field even
+	// if nothing was reported. The label sits directly below the menu items
+	// so kitchens and customers see it adjacent to the dishes.
+	rawRows.push({ label: 'Allergies / Dietary Notes', value: allergiesLine(order) });
 	if (order.paymentMethod) rawRows.push({ label: 'Payment', value: order.paymentMethod });
+	// Reference number lives at the foot of the field grid so the customer
+	// can find it without hunting and the events team can quote it back.
+	rawRows.push({ label: 'Reference', value: order.reference });
 
 	const visible = rawRows.filter((r) => r.value);
 	const fieldRows = visible.map((r, i) =>
@@ -206,15 +233,9 @@ export function renderPage1(
 				e(Text, { style: styles.docTitleAccent }, docTitleAccent)
 			),
 
-			// Field grid: clean two-column, no borders, no tints
-			e(View, null, ...fieldRows),
-
-			// Reference number, centered, italic, muted, at the bottom of the field block
-			e(
-				Text,
-				{ style: styles.customerReference },
-				`Reference  ${order.reference}`
-			)
+			// Field grid: clean two-column, no borders, no tints. Reference
+			// number is now the last row in the grid (see rawRows above).
+			e(View, null, ...fieldRows)
 		),
 
 		// Optional sample watermark

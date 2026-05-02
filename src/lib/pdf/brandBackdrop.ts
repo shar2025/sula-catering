@@ -102,3 +102,35 @@ export function brandBackdrop(width: number, height: number, gradientId: string)
 		e(G, null, ...diamondGrid(width, height))
 	);
 }
+
+// Centered "rule + diamond + rule" section divider, mirroring the website's
+//   ─── ◆ ───
+// pattern. Pure SVG, gold filled diamond, no font-glyph dependency. Default
+// 80pt wide, 12pt tall, with a 6pt-radius diamond in the center.
+export function goldDiamondDivider(width = 80, height = 12) {
+	const diamondHalf = 3.5; // 7pt across
+	const gap = 6;           // pt between rule end and diamond edge
+	const cx = width / 2;
+	const cy = height / 2;
+	const ruleY = cy - 0.3;
+	const ruleEnd = cx - diamondHalf - gap;
+	return e(
+		Svg,
+		{ width, height, viewBox: `0 0 ${width} ${height}` } as Record<string, unknown>,
+		// Left rule
+		e(Rect, { x: 0, y: ruleY, width: ruleEnd, height: 0.6, fill: GOLD } as Record<string, unknown>),
+		// Right rule
+		e(Rect, {
+			x: cx + diamondHalf + gap,
+			y: ruleY,
+			width: ruleEnd,
+			height: 0.6,
+			fill: GOLD
+		} as Record<string, unknown>),
+		// Filled diamond at center
+		e(Path, {
+			d: diamondPath(cx, cy, diamondHalf),
+			fill: GOLD
+		} as Record<string, unknown>)
+	);
+}

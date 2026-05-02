@@ -129,7 +129,10 @@ async function renderAudience(audience, filename) {
 // v3 = audience=internal now pages 1+2 only (no kitchen); page 2 minimal redesign
 // v4 = SVG smooth gradient + diamond pattern bookend (header + footer);
 //      Cormorant Garamond serif italic wordmark; italic gold accent in title
-const VERSION = process.env.PREVIEW_VERSION || 'v4';
+// v5 = page 1 adds Reference + Allergies field rows; page 2 ORDER section
+//      replaced with eyebrow + tracked headline + gold-diamond divider; bigger
+//      product-cell text; SVG goldDiamondDivider helper for section breaks
+const VERSION = process.env.PREVIEW_VERSION || 'v5';
 
 const results = [];
 results.push(await renderAudience('customer', `Sula-PREVIEW-customer-${VERSION}.pdf`));
