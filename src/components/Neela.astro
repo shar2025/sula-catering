@@ -600,26 +600,61 @@
 	let currentAudio = null;
 	let audioUnlocked = false;
 
-	// Pick a warm female en voice from the browser's installed list.
-	// getVoices() can return [] before the voiceschanged event fires; cache once available.
+	// Pick the highest-quality en voice the browser has installed.
+	// Priority: Apple Premium > Microsoft Aria/Jenny/Sonia (Natural neural) > Google
+	// natural > generic feminine names > any en-* > first available.
+	// getVoices() is async on Chrome; voiceschanged fires when the list is ready.
+	const VOICE_PREFERENCE = [
+		// Apple — highest quality on macOS / iOS
+		'Samantha', 'Karen', 'Moira', 'Tessa', 'Allison', 'Ava (Premium)', 'Ava',
+		// Microsoft Edge — Natural neural voices on Windows / Edge
+		'Microsoft Aria Online (Natural) - English (United States)',
+		'Microsoft Jenny Online (Natural) - English (United States)',
+		'Microsoft Sonia Online (Natural) - English (United Kingdom)',
+		'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Sonia',
+		// Google Chrome
+		'Google UK English Female', 'Google US English',
+		// Generic name fallbacks
+		'female', 'woman'
+	];
 	let cachedVoice = null;
 	function pickVoice() {
 		if (!speechSynthAvailable) return null;
 		if (cachedVoice) return cachedVoice;
 		const voices = window.speechSynthesis.getVoices();
 		if (!voices || !voices.length) return null;
-		const en = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith('en'));
-		const namePrefs = ['samantha', 'tessa', 'karen', 'victoria', 'allison', 'kate', 'serena', 'moira', 'fiona', 'ava', 'susan', 'jenny', 'female'];
-		for (const pref of namePrefs) {
-			const match = en.find((v) => v.name.toLowerCase().includes(pref));
-			if (match) { cachedVoice = match; return cachedVoice; }
+
+		// Exact match in priority order
+		for (const pref of VOICE_PREFERENCE) {
+			const v = voices.find((vv) => vv.name === pref || vv.name.toLowerCase() === pref.toLowerCase());
+			if (v) { cachedVoice = v; return cachedVoice; }
 		}
-		cachedVoice = en[0] || voices[0];
+		// Fuzzy: any voice whose name CONTAINS a preferred name
+		for (const pref of VOICE_PREFERENCE) {
+			const v = voices.find((vv) => vv.name.toLowerCase().includes(pref.toLowerCase()));
+			if (v) { cachedVoice = v; return cachedVoice; }
+		}
+		// Female-leaning en-* voice
+		const femaleEn = voices.find(
+			(v) => /female|woman|samantha|karen|aria|jenny|sonia/i.test(v.name) && /en/i.test(v.lang || '')
+		);
+		if (femaleEn) { cachedVoice = femaleEn; return cachedVoice; }
+		// Any en-US/GB/CA/AU
+		const en = voices.find((v) => /en-(US|GB|CA|AU)/i.test(v.lang || ''));
+		if (en) { cachedVoice = en; return cachedVoice; }
+
+		cachedVoice = voices[0];
 		return cachedVoice;
 	}
 	if (speechSynthAvailable) {
 		try {
-			window.speechSynthesis.addEventListener('voiceschanged', () => { cachedVoice = null; });
+			// Voices are async-loaded on Chrome; one-shot wake to populate the list.
+			if (!window.speechSynthesis.getVoices().length) {
+				window.speechSynthesis.addEventListener('voiceschanged', () => { cachedVoice = null; }, { once: true });
+			} else {
+				// Already loaded; still listen so a later voice install resets the cache.
+				window.speechSynthesis.addEventListener('voiceschanged', () => { cachedVoice = null; });
+			}
 		} catch (e) {}
 	}
 
@@ -670,11 +705,16 @@
 		if (!speechSynthAvailable) return false;
 		try {
 			const u = new SpeechSynthesisUtterance(text.slice(0, 1200));
-			u.lang = 'en-CA';
-			u.rate = 1.0;
-			u.pitch = 1.05;
 			const v = pickVoice();
-			if (v) u.voice = v;
+			if (v) {
+				u.voice = v;
+				u.lang = v.lang || 'en-US';
+			} else {
+				u.lang = 'en-US';
+			}
+			u.rate = 0.96; // slightly slower than default for warmth
+			u.pitch = 1.05; // slightly higher for friendliness
+			u.volume = 1.0;
 			window.speechSynthesis.speak(u);
 			return true;
 		} catch (e) { return false; }
