@@ -629,6 +629,11 @@
 	let elevenLabsUnavailable = false; // becomes true after a 503 from /api/neela-voice
 	let currentAudio = null;
 	let audioUnlocked = false;
+	// True between TTS start and TTS end. While true, the SpeechRecognition's
+	// onresult handler ignores any incoming results — this prevents Neela's
+	// own voice from being captured back as user input when the mic stays open
+	// in continuous mode.
+	let neelaIsSpeaking = false;
 
 	// Pick the highest-quality en voice the browser has installed.
 	// Priority: Apple Premium > Microsoft Aria/Jenny/Sonia (Natural neural) > Google
@@ -716,6 +721,12 @@
 		if (speechSynthAvailable) {
 			try { window.speechSynthesis.cancel(); } catch (e) {}
 		}
+		// Pausing/cancelling doesn't fire 'ended' / 'onend', so the neelaIsSpeaking
+		// gate would stay stuck open. Reset it here so the mic can resume processing.
+		if (neelaIsSpeaking) {
+			console.log('[neela-loop] stopCurrentAudio: clearing neelaIsSpeaking flag');
+			neelaIsSpeaking = false;
+		}
 	}
 
 	// Strip the order-marker JSON block + URLs + markdown asterisks before TTS.
@@ -745,10 +756,22 @@
 			u.rate = 0.96; // slightly slower than default for warmth
 			u.pitch = 1.05; // slightly higher for friendliness
 			u.volume = 1.0;
+			u.onstart = () => {
+				neelaIsSpeaking = true;
+				console.log('[neela-loop] tts started (synth), voiceLoopActive:', voiceLoopActive, 'speakerOn:', speakerOn);
+			};
 			u.onend = () => onTtsEnded();
 			window.speechSynthesis.speak(u);
+			// onstart may not fire on some browsers if audio context is locked; mark
+			// speaking pre-emptively so the gate is in place. onstart will overwrite to
+			// the same value if it does fire.
+			neelaIsSpeaking = true;
+			console.log('[neela-loop] speechSynthesis.speak() invoked');
 			return true;
-		} catch (e) { return false; }
+		} catch (e) {
+			console.log('[neela-loop] fallbackToSpeechSynth threw:', e?.message || e);
+			return false;
+		}
 	}
 
 	async function playNeelaVoice(rawText) {
@@ -773,15 +796,32 @@
 					const url = URL.createObjectURL(blob);
 					const audio = new Audio(url);
 					currentAudio = audio;
+					audio.addEventListener('play', () => {
+						neelaIsSpeaking = true;
+						console.log('[neela-loop] tts started (elevenlabs), voiceLoopActive:', voiceLoopActive, 'speakerOn:', speakerOn);
+					});
 					audio.addEventListener('ended', () => {
 						try { URL.revokeObjectURL(url); } catch (e) {}
 						onTtsEnded();
 					});
-					audio.addEventListener('error', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
-					await audio.play().catch(() => {});
+					audio.addEventListener('error', (err) => {
+						try { URL.revokeObjectURL(url); } catch (e) {}
+						console.log('[neela-loop] tts audio error:', err?.message || err);
+						// Treat error as TTS-ended so the loop doesn't get stuck speaking.
+						onTtsEnded();
+					});
+					// Mark speaking BEFORE play() resolves; iOS sometimes fires 'play' lazily.
+					neelaIsSpeaking = true;
+					console.log('[neela-loop] elevenlabs audio.play() invoked');
+					await audio.play().catch((err) => {
+						console.log('[neela-loop] elevenlabs audio.play() rejected:', err?.message || err);
+					});
 					return;
 				}
-			} catch (e) { /* fall through to browser fallback */ }
+			} catch (e) {
+				console.log('[neela-loop] elevenlabs fetch threw:', e?.message || e);
+				/* fall through to browser fallback */
+			}
 		}
 
 		// Path 2: browser SpeechSynthesis fallback.
@@ -852,49 +892,119 @@
 
 	function startMicRecording() {
 		if (!recognizer || recognizing) return;
-		try { recognizer.start(); } catch (e) { /* sometimes throws on rapid restart, ignore */ }
+		try {
+			recognizer.start();
+			console.log('[neela-loop] recognizer.start() invoked');
+		} catch (err) {
+			console.log('[neela-loop] recognizer.start() threw:', err?.message || err);
+			// Common case: 'InvalidStateError' when start() called while already running.
+			// Continuous-mode session is fine; the call was redundant.
+		}
 	}
 	function stopMicRecording() {
 		if (!recognizer || !recognizing) return;
-		try { recognizer.stop(); } catch (e) {}
+		try {
+			recognizer.stop();
+			console.log('[neela-loop] recognizer.stop() invoked');
+		} catch (e) {}
 	}
 
 	if (SpeechRecognition) {
 		micBtn.hidden = false;
 		recognizer = new SpeechRecognition();
 		recognizer.lang = 'en-CA';
-		recognizer.interimResults = true;
-		recognizer.continuous = false;
+		// IMPORTANT: continuous mode keeps the recognition session open across multiple
+		// user/Neela turns. Without it, the session ends after each utterance and the
+		// next .start() needs to be treated as a user gesture by the OS — which iOS
+		// Safari blocks when called from a non-user-initiated callback (like the
+		// audio 'ended' event). Continuous + interimResults=false avoids that path:
+		// one .start() at first mic tap, the session stays alive, no user gesture
+		// needed for subsequent turns.
+		recognizer.interimResults = false;
+		recognizer.continuous = true;
 		let baseline = '';
-		recognizer.onstart = () => { recognizing = true; baseline = inputEl.value; applyMicVisualState(); };
+		// Auto-submit on voice silence: each final-result event resets a debounce
+		// timer; when no new result arrives within AUTO_SUBMIT_DELAY ms, we submit.
+		// Required because in continuous mode the session never ends naturally —
+		// onend would never fire — so the previous "submit on onend" hook can't run.
+		const AUTO_SUBMIT_DELAY = 1100;
+		let autoSubmitTimer = null;
+		function scheduleAutoSubmit() {
+			if (autoSubmitTimer) clearTimeout(autoSubmitTimer);
+			autoSubmitTimer = setTimeout(() => {
+				autoSubmitTimer = null;
+				console.log('[neela-loop] auto-submit timer fired, voiceLoopActive:', voiceLoopActive, 'neelaIsSpeaking:', neelaIsSpeaking, 'input length:', inputEl.value.trim().length);
+				if (!voiceLoopActive) return;
+				if (neelaIsSpeaking) return;
+				if (inputEl.value.trim().length === 0) return;
+				try {
+					if (typeof inputForm.requestSubmit === 'function') {
+						inputForm.requestSubmit();
+					} else {
+						inputForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+					}
+					console.log('[neela-loop] auto-submit dispatched');
+				} catch (err) {
+					console.log('[neela-loop] auto-submit threw:', err?.message || err);
+				}
+			}, AUTO_SUBMIT_DELAY);
+		}
+		recognizer.onstart = () => {
+			recognizing = true;
+			baseline = inputEl.value;
+			console.log('[neela-loop] recognizer.onstart fired');
+			applyMicVisualState();
+		};
 		recognizer.onresult = (e) => {
+			// Gate: ignore everything captured while Neela is speaking. The mic stays
+			// open in continuous mode but we discard whatever the speakers leak back.
+			if (neelaIsSpeaking) {
+				console.log('[neela-loop] onresult ignored (neela speaking)');
+				return;
+			}
+			// In interimResults=false mode, only final results fire. Accumulate them
+			// since the last submit (i.e. since baseline was reset).
 			let transcript = '';
-			for (let i = e.resultIndex; i < e.results.length; i++) transcript += e.results[i][0].transcript;
-			inputEl.value = (baseline ? baseline + ' ' : '') + transcript.trim();
+			for (let i = e.resultIndex; i < e.results.length; i++) {
+				const r = e.results[i];
+				if (r && r.isFinal && r[0]) transcript += r[0].transcript + ' ';
+			}
+			transcript = transcript.trim();
+			if (!transcript) return;
+			inputEl.value = (baseline ? baseline + ' ' : '') + transcript;
 			lastInputViaVoice = true;
 			haveUsedMicAtLeastOnce = true;
 			updateVoiceModeIndicator();
+			console.log('[neela-loop] onresult final transcript:', transcript.length, 'chars');
+			if (voiceLoopActive) scheduleAutoSubmit();
 		};
-		recognizer.onerror = () => { recognizing = false; applyMicVisualState(); };
+		recognizer.onerror = (e) => {
+			console.log('[neela-loop] recognizer.onerror:', e?.error || e?.message || e);
+			// 'no-speech' is benign in continuous mode (just silence); session continues.
+			// 'audio-capture' / 'aborted' / 'network' are session-killing — onend fires next.
+		};
 		recognizer.onend = () => {
+			console.log('[neela-loop] recognizer.onend fired, voiceLoopActive:', voiceLoopActive, 'neelaIsSpeaking:', neelaIsSpeaking);
 			recognizing = false;
 			applyMicVisualState();
-			// In voice loop mode, auto-submit when the user has finished speaking and
-			// the input has a transcript. This is the "hands-free" piece — without it,
-			// the user has to tap Send between every turn, which defeats the loop.
-			// Outside the loop, leave the input filled so the user can edit + send manually.
-			if (voiceLoopActive && inputEl.value.trim().length > 0) {
+			// In continuous mode, onend means the session was killed (OS timeout, error,
+			// or explicit stop()). If we're still in the voice loop and Neela isn't
+			// speaking, attempt to restart the session. iOS Safari may block this when
+			// the call doesn't trace to a user gesture — diagnostic logs will reveal.
+			if (voiceLoopActive && !neelaIsSpeaking) {
 				setTimeout(() => {
-					if (voiceLoopActive && !recognizing && inputEl.value.trim().length > 0) {
+					if (voiceLoopActive && !recognizing && !neelaIsSpeaking && modal.classList.contains('active')) {
+						console.log('[neela-loop] onend: attempting auto-restart');
 						try {
-							if (typeof inputForm.requestSubmit === 'function') {
-								inputForm.requestSubmit();
-							} else {
-								inputForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-							}
-						} catch (e) { /* ignore */ }
+							recognizer.start();
+							console.log('[neela-loop] onend: auto-restart succeeded');
+						} catch (err) {
+							console.log('[neela-loop] onend: auto-restart failed (likely iOS gesture restriction):', err?.message || err);
+							// If we hit this on iOS in production, Path B (Tap-to-continue button)
+							// is the workaround.
+						}
 					}
-				}, 220);
+				}, 280);
 			}
 		};
 		micBtn.addEventListener('click', () => {
@@ -924,19 +1034,37 @@
 	}
 
 	// Hook called when TTS playback finishes (either ElevenLabs <audio>'s 'ended'
-	// or SpeechSynthesisUtterance's 'onend'). Auto-restarts the mic when the loop
-	// is active and the modal is still open.
+	// or SpeechSynthesisUtterance's 'onend'). Clears the neelaIsSpeaking gate so
+	// the SpeechRecognition (already running in continuous mode) starts processing
+	// user speech again. Also makes a defensive restart attempt if the session
+	// happened to die during TTS.
 	function onTtsEnded() {
+		console.log('[neela-loop] onTtsEnded fired, voiceLoopActive:', voiceLoopActive, 'speakerOn:', speakerOn, 'recognizing:', recognizing);
+		neelaIsSpeaking = false;
 		if (!voiceLoopActive) return;
 		if (!speakerOn) return;
 		if (!modal || !modal.classList.contains('active')) return;
-		// Brief pause before reopening the mic so the user knows Neela finished
-		setTimeout(() => {
-			if (voiceLoopActive && speakerOn && modal.classList.contains('active')) {
-				startMicRecording();
-				applyMicVisualState();
-			}
-		}, 280);
+		// In continuous mode the recognition session should already be alive — the
+		// neelaIsSpeaking gate just stopped onresult from processing during TTS.
+		// If it died (OS timeout during a long Neela reply), try to restart. This
+		// is the call iOS Safari may block, but with continuous mode it's the
+		// exception path, not the norm.
+		if (!recognizing) {
+			setTimeout(() => {
+				if (voiceLoopActive && speakerOn && !recognizing && modal.classList.contains('active')) {
+					console.log('[neela-loop] onTtsEnded: recognizer not running, attempting restart');
+					try {
+						recognizer.start();
+						console.log('[neela-loop] onTtsEnded: restart succeeded');
+					} catch (err) {
+						console.log('[neela-loop] onTtsEnded: restart failed (likely iOS gesture restriction):', err?.message || err);
+					}
+					applyMicVisualState();
+				}
+			}, 280);
+		} else {
+			console.log('[neela-loop] onTtsEnded: recognizer already running (continuous mode survived TTS)');
+		}
 	}
 
 	// Voice-mode indicator: pulsing dot next to "Neela" whenever speaker is on
