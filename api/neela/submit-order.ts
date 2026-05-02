@@ -7,7 +7,19 @@
  *   RESEND_API_KEY       , Resend; without it order still persists, email skipped
  *
  * Returns:
- *   { ok: true, reference: "SC-0502-A7K2", emailed: true|false, message: "..." }
+ *   { ok: true, reference: "SC-0502-A7K2", emailed: true|false, emailError?: "...", message: "..." }
+ *
+ * Email diagnostics: the Resend SDK does NOT throw on rejected sends, it
+ * returns { data: null, error: ResendError }. We surface that error string
+ * back through the handler response as `emailError` so a silent rejection
+ * (invalid api key, unverified domain, free-tier sender restriction, etc.)
+ * does not produce a misleading `emailed: true`. If you ever see emailed
+ * stay false in production, the most common causes are:
+ *   1. RESEND_API_KEY env var unset, rotated, or pointing at a different
+ *      Resend account than the one whose dashboard you are checking,
+ *   2. sulacatering.com domain not verified in Resend (the only addresses
+ *      onboarding@resend.dev can deliver to are the team-owner inbox),
+ *   3. NEELA_FROM_EMAIL set to an unverified custom sender.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -684,11 +696,11 @@ function shouldGeneratePdf(order: Order): boolean {
 	return order.mode !== 'consultation';
 }
 
-async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: boolean; emailId?: string }> {
+async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: boolean; emailId?: string; error?: string }> {
 	const apiKey = process.env.RESEND_API_KEY;
 	if (!apiKey) {
 		console.log('[neela-order] no resend key, skipped email send', { reference });
-		return { sent: false };
+		return { sent: false, error: 'RESEND_API_KEY not set' };
 	}
 
 	// Render PDFs in parallel where possible.
@@ -726,6 +738,19 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			text,
 			attachments: teamAttachments
 		});
+		if (teamResult.error) {
+			const e = teamResult.error as { message?: string; statusCode?: number; name?: string };
+			const detail = e.message || String(teamResult.error);
+			console.error('[neela-order] resend rejected team email', {
+				reference,
+				from: fromAddr,
+				to: teamRecipient,
+				statusCode: e.statusCode,
+				name: e.name,
+				detail
+			});
+			return { sent: false, error: detail };
+		}
 		const emailId = (teamResult.data && (teamResult.data as { id?: string }).id) || undefined;
 		console.log('[neela-order] sent to events team', { reference, emailId, withPdf: !!fullBuffer, testMode });
 		await markEmailed(reference);
@@ -741,7 +766,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 				const customerSubject = withTestPrefix(customerSubjectBase);
 				const customerTo = testMode ? teamRecipient : order.contact.email;
 				const customerHtml = buildCustomerEmailHtml(reference, order);
-				await resend.emails.send({
+				const customerResult = await resend.emails.send({
 					from: fromAddr,
 					to: [customerTo],
 					replyTo: EMAIL_TO_PROD,
@@ -749,7 +774,12 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 					html: customerHtml,
 					attachments: [{ filename: `Sula-Catering-${reference}.pdf`, content: customerBuffer }]
 				});
-				console.log('[neela-order] sent customer copy', { reference, redirected: testMode });
+				if (customerResult.error) {
+					const e = customerResult.error as { message?: string; statusCode?: number; name?: string };
+					console.warn('[neela-order] customer email rejected', { reference, statusCode: e.statusCode, name: e.name, detail: e.message });
+				} else {
+					console.log('[neela-order] sent customer copy', { reference, redirected: testMode });
+				}
 			} catch (err) {
 				console.warn('[neela-order] customer email failed (non-fatal)', err);
 			}
@@ -760,14 +790,19 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		if (kitchenBuffer && process.env.KITCHEN_EMAIL) {
 			try {
 				const kitchenTo = testMode ? teamRecipient : process.env.KITCHEN_EMAIL;
-				await resend.emails.send({
+				const kitchenResult = await resend.emails.send({
 					from: fromAddr,
 					to: [kitchenTo],
 					subject: withTestPrefix(`[Kitchen ${reference}] Prep sheet ${order.eventDate || ''}`.trim()),
 					html: `<p style="font-family:Helvetica,Arial,sans-serif;color:#1a1a1a">Kitchen prep sheet for reference <strong>${reference}</strong> attached. ${order.guestCount || ''} guests, ${order.eventDate || 'date TBD'}.</p>`,
 					attachments: [{ filename: `${reference}-kitchen.pdf`, content: kitchenBuffer }]
 				});
-				console.log('[neela-order] sent kitchen copy', { reference });
+				if (kitchenResult.error) {
+					const e = kitchenResult.error as { message?: string; statusCode?: number; name?: string };
+					console.warn('[neela-order] kitchen email rejected', { reference, statusCode: e.statusCode, name: e.name, detail: e.message });
+				} else {
+					console.log('[neela-order] sent kitchen copy', { reference });
+				}
 			} catch (err) {
 				console.warn('[neela-order] kitchen email failed (non-fatal)', err);
 			}
@@ -775,8 +810,10 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 
 		return { sent: true, emailId };
 	} catch (err) {
-		console.error('[neela-order] email send failed', err);
-		return { sent: false };
+		const e = err as { message?: string };
+		const detail = e?.message || String(err);
+		console.error('[neela-order] email send failed', { reference, detail, err });
+		return { sent: false, error: detail };
 	}
 }
 
@@ -810,7 +847,7 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">${escapeHtml(body)}</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">Reply to this email if anything in the attached needs adjusting before we put together the quote.</p>
-				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events.sula@gmail.com &middot; 604-215-1130</p>
+				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
 			</td></tr>
 			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
 				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>
@@ -855,12 +892,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		}
 	}
 
-	const { sent } = await sendOrderEmail(reference, v.order);
+	const { sent, error: emailError } = await sendOrderEmail(reference, v.order);
 
 	console.log('[neela-order] complete', {
 		reference,
 		mode: v.order.mode,
 		emailed: sent,
+		emailError: emailError || null,
 		eventType: v.order.eventType,
 		guestCount: v.order.guestCount
 	});
@@ -870,6 +908,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		reference,
 		mode: v.order.mode,
 		emailed: sent,
+		...(emailError ? { emailError } : {}),
 		message: modeReplyMessage(reference, v.order.mode)
 	});
 }
