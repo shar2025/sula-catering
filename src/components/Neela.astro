@@ -296,7 +296,7 @@
 
 	const SESSION_KEY = 'neela-conv-v1';
 	const SESSION_ID_KEY = 'neela-session-id';
-	const FALLBACK_MSG = "I'm taking a quick break right now. Email events.sula@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
+	const FALLBACK_MSG = "I'm taking a quick break right now. Email mail.sharathvittal@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
 	const MAX_USER_MESSAGES = 25;
 
 	let conversation = [];
@@ -580,7 +580,7 @@
 			card.classList.add('neela-order-card-errored');
 			card.innerHTML =
 				'<p class="neela-order-sent-title">That didn\'t go through.</p>' +
-				'<p class="neela-order-sent-body">Easiest path: call <a href="tel:+16042151130">604-215-1130</a> or email <a href="mailto:events.sula@gmail.com">events.sula@gmail.com</a>. We\'ll handle it from there.</p>';
+				'<p class="neela-order-sent-body">Easiest path: call <a href="tel:+16042151130">604-215-1130</a> or email <a href="mailto:mail.sharathvittal@gmail.com">mail.sharathvittal@gmail.com</a>. We\'ll handle it from there.</p>';
 			confirmBtn.disabled = false;
 			confirmBtn.textContent = originalLabel;
 		}
@@ -1266,7 +1266,7 @@
 			if (resp.status === 429) {
 				const data = await resp.json().catch(() => ({}));
 				showTyping(false);
-				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at events.sula@gmail.com or book a quick call: calendly.com/sula-catering/30min");
+				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at mail.sharathvittal@gmail.com or book a quick call: calendly.com/sula-catering/30min");
 				return;
 			}
 			if (!resp.ok && resp.status !== 504 && resp.status !== 502 && resp.status !== 503) {

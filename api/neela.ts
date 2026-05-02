@@ -38,9 +38,9 @@ const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const RATE_LIMIT_MAX = 40;
 
 const FALLBACK_MSG =
-	"I'm taking a quick break right now. Email events.sula@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
+	"I'm taking a quick break right now. Email mail.sharathvittal@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
 const RATE_LIMIT_MSG =
-	"Looks like we've chatted plenty today. To keep going, drop us a line at events.sula@gmail.com or book a quick call at calendly.com/sula-catering/30min.";
+	"Looks like we've chatted plenty today. To keep going, drop us a line at mail.sharathvittal@gmail.com or book a quick call at calendly.com/sula-catering/30min.";
 const CAP_MSG =
 	"We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/ or book a call at calendly.com/sula-catering/30min.";
 
@@ -89,7 +89,7 @@ CONTACT (handoff order depends on intent, see HANDOFF HIERARCHY below)
 - **Menu builder / "send me ideas" path:** sulaindianrestaurant.com/catering-order-custom/
 - **Quote form (when customer has date + headcount):** sulaindianrestaurant.com/sula-catering-order/
 - Calendly 30-min call (when customer wants to talk to a human): calendly.com/sula-catering/30min
-- Email (edge cases / complex asks): events.sula@gmail.com
+- Email (edge cases / complex asks): mail.sharathvittal@gmail.com
 - Phone (urgent same-day only): 604-215-1130
 - Website: sulacatering.com
 
@@ -147,7 +147,7 @@ Wedding intent triggers (any of these): "wedding", "getting married", "our weddi
 The wedding flow:
 1. Acknowledge warmly, ONE line max ("congrats, big day"), then capture lightweight scope: tentative date or month + rough guest count.
 2. Capture contact: name + email + phone (phone matters more for weddings since the team often calls back).
-3. Offer Calendly directly. Use the wedding-team Calendly URL placeholder [CALENDLY_URL] literally (Shar wires the real URL via env / runtime substitution). Phrasing: "Weddings have a lot of moving pieces (food, venue, service style, decor), so a quick call with the team is the easiest way to scope it properly. Here's the team's calendar: [CALENDLY_URL]". If the customer asks for a different way to get on the calendar, fall back to events.sula@gmail.com.
+3. Offer Calendly directly. Use the wedding-team Calendly URL placeholder [CALENDLY_URL] literally (Shar wires the real URL via env / runtime substitution). Phrasing: "Weddings have a lot of moving pieces (food, venue, service style, decor), so a quick call with the team is the easiest way to scope it properly. Here's the team's calendar: [CALENDLY_URL]". If the customer asks for a different way to get on the calendar, fall back to mail.sharathvittal@gmail.com.
 4. Optionally emit the order marker as mode "consultation" so the events team has a heads-up before the call. NO menuTier, NO setupType, NO customMenuDetails, NO quote object. Just contact + date + guestCount + notes flagging it's a wedding.
 
 What NOT to do for weddings:
@@ -224,7 +224,7 @@ The PRIMARY destination is in-chat collection + PDF quote. External URLs are FAL
 
 3. **Quote form fallback** (sulaindianrestaurant.com/sula-catering-order/), only as a fallback if the in-chat conversation stalls (the customer drops off after a few turns, or refuses to share contact details). Phrase it as "if it's easier for you, you can also fill it in here: [URL], same fields, same outcome." Don't lead with this when in-chat collection is going fine.
 
-4. **Email** (events.sula@gmail.com), only for edge cases / complex asks the system can't handle in chat (cancellation, complaint, weird custom request beyond standard catering, accommodating something the form schema doesn't capture).
+4. **Email** (mail.sharathvittal@gmail.com), only for edge cases / complex asks the system can't handle in chat (cancellation, complaint, weird custom request beyond standard catering, accommodating something the form schema doesn't capture).
 
 5. **Phone** (604-215-1130), only for genuinely urgent same-day situations.
 

@@ -37,7 +37,7 @@ export const config = { maxDuration: 30 };
 //   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject prefixed [TEST MODE])
 //   NEELA_FROM_EMAIL → custom sender; falls back to Resend's onboarding@resend.dev
 //                       (the only sender that works without verified domain DNS)
-const EMAIL_TO_PROD = 'events@sulaindianrestaurant.com';
+const EMAIL_TO_PROD = 'mail.sharathvittal@gmail.com';
 function recipient(): string {
 	return process.env.NEELA_TEST_EMAIL || EMAIL_TO_PROD;
 }
@@ -847,7 +847,7 @@ function buildCustomerEmailHtml(reference: string, order: Order): string {
 				<p style="margin:0 0 12px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1a1a1a;line-height:1.6;font-style:italic">Hi ${escapeHtml(order.contact.name)},</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">${escapeHtml(body)}</p>
 				<p style="margin:0 0 14px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;color:#1a1a1a;line-height:1.65">Reply to this email if anything in the attached needs adjusting before we put together the quote.</p>
-				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; events@sulaindianrestaurant.com &middot; 604-215-1130</p>
+				<p style="margin:18px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:#666">, Sula Catering events team &middot; mail.sharathvittal@gmail.com &middot; 604-215-1130</p>
 			</td></tr>
 			<tr><td style="padding:14px 32px 22px;border-top:1px solid rgba(184,149,106,0.2);background:#fbf6ec">
 				<p style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:11px;color:#666;letter-spacing:0.3px">${escapeHtml(dateLabel)} &middot; sulacatering.com</p>
