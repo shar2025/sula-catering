@@ -5,6 +5,9 @@ Neela is the AI event-planning assistant on sulacatering.com — the floating go
 - `api/neela.ts` — chat completion (Anthropic Claude Sonnet)
 - `api/neela-voice.ts` — text-to-speech proxy (ElevenLabs)
 - `api/neela-lead.ts` — captures name + email when a visitor opts in
+- `api/neela/submit-order.ts` — captures a customer-confirmed full order, persists to `neela_orders`, emails the events team
+- `api/cron/neela-digest.ts` — daily summary email (cron at 16:00 UTC)
+- `api/admin/neela-stats.ts` — read-only admin stats endpoint
 
 Until the env vars below are set in Vercel, the chat shows a polite fallback message pointing visitors to email, phone, and Calendly. Voice replies stay hidden until the ElevenLabs key lands.
 
