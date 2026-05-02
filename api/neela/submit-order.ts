@@ -729,9 +729,14 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 		const teamAttachments = fullBuffer
 			? [{ filename: `${reference}-full.pdf`, content: fullBuffer }]
 			: undefined;
+		// TEMP: Resend free tier requires sending to the team-owner inbox until
+		// sulacatering.com domain is verified at resend.com/domains. After
+		// verification, switch FROM to neela@sulacatering.com and revert this back
+		// to events@sulaindianrestaurant.com.
+		const teamTo = process.env.NEELA_TEST_EMAIL || 'sulaindianrestaurant@gmail.com';
 		const teamResult = await resend.emails.send({
 			from: fromAddr,
-			to: [teamRecipient],
+			to: [teamTo],
 			replyTo: order.contact.email,
 			subject,
 			html,
@@ -744,7 +749,7 @@ async function sendOrderEmail(reference: string, order: Order): Promise<{ sent: 
 			console.error('[neela-order] resend rejected team email', {
 				reference,
 				from: fromAddr,
-				to: teamRecipient,
+				to: teamTo,
 				statusCode: e.statusCode,
 				name: e.name,
 				detail
