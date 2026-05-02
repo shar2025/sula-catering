@@ -60,7 +60,67 @@ Quick options:
 
 Neela's voice, knowledge, FAQs, and behaviour live in the `SYSTEM_PROMPT` constant inside `api/neela.ts`. Update there, redeploy, done. Anthropic prompt caching means the first request after a deploy is slightly slower while the cache rebuilds, then it's back to fast.
 
-## Phase 2: Email ingestion
+## Phase 2: Inbound Gmail integration (events.sula@gmail.com)
+
+Neela now answers email sent to **events.sula@gmail.com** automatically. Inbound mail flows through Gmail watch -> Pub/Sub -> the Vercel push endpoint, gets classified by Claude Haiku, and Neela either replies in-thread, flags for the events team, or archives.
+
+### Endpoints
+
+| Path | Trigger | Purpose |
+| --- | --- | --- |
+| `/api/neela/gmail-oauth-start` | manual GET (one-time) | Redirects to Google's consent page so events.sula can grant gmail.modify. |
+| `/api/neela/gmail-oauth-callback` | Google redirect | Exchanges the auth code, displays the refresh token to paste into Vercel. |
+| `/api/neela/gmail-push` | Pub/Sub push | Receives Gmail watch notifications, calls history.list, dispatches to the action handler. |
+| `/api/neela/gmail-watch-renew` | daily cron at 10:00 UTC + manual GET | Calls users.watch to keep the Pub/Sub push alive (Gmail watches expire every 7 days). Run once manually right after the OAuth grant to bootstrap. |
+
+### Required environment variables
+
+Add these in **Vercel -> Project -> Settings -> Environment Variables**, then redeploy.
+
+| Name | Required | Value |
+| --- | --- | --- |
+| `GOOGLE_OAUTH_CLIENT_ID` | yes | `517540380375-ga1btmjotnb9g1ub82gs2l3jvepbl3va.apps.googleusercontent.com` (the Sula Neela web client). |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | yes | OAuth client secret from the GCP console (Sula Neela web client). Treat as a secret, never commit. |
+| `GMAIL_PUBSUB_TOPIC` | yes | `projects/sula-neela-events/topics/gmail-events-sula-inbox` (full resource name). |
+| `GMAIL_USER_EMAIL` | yes | `events.sula@gmail.com`. The inbox we watch + send from. |
+| `GMAIL_REFRESH_TOKEN` | yes (post-OAuth) | Filled in once via the OAuth callback page. Without it, the push handler ack-skips and Neela falls back to chat-only. |
+| `GMAIL_OAUTH_REDIRECT_URI` | optional | Defaults to `https://sulacatering.com/api/neela/gmail-oauth-callback`. Override only if domain changes. |
+| `GMAIL_OAUTH_STATE_SECRET` | optional | HMAC secret for the CSRF state on the OAuth flow. Defaults to a derived value of `GOOGLE_OAUTH_CLIENT_SECRET` if unset. |
+| `GMAIL_PUBSUB_VERIFICATION_TOKEN` | recommended | Shared secret. When set, the push endpoint requires `?token=...` matching this value. Append it to the Pub/Sub push subscription URL: `https://sulacatering.com/api/neela/gmail-push?token=<value>`. |
+| `NEELA_TEAM_EMAIL` | optional | Where Neela forwards `[CHANGE REQUEST]` and `[FLAG]` notices. Falls back to `NEELA_TEST_EMAIL`, then `mail.sharathvittal@gmail.com`. Complaints additionally CC `events@sulaindianrestaurant.com`. |
+
+### One-time bootstrap (the 60-second OAuth click)
+
+1. Set the env vars above except `GMAIL_REFRESH_TOKEN` and redeploy.
+2. Open `https://sulacatering.com/api/neela/gmail-oauth-start` in a browser **signed in as events.sula@gmail.com** (the only test user on the consent screen).
+3. Click "Allow" on Google's consent screen.
+4. The callback page displays the refresh token. Copy it into Vercel as `GMAIL_REFRESH_TOKEN` (Production + Preview), redeploy.
+5. Hit `https://sulacatering.com/api/neela/gmail-watch-renew` once manually (browser GET) to start the Pub/Sub subscription. This returns the `historyId` and `expiration` in JSON.
+6. Send a test email to events.sula@gmail.com from another address. Within ~10s the push endpoint should fire, classify, and Neela should reply in-thread.
+
+If step 4's page doesn't show a refresh_token: revoke the grant at `myaccount.google.com/permissions` and rerun step 2 (Google only emits a refresh token on the first grant per app+account pair).
+
+### Postgres tables auto-created
+
+`/api/neela/gmail-push` creates these on first call:
+
+- `neela_gmail_threads` (thread_id PK, customer_email, last_history_id, last_message_id, status, created_at, updated_at) - dedup + status tracking.
+- `neela_gmail_watch_state` (singleton row, id=1) - last seen historyId so re-deliveries don't replay.
+- `neela_order_change_requests` - queued change requests pending events-team approval (auto-apply is intentionally NOT enabled in V1; see `src/lib/neela-email-action.ts`).
+
+### Labels Neela manages on the inbox
+
+- `NEELA_HANDLED` - Neela replied or archived; nothing to do.
+- `NEELA_NEEDS_REVIEW` - complaint or anything Neela bailed on; events team must respond.
+- `NEELA_CHANGE_REQUEST` - customer asked to modify an existing booking; team must approve before applying.
+
+Labels auto-create on first use.
+
+### Push subscription URL
+
+After setting `GMAIL_PUBSUB_VERIFICATION_TOKEN`, update the Pub/Sub push subscription `gmail-events-sula-inbox-push` so its push endpoint becomes `https://sulacatering.com/api/neela/gmail-push?token=<token-value>`. Without that token, the endpoint accepts any well-formed Pub/Sub envelope (Phase 1 deferred enabling OIDC auth on the subscription).
+
+## Phase 2 (legacy section): Email ingestion
 
 When the events team is ready, an `.mbox` export from their Gmail inbox can be turned into a Q&A corpus that Neela can learn from. The pipeline lives in `scripts/ingest-emails.mjs`.
 
