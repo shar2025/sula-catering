@@ -30,6 +30,13 @@ import { FORM_KNOWLEDGE, FORM_KNOWLEDGE_GENERATED_AT } from '../src/lib/neela-fo
 import { POLICIES_KNOWLEDGE, POLICIES_KNOWLEDGE_VERSION } from '../src/lib/neela-policies.js';
 import { PUBLIC_KNOWLEDGE, PUBLIC_KNOWLEDGE_VERSION } from '../src/lib/neela-public-knowledge.js';
 import { BUYOUT_KNOWLEDGE, BUYOUT_KNOWLEDGE_VERSION } from '../src/lib/neela-buyout-knowledge.js';
+import {
+	EMAIL_CORPUS,
+	EMAIL_CORPUS_THREAD_COUNT,
+	EMAIL_CORPUS_TOKEN_ESTIMATE,
+	EMAIL_CORPUS_OVER_BUDGET,
+	EMAIL_CORPUS_GENERATED_AT
+} from '../src/lib/neela-email-corpus.js';
 
 export const config = { maxDuration: 60 };
 
@@ -1752,6 +1759,41 @@ async function sendFlagEmail(flag: FlagPayload): Promise<void> {
 	}
 }
 
+// Builds the inline-prompt rendering of EMAIL_CORPUS, appended onto the
+// merged policies+public+buyout cached block. We render each thread as a
+// short topic + summary + verbatim Q/A snippet so Neela can mirror the
+// events team's actual phrasing on edge-case questions (allergies, lead
+// times, deposits, etc.) without inventing numbers.
+//
+// When EMAIL_CORPUS_OVER_BUDGET is true (set by scripts/ingest-emails.mjs
+// when the corpus exceeds the 25k token budget), this returns '' and the
+// downstream RAG path takes over (TODO Phase 3.1: vector index).
+function buildEmailCorpusBlock(): string {
+	const header = [
+		`SULA EMAIL CORPUS (${EMAIL_CORPUS_THREAD_COUNT} threads, ~${EMAIL_CORPUS_TOKEN_ESTIMATE} tokens, generated ${EMAIL_CORPUS_GENERATED_AT})`,
+		``,
+		`These are anonymized real customer threads from the Sula events team's inbox, summarized into topic + Q/A pairs. Use them to:`,
+		`- Mirror the team's actual phrasing on edge cases (allergies, halal, Jain, deposits, last-minute, cancellations, weddings, tastings, recurring corporate)`,
+		`- Stay grounded in HOW the team has actually answered, not in what you imagine they would say`,
+		`- NEVER quote numbers from these threads as fixed policy. They are reference, not contract. When a customer asks for a hard number (deposit %, cancellation window, recurring discount), defer to the events team for written confirmation.`,
+		``,
+		`Format: each entry has a topic, a one-line summary, then a verbatim customer question and the team's verbatim reply (truncated).`,
+		``
+	].join('\n');
+
+	const entries = EMAIL_CORPUS.map((entry, i) => {
+		const lines = [
+			`### Thread ${i + 1}: ${entry.topic}`,
+			`Summary: ${entry.summary}`,
+			`Customer asked: ${entry.key_exchange.q}`,
+			`Team replied: ${entry.key_exchange.a}`
+		];
+		return lines.join('\n');
+	}).join('\n\n');
+
+	return header + entries;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
 	console.log('[neela] hit', req.method);
 
@@ -1824,12 +1866,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			cache_control: { type: 'ephemeral' }
 		});
 	}
-	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms, policies+public+buyout).
-	// Public + buyout knowledge are concatenated onto policies so they share a single cached block.
+	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms,
+	// policies+public+buyout+email-corpus). Public, buyout, and the email
+	// corpus are concatenated onto policies so they share a single cached
+	// block. The email corpus is gated on EMAIL_CORPUS_OVER_BUDGET; when true,
+	// the inline-prompt path drops it and a future RAG path takes over.
+	const emailCorpusBlock =
+		!EMAIL_CORPUS_OVER_BUDGET && EMAIL_CORPUS && EMAIL_CORPUS.length > 0
+			? buildEmailCorpusBlock()
+			: '';
 	const policiesAndPublic =
 		POLICIES_KNOWLEDGE +
 		(PUBLIC_KNOWLEDGE && PUBLIC_KNOWLEDGE.length > 0 ? '\n\n' + PUBLIC_KNOWLEDGE : '') +
-		(BUYOUT_KNOWLEDGE && BUYOUT_KNOWLEDGE.length > 0 ? '\n\n' + BUYOUT_KNOWLEDGE : '');
+		(BUYOUT_KNOWLEDGE && BUYOUT_KNOWLEDGE.length > 0 ? '\n\n' + BUYOUT_KNOWLEDGE : '') +
+		(emailCorpusBlock ? '\n\n' + emailCorpusBlock : '');
 	if (policiesAndPublic.length > 0) {
 		systemBlocks.push({
 			type: 'text',
@@ -1871,6 +1921,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		policiesVersion: POLICIES_KNOWLEDGE_VERSION,
 		publicVersion: PUBLIC_KNOWLEDGE_VERSION,
 		buyoutVersion: BUYOUT_KNOWLEDGE_VERSION,
+		emailCorpusThreads: EMAIL_CORPUS_THREAD_COUNT,
+		emailCorpusOverBudget: EMAIL_CORPUS_OVER_BUDGET,
 		ip: ip.slice(0, 16)
 	});
 
