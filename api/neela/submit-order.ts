@@ -96,11 +96,12 @@ const REFERENCE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // I, O, 0, 1 exclud
 
 type EventType = 'wedding' | 'corporate' | 'private' | 'cafe-chai' | 'other';
 type ServiceType = 'drop-off' | 'full-service' | 'live-station' | 'in-restaurant';
-// Mirrors the 3 paths on sulaindianrestaurant.com/sula-catering-order/:
-//   'full'         = "I'm Ready" full quote request
-//   'quick'        = "Still Deciding" lightweight inquiry
-//   'consultation' = "Want Help" Calendly-call routing (no confirm card)
-type Mode = 'full' | 'quick' | 'consultation';
+// Mirrors the 3 paths Neela offers in the chat opener:
+//   'full'         = "Get a full quote", 7-step walkthrough, full PDF + line items
+//   'custom'       = "Send a custom order", 5-step lighter, free-text menu, team prices
+//   'consultation' = "Book a 30-min call", Calendly direct, optional contact, no PDF
+//   'quick'        = legacy fallback when a full-path walkthrough tapped out partway
+type Mode = 'full' | 'quick' | 'consultation' | 'custom';
 
 interface Dietary {
 	vegetarianPct?: number;
@@ -194,7 +195,7 @@ interface SubmitBody {
 
 const VALID_EVENT_TYPES: EventType[] = ['wedding', 'corporate', 'private', 'cafe-chai', 'other'];
 const VALID_SERVICE_TYPES: ServiceType[] = ['drop-off', 'full-service', 'live-station', 'in-restaurant'];
-const VALID_MODES: Mode[] = ['full', 'quick', 'consultation'];
+const VALID_MODES: Mode[] = ['full', 'quick', 'consultation', 'custom'];
 
 function isValidEmail(s: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -319,13 +320,13 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		return { ok: false, error: 'order.eventType invalid (one of: ' + VALID_EVENT_TYPES.join(', ') + ')' };
 	}
 
-	// guestCount, required for full (number), required for quick (number or "rough range" string),
+	// guestCount, required for full + custom (number), required for quick (number or "rough range" string),
 	// optional for consultation.
 	let guestCountValue: number | string | undefined;
-	if (mode === 'full') {
+	if (mode === 'full' || mode === 'custom') {
 		const n = Number(o.guestCount);
 		if (!Number.isFinite(n) || n < 1) {
-			return { ok: false, error: 'order.guestCount required (positive integer for full mode)' };
+			return { ok: false, error: `order.guestCount required (positive integer for ${mode} mode)` };
 		}
 		guestCountValue = Math.floor(n);
 	} else if (mode === 'quick') {
@@ -359,6 +360,20 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 		return { ok: false, error: 'order.serviceType must be one of: ' + VALID_SERVICE_TYPES.join(', ') };
 	}
 	const oo = o as Partial<Order>;
+
+	// Custom mode requires deliveryAddress + the customer's free-text menu description
+	// (customMenuDetails). Without these the events team can't price anything; surface
+	// a clear validation error rather than persisting a half-shaped order.
+	if (mode === 'custom') {
+		const addr = String(oo.deliveryAddress || '').trim();
+		if (!addr) {
+			return { ok: false, error: 'order.deliveryAddress required for custom mode (full street address)' };
+		}
+		const menuText = String(oo.customMenuDetails || '').trim();
+		if (!menuText) {
+			return { ok: false, error: 'order.customMenuDetails required for custom mode (the customer\'s free-text menu description)' };
+		}
+	}
 	const order: Order = {
 		mode,
 		eventType: o.eventType as EventType | undefined,
@@ -577,6 +592,7 @@ function buildQuoteHtml(q?: Quote): string {
 function modeEyebrow(mode: Mode): string {
 	if (mode === 'quick') return 'Neela &middot; new inquiry (still deciding)';
 	if (mode === 'consultation') return 'Neela &middot; wants a Calendly call';
+	if (mode === 'custom') return 'Neela &middot; custom order, team prices the menu';
 	return 'Neela &middot; new order captured';
 }
 
@@ -607,6 +623,9 @@ function modeSubject(reference: string, order: Order, leadTime: LeadTimeWarning 
 	if (order.mode === 'consultation') {
 		return `${rushPrefix}[Neela call request ${reference}] ${order.contact.name} wants a Calendly chat`;
 	}
+	if (order.mode === 'custom') {
+		return `${rushPrefix}[Neela custom order ${reference}] ${typeStr} for ${guestStr} on ${dateStr}, please price`;
+	}
 	if (isBuyoutOrder(order)) {
 		const loc = order.location?.venueOrAddress || order.location?.city || 'Sula';
 		return `${rushPrefix}[Neela buyout ${reference}] ${loc} for ${guestStr} on ${dateStr}`;
@@ -620,6 +639,9 @@ function modeReplyMessage(reference: string, mode: Mode): string {
 	}
 	if (mode === 'consultation') {
 		return `Reference ${reference} noted, the events team has your details. Easiest next step: book a 30-min call at calendly.com/sula-catering/30min.`;
+	}
+	if (mode === 'custom') {
+		return `Got it. The events team will price your menu and come back within 6 hours with options + a formal quote. Reference ${reference} in case you want to follow up.`;
 	}
 	return `Got it! Sent over to the events team. They'll be in touch within a business day. Reference ${reference} in case you want to follow up.`;
 }
@@ -890,9 +912,18 @@ async function renderInvoicePdfBuffer(
 }
 
 // Skip PDF for consultation mode (just contact + notes, not enough to render
-// a meaningful kitchen sheet). Quick + Full both get PDFs.
+// a meaningful kitchen sheet). Quick + Full + Custom all get PDFs.
 function shouldGeneratePdf(order: Order): boolean {
 	return order.mode !== 'consultation';
+}
+
+// Custom mode skips Page 2 (formal invoice) and Page 3 (kitchen sheet) since
+// the customer described the menu in their own words, no tier/dishes/quote yet
+// for the kitchen to plan against. Both team and customer copies use the
+// page-1-only "submission record" template; the team prices the menu manually
+// and follows up with the formal written quote.
+function isCustomMode(order: Order): boolean {
+	return order.mode === 'custom';
 }
 
 async function sendOrderEmail(reference: string, order: Order, leadTime: LeadTimeWarning | null): Promise<{ sent: boolean; emailId?: string; error?: string }> {
@@ -912,13 +943,29 @@ async function sendOrderEmail(reference: string, order: Order, leadTime: LeadTim
 	// 'customer' → page 1 only (initial submission record; no pricing)
 	// 'kitchen'  → page 3 only (separate prep sheet for the kitchen team)
 	const generatePdfs = shouldGeneratePdf(order);
-	const [teamBuffer, customerBuffer, kitchenBuffer] = generatePdfs
-		? await Promise.all([
-			renderInvoicePdfBuffer(reference, order, 'internal'),
-			renderInvoicePdfBuffer(reference, order, 'customer'),
-			renderInvoicePdfBuffer(reference, order, 'kitchen')
-		])
-		: [null, null, null];
+	const customMode = isCustomMode(order);
+	// Custom mode: skip Page 2 (formal invoice) and Page 3 (kitchen sheet)
+	// renders. Both team and customer copies use the page-1-only 'customer'
+	// template since there's no tier or dish-pick capture to drive an invoice
+	// or a kitchen sheet yet, the team prices the menu manually and follows up
+	// with the formal written quote.
+	let teamBuffer: Buffer | null = null;
+	let customerBuffer: Buffer | null = null;
+	let kitchenBuffer: Buffer | null = null;
+	if (generatePdfs) {
+		if (customMode) {
+			const page1 = await renderInvoicePdfBuffer(reference, order, 'customer');
+			teamBuffer = page1;
+			customerBuffer = page1;
+			kitchenBuffer = null;
+		} else {
+			[teamBuffer, customerBuffer, kitchenBuffer] = await Promise.all([
+				renderInvoicePdfBuffer(reference, order, 'internal'),
+				renderInvoicePdfBuffer(reference, order, 'customer'),
+				renderInvoicePdfBuffer(reference, order, 'kitchen')
+			]);
+		}
+	}
 
 	try {
 		const resend = new Resend(apiKey);

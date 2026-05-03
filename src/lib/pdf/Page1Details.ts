@@ -189,7 +189,16 @@ export function renderPage1(
 		rawRows.push({ label: 'Menu', value: order.menuTier });
 	}
 	if (order.spiceLevel) rawRows.push({ label: 'Spice Level', value: order.spiceLevel });
-	rawRows.push({ label: 'Includes', value: STANDARD_INCLUDES });
+	// Custom mode: customer described the menu in their own words. Render that
+	// free-text description as "Menu Notes" prominently and SKIP the standard
+	// Includes line (no tier was picked, the customer's words are the menu).
+	const isCustomMode = order.mode === 'custom';
+	if (isCustomMode && order.customMenuDetails) {
+		rawRows.push({ label: 'Menu Notes', value: order.customMenuDetails });
+	}
+	if (!isCustomMode) {
+		rawRows.push({ label: 'Includes', value: STANDARD_INCLUDES });
+	}
 	if (order.additionalMenuItems) {
 		rawRows.push({ label: 'Additional Items', value: order.additionalMenuItems });
 	} else if (order.addOns && order.addOns.length) {
