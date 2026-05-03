@@ -10,10 +10,6 @@
 // fallback (email + phone + Calendly).
 ---
 
-<a class="neela-old-style" href="https://sulaindianrestaurant.com/catering-order-custom/" target="_blank" rel="noopener noreferrer" aria-label="Old style order form, opens in a new tab">
-	Old style
-</a>
-
 <button class="neela-fab" id="neela-fab" type="button" aria-label="Ask Neela, Sula's event planning helper">
 	<img class="neela-fab-glyph" src="/apple-touch-icon.png" alt="" width="36" height="36" />
 	<span class="neela-fab-label">Ask <em>Neela</em></span>
@@ -55,7 +51,7 @@
 
 		<div class="neela-messages" id="neela-messages" aria-live="polite" aria-busy="false">
 			<div class="neela-msg neela-msg-bot">
-				<p>Hi, I'm Neela. I help with weddings, corporate, private parties, and café catering across Greater Vancouver. Three quick paths below, or just tell me what you're planning.</p>
+				<p>Hey, I'm Neela. I've got you, I can take care of everything in a few quick steps right here. Or fill our quick form if you'd rather. Your call.</p>
 			</div>
 		</div>
 
@@ -64,10 +60,10 @@
 		</div>
 
 		<div class="neela-suggested" id="neela-suggested" role="group" aria-label="Suggested questions">
+			<button type="button" class="neela-chip neela-suggestion-chip-href" data-neela-href="https://sulaindianrestaurant.com/catering-order-custom/" aria-label="Fill the form, opens in a new tab">Fill the form <span class="neela-chip-ext" aria-hidden="true">↗</span></button>
 			<button type="button" class="neela-chip" data-neela-prompt="Get a full quote">Get a full quote</button>
 			<button type="button" class="neela-chip" data-neela-prompt="Send a custom order">Send a custom order</button>
 			<button type="button" class="neela-chip" data-neela-prompt="Book a 30-min call">Book a 30-min call</button>
-			<button type="button" class="neela-chip" data-neela-prompt="Just browsing, send me ideas">Just browsing, send me ideas</button>
 		</div>
 
 		<div class="neela-voice-nudge" id="neela-voice-nudge" hidden role="status" aria-live="polite">
@@ -130,14 +126,6 @@
 	@keyframes neela-fab-spin{to{--neela-fab-angle:360deg}}
 	@media (prefers-reduced-motion:reduce){.neela-fab,.neela-fab::before,.neela-fab-halo{animation:none}.neela-fab{box-shadow:0 8px 28px rgba(10,22,40,0.35),0 0 30px rgba(58,10,69,0.6)}}
 	body.menu-open .neela-fab,body.neela-open .neela-fab{opacity:0;pointer-events:none;transform:translateY(20px)}
-
-	/* OLD-STYLE PILL, secondary fallback for users who prefer the form-only flow.
-	   Sits above the Neela FAB in the bottom-right stack so Neela keeps the prime
-	   thumb position; smaller scale, no glow, no halo, no rotating ring. Min 44px
-	   tap target for mobile. */
-	.neela-old-style{position:fixed;right:24px;bottom:100px;z-index:97;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;background:linear-gradient(135deg,var(--gold-deep),var(--gold));color:var(--midnight);border:1px solid rgba(232,201,135,0.4);border-radius:999px;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;font-weight:600;letter-spacing:0.3px;text-decoration:none;box-shadow:0 4px 14px rgba(10,22,40,0.28);transition:transform 0.3s ease,box-shadow 0.3s ease,background 0.3s ease;opacity:0.92}
-	.neela-old-style:hover{opacity:1;transform:translateY(-1px);background:linear-gradient(135deg,var(--gold),var(--gold-light));box-shadow:0 8px 20px rgba(10,22,40,0.36)}
-	body.menu-open .neela-old-style,body.neela-open .neela-old-style{opacity:0;pointer-events:none;transform:translateY(20px)}
 
 	/* NEELA MODAL */
 	.neela-modal{position:fixed;inset:0;z-index:998;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.35s cubic-bezier(0.4,0,0.2,1)}
@@ -318,6 +306,12 @@
 	/* SUGGESTION CHIPS, lighter pill set after info / browsing replies */
 	.neela-suggestions-inline{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;margin:2px 4px 6px;max-width:88%;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
 	.neela-suggestion-chip{font-size:13px;padding:6px 12px}
+	/* External-link chip: same gold pill outline, with a small ↗ glyph and a
+	   44px min tap target for mobile. Tap opens the URL in a new tab via
+	   window.open(noopener,noreferrer) instead of firing a chat turn. */
+	.neela-suggestion-chip-href{min-height:44px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px}
+	.neela-chip-ext{font-size:12px;line-height:1;opacity:0.85;display:inline-block;transform:translateY(-1px)}
+	.neela-suggestion-href-note{flex-basis:100%;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12.5px;color:var(--gold-light);opacity:0.75;margin:4px 2px 0;letter-spacing:0.2px}
 	/* Post-submit close chips, hidden until the order card flips to "sent". */
 	.neela-suggestions-pending{display:none}
 	.neela-suggestions-revealed{display:flex;animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both}
@@ -367,7 +361,6 @@
 	@media (max-width:600px){
 		.neela-fab{right:18px;bottom:18px;height:56px;font-size:14px;padding-right:16px}
 		.neela-fab-glyph{width:32px;height:32px;margin:6px 0 6px 6px}
-		.neela-old-style{right:18px;bottom:84px;min-height:44px;padding:0 16px;font-size:13.5px}
 		.neela-modal-card{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;border-left:none;border-right:none;transform:translateY(100%) scale(1)}
 		.neela-modal.active .neela-modal-card{transform:translateY(0) scale(1)}
 		.neela-header{padding:16px 14px 14px}
@@ -649,13 +642,41 @@
 		const wrap = document.createElement('div');
 		wrap.className = 'neela-suggestions-inline neela-quick-active';
 		chips.forEach((c) => {
-			if (typeof c !== 'string' || !c.trim()) return;
-			const btn = document.createElement('button');
-			btn.type = 'button';
-			btn.className = 'neela-chip neela-suggestion-chip';
-			btn.textContent = c;
-			btn.addEventListener('click', () => quickReplyTap(c));
-			wrap.appendChild(btn);
+			// String chip: tap submits as user message (existing behavior).
+			if (typeof c === 'string') {
+				const label = c.trim();
+				if (!label) return;
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'neela-chip neela-suggestion-chip';
+				btn.textContent = label;
+				btn.addEventListener('click', () => quickReplyTap(label));
+				wrap.appendChild(btn);
+				return;
+			}
+			// Object chip with href: tap opens external URL in a new tab. Does
+			// NOT fire a chat turn. A small confirmation row appears below the
+			// chip group so the user knows the form opened in a new tab.
+			if (c && typeof c === 'object' && typeof c.label === 'string' && typeof c.href === 'string') {
+				const label = c.label.trim();
+				const href = c.href.trim();
+				if (!label || !/^https?:\/\//i.test(href)) return;
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'neela-chip neela-suggestion-chip neela-suggestion-chip-href';
+				btn.innerHTML = escapeHtml(label) + ' <span class="neela-chip-ext" aria-hidden="true">↗</span>';
+				btn.setAttribute('aria-label', label + ', opens in a new tab');
+				btn.addEventListener('click', () => {
+					try { window.open(href, '_blank', 'noopener,noreferrer'); } catch (e) {}
+					const note = document.createElement('div');
+					note.className = 'neela-suggestion-href-note';
+					note.textContent = 'Opened the form in a new tab.';
+					wrap.appendChild(note);
+					messagesEl.scrollTop = messagesEl.scrollHeight;
+				});
+				wrap.appendChild(btn);
+				return;
+			}
 		});
 		return wrap.children.length ? wrap : null;
 	}
@@ -1096,10 +1117,17 @@
 		if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
 	});
 
-	// Suggested chips
+	// Suggested chips. Two shapes:
+	//  - data-neela-prompt → tap submits the value as a typed user message
+	//  - data-neela-href   → tap opens the external URL in a new tab; no chat turn
 	suggestedEl.addEventListener('click', (e) => {
 		const btn = e.target.closest('.neela-chip');
 		if (!btn) return;
+		const href = btn.dataset.neelaHref;
+		if (href && /^https?:\/\//i.test(href)) {
+			try { window.open(href, '_blank', 'noopener,noreferrer'); } catch (e) {}
+			return;
+		}
 		const prompt = btn.dataset.neelaPrompt || btn.textContent.trim();
 		inputEl.value = prompt;
 		submitMessage();
