@@ -282,6 +282,23 @@
 	.neela-quote-total span:last-child{font-variant-numeric:tabular-nums;font-size:18px}
 	.neela-quote-disclaimer{margin:10px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12px;color:rgba(245,237,224,0.6);line-height:1.5;letter-spacing:0.2px}
 
+	/* PRICING BOX, gold-bordered approximate-pricing breakdown card. Appears
+	   below Neela's prose intro when she emits NEELA_PRICING_BOX. Visually
+	   distinct from the chat bubbles, full panel width, fade-in on render.
+	   Display only, NOT interactive. */
+	.neela-pricing-box{align-self:stretch;margin:6px 4px 10px;padding:16px 18px 14px;background:linear-gradient(135deg,rgba(20,36,66,0.7),rgba(37,4,45,0.45));border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 0 1px rgba(232,201,135,0.1),0 6px 18px rgba(10,22,40,0.32);animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-pricing-items{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+	.neela-pricing-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-family:'Montserrat',sans-serif;font-size:13px;line-height:1.5;color:var(--cream);letter-spacing:0.15px}
+	.neela-pricing-row-label{flex:1;min-width:0;color:rgba(245,237,224,0.92)}
+	.neela-pricing-row-amount{flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--cream);font-weight:600}
+	.neela-pricing-sums{display:flex;flex-direction:column;gap:4px;padding-top:10px;border-top:1px solid rgba(184,149,106,0.45)}
+	.neela-pricing-sum-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;font-family:'Montserrat',sans-serif;font-size:13px;line-height:1.5;color:rgba(245,237,224,0.78);letter-spacing:0.2px}
+	.neela-pricing-sum-label{flex-shrink:0}
+	.neela-pricing-sum-amount{flex-shrink:0;font-variant-numeric:tabular-nums;color:var(--cream)}
+	.neela-pricing-sum-total{margin-top:6px;padding-top:8px;border-top:1px solid rgba(184,149,106,0.32);font-family:'Libre Baskerville',Georgia,serif;font-size:16.5px;font-weight:700;letter-spacing:0.3px;color:var(--gold-light)}
+	.neela-pricing-sum-total .neela-pricing-sum-amount{font-size:17.5px;color:var(--gold-shimmer)}
+	.neela-pricing-note{margin:12px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;color:rgba(245,237,224,0.7);line-height:1.5;letter-spacing:0.2px;text-align:center}
+
 	/* QUICK-REPLY OPTIONS, inline tappable buttons under a Neela message.
 	   Vertical stack so each label has its own clear tap target on mobile. */
 	.neela-quick-replies{display:flex;flex-direction:column;gap:8px;align-self:stretch;margin:2px 4px 8px;animation:neela-fade-up 0.3s cubic-bezier(0.4,0,0.2,1) both}
@@ -430,6 +447,8 @@
 	//   <<<NEELA_TIERS_MORE>>>    , additional tiers behind a "View all" expander
 	//   <<<NEELA_FORM>>>          , inline contact form (name / phone / email)
 	//   <<<NEELA_SUGGESTIONS>>>   , lightweight follow-up chips
+	//   <<<NEELA_PRICING_BOX>>>   , approximate pricing breakdown card (line items,
+	//                               subtotal, GST, total, "team will finalize" note)
 	//   <<<NEELA_FLAG>>>          , server-side trigger to email the events team
 	//                               for review (out-of-area, rush, complaint,
 	//                               discount, etc.). Renders a small "flagged
@@ -445,6 +464,7 @@
 	const TIERS_MORE_MARKER_RE = /<<<NEELA_TIERS_MORE>>>([\s\S]*?)<<<END_NEELA_TIERS_MORE>>>/;
 	const FORM_MARKER_RE = /<<<NEELA_FORM>>>([\s\S]*?)<<<END_NEELA_FORM>>>/;
 	const SUGGESTIONS_MARKER_RE = /<<<NEELA_SUGGESTIONS>>>([\s\S]*?)<<<END_NEELA_SUGGESTIONS>>>/;
+	const PRICING_BOX_MARKER_RE = /<<<NEELA_PRICING_BOX>>>([\s\S]*?)<<<END_NEELA_PRICING_BOX>>>/;
 	const FLAG_MARKER_RE = /<<<NEELA_FLAG>>>([\s\S]*?)<<<END_NEELA_FLAG>>>/;
 	function tryParseJson(raw, label) {
 		try { return JSON.parse(raw.trim()); }
@@ -452,7 +472,7 @@
 	}
 	function extractMarkers(text) {
 		let display = String(text);
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, flag = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null;
 		const om = display.match(ORDER_MARKER_RE);
 		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
 		const opm = display.match(OPTIONS_MARKER_RE);
@@ -465,9 +485,11 @@
 		if (fm) { display = display.replace(FORM_MARKER_RE, '').trim(); form = tryParseJson(fm[1], 'form'); }
 		const sm = display.match(SUGGESTIONS_MARKER_RE);
 		if (sm) { display = display.replace(SUGGESTIONS_MARKER_RE, '').trim(); suggestions = tryParseJson(sm[1], 'suggestions'); }
+		const pbm = display.match(PRICING_BOX_MARKER_RE);
+		if (pbm) { display = display.replace(PRICING_BOX_MARKER_RE, '').trim(); pricingBox = tryParseJson(pbm[1], 'pricing_box'); }
 		const flm = display.match(FLAG_MARKER_RE);
 		if (flm) { display = display.replace(FLAG_MARKER_RE, '').trim(); flag = tryParseJson(flm[1], 'flag'); }
-		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, flag };
+		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, pricingBox, flag };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -482,7 +504,7 @@
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, flag = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null;
 		let displayText = String(text);
 		if (role !== 'user') {
 			const ex = extractMarkers(displayText);
@@ -493,6 +515,7 @@
 			tiersMore = ex.tiersMore;
 			form = ex.form;
 			suggestions = ex.suggestions;
+			pricingBox = ex.pricingBox;
 			flag = ex.flag;
 		}
 
@@ -502,6 +525,15 @@
 			.join('');
 		div.innerHTML = paragraphs;
 		messagesEl.appendChild(div);
+
+		// Pricing box renders above any order card or form / options so the
+		// customer sees the approximate breakdown before the action surface.
+		// The box is a SECONDARY visual marker, paired with ORDER_READY at the
+		// close OR with FORM / OPTIONS during the walkthrough.
+		if (pricingBox && Array.isArray(pricingBox.lineItems) && pricingBox.lineItems.length) {
+			const boxEl = renderPricingBox(pricingBox);
+			if (boxEl) messagesEl.appendChild(boxEl);
+		}
 
 		// Order marker is mostly exclusive: the card replaces inline quick-replies,
 		// tier cards, options, and forms. The ONE allowed pairing is the post-submit
@@ -566,6 +598,72 @@
 			'<span class="neela-flag-badge-dot" aria-hidden="true"></span>' +
 			'<span class="neela-flag-badge-text">Flagged for team review, response within 6 hours.</span>';
 		wrap.title = summary;
+		return wrap;
+	}
+
+	// PRICING BOX, gold-bordered card with line items + subtotal/GST/total + the
+	// approximate caveat. Renders below Neela's prose intro when she emits the
+	// NEELA_PRICING_BOX marker (see persona block: PRICING SUMMARY BOX MARKER).
+	// Display only, NOT interactive.
+	function renderPricingBox(spec) {
+		if (!spec || !Array.isArray(spec.lineItems) || !spec.lineItems.length) return null;
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-pricing-box';
+		wrap.setAttribute('role', 'region');
+		wrap.setAttribute('aria-label', 'Approximate pricing breakdown');
+
+		const items = document.createElement('div');
+		items.className = 'neela-pricing-items';
+		spec.lineItems.forEach((it) => {
+			if (!it || typeof it.label !== 'string' || typeof it.amount !== 'string') return;
+			const label = it.label.trim();
+			const amount = it.amount.trim();
+			if (!label || !amount) return;
+			const row = document.createElement('div');
+			row.className = 'neela-pricing-row';
+			const labelEl = document.createElement('span');
+			labelEl.className = 'neela-pricing-row-label';
+			labelEl.textContent = label;
+			const amountEl = document.createElement('span');
+			amountEl.className = 'neela-pricing-row-amount';
+			amountEl.textContent = amount;
+			row.appendChild(labelEl);
+			row.appendChild(amountEl);
+			items.appendChild(row);
+		});
+		wrap.appendChild(items);
+
+		// Thin gold rule, then subtotal + GST rows, then total row. Each one
+		// optional in case the model omits a field (defensive against partial JSON).
+		const sumWrap = document.createElement('div');
+		sumWrap.className = 'neela-pricing-sums';
+		function addSumRow(label, amount, cls) {
+			if (typeof amount !== 'string' || !amount.trim()) return;
+			const row = document.createElement('div');
+			row.className = 'neela-pricing-sum-row' + (cls ? ' ' + cls : '');
+			const labelEl = document.createElement('span');
+			labelEl.className = 'neela-pricing-sum-label';
+			labelEl.textContent = label;
+			const amountEl = document.createElement('span');
+			amountEl.className = 'neela-pricing-sum-amount';
+			amountEl.textContent = amount.trim();
+			row.appendChild(labelEl);
+			row.appendChild(amountEl);
+			sumWrap.appendChild(row);
+		}
+		addSumRow('Subtotal', spec.subtotal);
+		addSumRow('GST 5%', spec.gst);
+		addSumRow('Approximate Total', spec.total, 'neela-pricing-sum-total');
+		if (sumWrap.children.length) wrap.appendChild(sumWrap);
+
+		const noteText = (spec.note && typeof spec.note === 'string' && spec.note.trim())
+			? spec.note.trim()
+			: 'This is approximate. The events team will send the final quote with any adjustments.';
+		const note = document.createElement('p');
+		note.className = 'neela-pricing-note';
+		note.textContent = noteText;
+		wrap.appendChild(note);
+
 		return wrap;
 	}
 
@@ -1282,6 +1380,7 @@
 			.replace(/<<<NEELA_TIERS>>>[\s\S]*?<<<END_NEELA_TIERS>>>/g, '')
 			.replace(/<<<NEELA_FORM>>>[\s\S]*?<<<END_NEELA_FORM>>>/g, '')
 			.replace(/<<<NEELA_SUGGESTIONS>>>[\s\S]*?<<<END_NEELA_SUGGESTIONS>>>/g, '')
+			.replace(/<<<NEELA_PRICING_BOX>>>[\s\S]*?<<<END_NEELA_PRICING_BOX>>>/g, '')
 			.replace(/<<<NEELA_FLAG>>>[\s\S]*?<<<END_NEELA_FLAG>>>/g, '')
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
