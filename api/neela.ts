@@ -190,6 +190,51 @@ DO NOT use URGENT-PATH for:
 
 The URGENT-PATH is a sibling of the LEAD-TIME enforcement, not a replacement. Lead-time enforcement still applies (24h up to 25 guests, 72h for 26+). The phone path is just a faster route for genuine emergencies; the manager on the other end will still apply Sula's lead-time and pricing rules.
 
+LIVE LOOKUP RULES (HARD RULE, when to use the lookup_sula_page and web_search tools)
+
+You have two server-side tools wired up. They cost a couple of seconds of latency per call, so use them only when the corpus genuinely can't answer.
+
+- Use lookup_sula_page when the customer asks for current/today's info that might have changed (today's hours, current menu items, holiday closures, address verification, today's specials). Always cite the page URL after using it ("checked the live page just now").
+- Use web_search ONLY for objective FACTS, current hours from official listings, awards, address verification, recent menu changes, recent positive or neutral press features. NEVER for review aggregation, customer opinion, "what do people think of Sula?", critical press, or complaint lookups. The allowlist deliberately excludes Yelp and TripAdvisor for that reason.
+- Don't use tools for facts already in your corpus (basic Sula history, brand voice, menu tiers, standard policies, the verified dish list, lead-time thresholds, delivery zones). Only when the corpus is uncertain or the question implies "right now".
+- After using a tool, acknowledge briefly ("I just checked the live site" or "quick check on a few press sites") so the customer knows where the answer came from.
+- If a tool call fails or returns nothing useful, fall back to the corpus and note "I couldn't pull a live update on that, here's what I have on file" + the corpus answer.
+- Hard cap: don't fire more than 3 tool calls in one turn. If you need more than that, the corpus answer is the better path.
+
+POSITIVE-FILTER ON SEARCH RESULTS (HARD RULE, applies to anything web_search or lookup_sula_page returns)
+
+- When reading web_search or lookup results, FILTER OUT any negative or critical content before responding. The model never repeats it back, even paraphrased.
+- Never repeat 1-star reviews, negative quotes, complaints, "got sick" stories, or critical press. Even if a returned snippet contains them, drop the snippet.
+- Focus ONLY on positive or neutral facts: hours, awards, addresses, menu changes, recent positive press, opening dates, halal certification, etc.
+- If a customer asks "what do people say about Sula?" or any review/opinion question:
+  - DO NOT call web_search to harvest reviews.
+  - DO NOT quote review platforms.
+  - Reply pattern: "We're proud of our reviews, easy to check yourself on Yelp, TripAdvisor, or Google Maps. Anything specific you want to know about us I can help with directly?"
+- If the only relevant info you find is negative, DON'T mention it. Reply pattern: "I don't have a specific update on that, the events team can fill you in at events.sula@gmail.com."
+- This rule overrides the model's instinct to be thorough or balanced. Reputation defense > comprehensiveness.
+
+LIVE LOOKUP, FEW-SHOT EXAMPLES
+
+Example 1, today's hours:
+Customer: "What time does Davie close tonight?"
+Neela calls lookup_sula_page with { url: "https://sulaindianrestaurant.com/davie-street/", section: "hours" }, parses the schema's openingHoursSpecification for today, then replies: "Davie closes at 11pm tonight (just checked the live page). Want me to hold a table or sort catering for you?"
+
+Example 2, current award / press:
+Customer: "Has Sula won any 2026 awards?"
+Neela calls web_search with the query "Sula Indian Restaurant Vancouver award 2026" (allowlist filters to the press sites), parses results, and either replies with what was found ("Vancouver Magazine listed Sula in their 2026 best-of, just checked") OR says "haven't seen anything yet for 2026, the team would be the first to know if something landed."
+
+Example 3, holiday closure check:
+Customer: "Are you open on Christmas Day?"
+Neela calls lookup_sula_page with { url: "https://sulaindianrestaurant.com/", section: "main" } to scan for any holiday banner, and if nothing is found, falls back: "Nothing on the live site about Christmas hours yet. Safest bet is to call the location, Commercial Drive 604-265-7493, Main 778-718-4409, Davie 778-663-5433, they'll have the closest read."
+
+Example 4, when NOT to use the tools:
+Customer: "What are your menu tier prices?"
+Neela does NOT call any tool. The verified tier prices are in the persona corpus (Option 1 $23.95 through Meat Lovers $31.95). She quotes from corpus directly. Live lookup adds latency for nothing.
+
+Example 5, reputation question (NEVER call web_search for this):
+Customer: "What's Sula's reputation like?" or "What do people say about Sula?" or "Are the reviews any good?"
+Neela does NOT call any tool. She replies: "We're proud of our reputation, 15 years in Vancouver, halal kitchen since 2010, great teams across our four spots. Best to check Google or Yelp yourself for recent reviews. Anything specific I can help you decide on?" Reputation questions stay corpus-only because review platforms skew toward edge cases and Neela should never paraphrase a critical review back at the customer.
+
 VOICE
 - Warm, casual, Vancouver-local. Friend who happens to know catering inside out.
 - Short replies. 2 to 4 sentences usually. No walls of text.
@@ -1952,6 +1997,56 @@ function scrubPersonalEmails(text: string, context: string): string {
 	return out;
 }
 
+// REPUTATION GUARDRAIL: when web_search ran on this turn, scan the model's
+// reply for review-style negativity. The persona's POSITIVE-FILTER block
+// tells Neela not to repeat negative content, but a model can slip,
+// especially when a search result is heavy with bad-review language. If we
+// detect any of the trigger phrases in the final reply AND a web_search
+// fired, replace the entire reply with a safe deflection. Gated on web_search
+// so a customer talking about their own bad past experience ("the food was
+// cold last time") doesn't trigger a false-positive scrub of Neela's reply.
+const NEGATIVE_REVIEW_PATTERNS: RegExp[] = [
+	/\b1[\s-]star\b/i,
+	/\bone[\s-]star\b/i,
+	/\bterrible\b/i,
+	/\bawful\b/i,
+	/\bhorrible\b/i,
+	/\bworst\b/i,
+	/\bdirty\b/i,
+	/\bfilthy\b/i,
+	/\bfood poisoning\b/i,
+	/\bgot sick\b/i,
+	/\bmade (?:me|us|them) sick\b/i,
+	/\brude staff\b/i,
+	/\brude service\b/i,
+	/\bsoggy\b/i,
+	/\bbland\b/i,
+	/\bovercooked\b/i,
+	/\bundercooked\b/i,
+	/\bnever again\b/i,
+	/\bdo not recommend\b/i,
+	/\bdon'?t recommend\b/i,
+	/\bwould(?:n'?t| not) recommend\b/i,
+	/\bavoid this place\b/i,
+	/\bstay away\b/i
+];
+const REPUTATION_DEFLECTION =
+	"We're proud of our reputation, easy to check yourself on Google or Yelp. If there's something specific about Sula I can help you decide on, I'm here.";
+export function scrubNegativeReviewContent(text: string, hadWebSearch: boolean, context: string): { text: string; scrubbed: boolean; matched: string[] } {
+	if (!text || !hadWebSearch) return { text, scrubbed: false, matched: [] };
+	const matched: string[] = [];
+	for (const pattern of NEGATIVE_REVIEW_PATTERNS) {
+		const m = text.match(pattern);
+		if (m) matched.push(m[0]);
+	}
+	if (matched.length === 0) return { text, scrubbed: false, matched: [] };
+	console.warn('[neela-reputation] scrubbed negative-review content from web_search reply', {
+		context,
+		matched: matched.slice(0, 5)
+	});
+	return { text: REPUTATION_DEFLECTION, scrubbed: true, matched };
+}
+
 type Role = 'user' | 'assistant';
 interface ChatMessage {
 	role: Role;
@@ -2224,6 +2319,214 @@ function buildEmailCorpusBlock(): string {
 	return header + entries;
 }
 
+// LIVE LOOKUP TOOLS. Two server-side tools wired into the Anthropic call so
+// Neela can verify current/today's info instead of guessing from her corpus
+// snapshot:
+//   - `lookup_sula_page` (custom client tool, executed here): fetch a page
+//     from a Sula domain, parse out schema.org JSON-LD or main text. Strict
+//     domain allowlist. 1-hour in-memory cache so a popular question (today's
+//     Davie hours) doesn't re-fetch on every turn.
+//   - `web_search` (Anthropic's native server tool, executed by Anthropic):
+//     allowlist-filtered to Sula sites + a small set of Vancouver press /
+//     review domains for award/press/external-context lookups.
+// The persona's "LIVE LOOKUP RULES" block tells Neela when to use which.
+const LOOKUP_ALLOWED_DOMAINS = [
+	'sulaindianrestaurant.com',
+	'sulacafe.com',
+	'sulacatering.com',
+	'events.sulaindianrestaurant.com'
+];
+// Web-search allowlist intentionally EXCLUDES yelp.com and tripadvisor.com.
+// Review-aggregator domains are negativity-heavy and the persona's positive
+// filter alone isn't a strong enough guarantee. Keep the surface to factual
+// press / hours / awards.
+const WEB_SEARCH_ALLOWED_DOMAINS = [
+	'sulaindianrestaurant.com',
+	'sulacafe.com',
+	'sulacatering.com',
+	'vancouvermag.com',
+	'dailyhive.com',
+	'scoutmagazine.ca',
+	'eatervancouver.com',
+	'theglobeandmail.com',
+	'georgiastraight.com',
+	'opentable.com',
+	'foodology.ca',
+	'vancouverisawesome.com'
+];
+const LOOKUP_FETCH_TIMEOUT_MS = 10000;
+const LOOKUP_CACHE_TTL_MS = 60 * 60 * 1000;
+const LOOKUP_TEXT_MAX = 3000;
+const MAX_TOOL_CALLS_PER_TURN = 3;
+
+interface LookupCacheEntry {
+	data: unknown;
+	fetchedAt: number;
+}
+const lookupCache = new Map<string, LookupCacheEntry>();
+
+const NEELA_TOOLS: Anthropic.Messages.ToolUnion[] = [
+	{
+		name: 'lookup_sula_page',
+		description:
+			"Fetch a live page from one of the Sula websites and return its rendered text + key schema markup. Use when the customer asks for very current info (hours today, current menu items, today's specials, holiday closures, address verification) that may have changed since your training. Strict Sula-domain allowlist on the server.",
+		input_schema: {
+			type: 'object',
+			properties: {
+				url: {
+					type: 'string',
+					description:
+						'Full URL of the page to fetch. Must be on sulaindianrestaurant.com, sulacafe.com, sulacatering.com, or events.sulaindianrestaurant.com (subdomains allowed).'
+				},
+				section: {
+					type: 'string',
+					enum: ['full', 'schema', 'hours', 'menu', 'main'],
+					description:
+						"Which slice of the page to return. 'hours' parses openingHoursSpecification from JSON-LD. 'schema' returns all JSON-LD blocks. 'menu', 'main', and 'full' return rendered text trimmed to ~3000 chars."
+				}
+			},
+			required: ['url']
+		}
+	},
+	{
+		type: 'web_search_20250305',
+		name: 'web_search',
+		max_uses: 3,
+		allowed_domains: WEB_SEARCH_ALLOWED_DOMAINS
+	}
+];
+
+function isAllowedLookupHost(hostname: string): boolean {
+	const h = hostname.toLowerCase();
+	return LOOKUP_ALLOWED_DOMAINS.some((d) => h === d || h.endsWith('.' + d));
+}
+
+function decodeHtmlEntities(s: string): string {
+	return s
+		.replace(/&nbsp;/g, ' ')
+		.replace(/&amp;/g, '&')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#039;/g, "'")
+		.replace(/&#39;/g, "'")
+		.replace(/&apos;/g, "'");
+}
+
+function extractSchemaBlocks(html: string): unknown[] {
+	const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+	const out: unknown[] = [];
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(html)) !== null) {
+		const raw = m[1].trim();
+		if (!raw) continue;
+		try {
+			out.push(JSON.parse(raw));
+		} catch {
+			// Some sites embed non-strict JSON, skip rather than throw.
+		}
+	}
+	return out;
+}
+
+function collectHoursFromSchema(node: unknown, out: unknown[]): void {
+	if (!node || typeof node !== 'object') return;
+	if (Array.isArray(node)) {
+		for (const item of node) collectHoursFromSchema(item, out);
+		return;
+	}
+	const obj = node as Record<string, unknown>;
+	if (obj.openingHoursSpecification) out.push(obj.openingHoursSpecification);
+	if (obj.openingHours) out.push(obj.openingHours);
+	for (const v of Object.values(obj)) collectHoursFromSchema(v, out);
+}
+
+function extractMainText(html: string, max: number): string {
+	let text = html
+		.replace(/<script[\s\S]*?<\/script>/gi, ' ')
+		.replace(/<style[\s\S]*?<\/style>/gi, ' ')
+		.replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+		.replace(/<!--[\s\S]*?-->/g, ' ')
+		.replace(/<[^>]+>/g, ' ');
+	text = decodeHtmlEntities(text).replace(/\s+/g, ' ').trim();
+	if (text.length > max) text = text.slice(0, max) + '...';
+	return text;
+}
+
+interface LookupSulaInput {
+	url: string;
+	section?: 'full' | 'schema' | 'hours' | 'menu' | 'main';
+}
+interface LookupSulaResult {
+	url: string;
+	section: string;
+	fetched_at: string;
+	schema?: unknown[];
+	hours?: unknown[];
+	text?: string;
+	error?: string;
+}
+
+export async function lookupSulaPage(input: LookupSulaInput): Promise<LookupSulaResult> {
+	const section = input.section || 'main';
+	const baseResult = (extra: Partial<LookupSulaResult>): LookupSulaResult => ({
+		url: input.url,
+		section,
+		fetched_at: new Date().toISOString(),
+		...extra
+	});
+	let parsed: URL;
+	try {
+		parsed = new URL(input.url);
+	} catch {
+		return baseResult({ error: 'Invalid URL' });
+	}
+	if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+		return baseResult({ error: `Unsupported protocol ${parsed.protocol}` });
+	}
+	if (!isAllowedLookupHost(parsed.hostname)) {
+		return baseResult({
+			error: `Hostname ${parsed.hostname} is not on the Sula allowlist (sulaindianrestaurant.com, sulacafe.com, sulacatering.com, events.sulaindianrestaurant.com).`
+		});
+	}
+	const cacheKey = `${parsed.toString()}::${section}`;
+	const cached = lookupCache.get(cacheKey);
+	if (cached && Date.now() - cached.fetchedAt < LOOKUP_CACHE_TTL_MS) {
+		console.log('[neela-tools] lookup_sula_page cache hit', { url: parsed.toString(), section });
+		return cached.data as LookupSulaResult;
+	}
+	let html: string;
+	try {
+		const resp = await fetch(parsed.toString(), {
+			signal: AbortSignal.timeout(LOOKUP_FETCH_TIMEOUT_MS),
+			headers: { 'user-agent': 'NeelaBot/1.0 (+https://sulacatering.com)' }
+		});
+		if (!resp.ok) {
+			return baseResult({ error: `Fetch returned status ${resp.status}` });
+		}
+		html = await resp.text();
+	} catch (err) {
+		return baseResult({
+			error: `Fetch failed: ${err instanceof Error ? err.message : 'unknown error'}`
+		});
+	}
+	const result: LookupSulaResult = baseResult({});
+	if (section === 'schema' || section === 'hours' || section === 'full') {
+		const schemas = extractSchemaBlocks(html);
+		result.schema = schemas;
+		if (section === 'hours') {
+			const hours: unknown[] = [];
+			collectHoursFromSchema(schemas, hours);
+			result.hours = hours;
+		}
+	}
+	if (section !== 'schema' && section !== 'hours') {
+		result.text = extractMainText(html, LOOKUP_TEXT_MAX);
+	}
+	lookupCache.set(cacheKey, { data: result, fetchedAt: Date.now() });
+	return result;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
 	console.log('[neela] hit', req.method);
 
@@ -2362,20 +2665,125 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	});
 
 	try {
-		const response = await client.messages.create(
-			{
-				model: 'claude-sonnet-4-6',
-				max_tokens: 1024,
-				system: systemBlocks,
-				messages: cleanedMessages
-			},
-			{
-				signal: abortController.signal,
-				timeout: ANTHROPIC_TIMEOUT_MS
+		// Tool-execution loop. Most turns finish in one round (no tools needed).
+		// When the model invokes `lookup_sula_page`, we execute it server-side
+		// and feed the tool_result back. `web_search` is Anthropic's native
+		// server tool, executed transparently inside a single API request, so
+		// it doesn't drive an extra loop iteration here. Hard cap of
+		// MAX_TOOL_CALLS_PER_TURN custom-tool calls per turn so a confused
+		// model can't spin.
+		const conversation: Anthropic.MessageParam[] = cleanedMessages.map((m) => ({
+			role: m.role,
+			content: m.content
+		}));
+		let response: Anthropic.Message;
+		let totalCustomToolCalls = 0;
+		let aggregatedInputTokens = 0;
+		let aggregatedOutputTokens = 0;
+		let lastCacheRead: number | null = null;
+		let lastCacheCreation: number | null = null;
+		let loopGuard = 0;
+		while (true) {
+			loopGuard += 1;
+			if (loopGuard > MAX_TOOL_CALLS_PER_TURN + 2) {
+				console.warn('[neela-tools] loopGuard tripped, breaking');
+				break;
 			}
-		);
+			// On the final fallback round (after exceeding the tool-call cap)
+			// we drop tools entirely so the model has to answer from corpus.
+			const includeTools = totalCustomToolCalls < MAX_TOOL_CALLS_PER_TURN;
+			response = await client.messages.create(
+				{
+					model: 'claude-sonnet-4-6',
+					max_tokens: 1024,
+					system: systemBlocks,
+					messages: conversation,
+					...(includeTools ? { tools: NEELA_TOOLS } : {})
+				},
+				{
+					signal: abortController.signal,
+					timeout: ANTHROPIC_TIMEOUT_MS
+				}
+			);
+			aggregatedInputTokens += response.usage?.input_tokens ?? 0;
+			aggregatedOutputTokens += response.usage?.output_tokens ?? 0;
+			lastCacheRead = response.usage?.cache_read_input_tokens ?? lastCacheRead;
+			lastCacheCreation = response.usage?.cache_creation_input_tokens ?? lastCacheCreation;
+			console.log('[neela] anthropic round', {
+				round: loopGuard,
+				stopReason: response.stop_reason,
+				inputTokens: response.usage?.input_tokens,
+				outputTokens: response.usage?.output_tokens,
+				cacheRead: response.usage?.cache_read_input_tokens,
+				cacheCreation: response.usage?.cache_creation_input_tokens,
+				includeTools
+			});
+			if (response.stop_reason !== 'tool_use') break;
+			const customToolUses = response.content.filter(
+				(b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === 'lookup_sula_page'
+			);
+			if (customToolUses.length === 0) break;
+			conversation.push({ role: 'assistant', content: response.content });
+			const toolResults: Anthropic.ToolResultBlockParam[] = [];
+			for (const block of customToolUses) {
+				totalCustomToolCalls += 1;
+				if (totalCustomToolCalls > MAX_TOOL_CALLS_PER_TURN) {
+					console.warn('[neela-tools] exceeded MAX_TOOL_CALLS_PER_TURN', {
+						toolName: block.name,
+						input: block.input
+					});
+					toolResults.push({
+						type: 'tool_result',
+						tool_use_id: block.id,
+						content:
+							'Tool-call limit reached for this turn. Answer from your corpus knowledge without further tool calls.',
+						is_error: true
+					});
+					continue;
+				}
+				console.log('[neela-tools] calling lookup_sula_page', {
+					id: block.id,
+					input: block.input
+				});
+				let resultStr = '';
+				try {
+					const result = await lookupSulaPage(block.input as LookupSulaInput);
+					resultStr = JSON.stringify(result).slice(0, 8000);
+				} catch (err) {
+					resultStr = JSON.stringify({
+						error: `Tool execution failed: ${err instanceof Error ? err.message : 'unknown error'}`
+					});
+				}
+				toolResults.push({
+					type: 'tool_result',
+					tool_use_id: block.id,
+					content: resultStr
+				});
+			}
+			conversation.push({ role: 'user', content: toolResults });
+		}
 
-		const reply = response.content
+		// Detect whether Anthropic's server-side web_search fired anywhere in
+		// the conversation history (its tool_use / tool_result blocks land
+		// directly in the response content stream, not as a separate
+		// stop_reason). We need this for the reputation-scrubber gate below.
+		const finalContent = response!.content as Array<{ type: string; name?: string }>;
+		const hadWebSearch =
+			finalContent.some(
+				(b) =>
+					(b.type === 'server_tool_use' || b.type === 'web_search_tool_result') &&
+					(!b.name || b.name === 'web_search')
+			) ||
+			conversation.some((m) => {
+				if (typeof m.content === 'string') return false;
+				return (m.content as Array<{ type: string; name?: string }>).some(
+					(b) =>
+						(b.type === 'server_tool_use' || b.type === 'web_search_tool_result') &&
+						(!b.name || b.name === 'web_search')
+				);
+			});
+		const usedTools = totalCustomToolCalls > 0 || hadWebSearch;
+		const reply = response!.content
 			.filter((block): block is Anthropic.TextBlock => block.type === 'text')
 			.map((block) => block.text)
 			.join('\n')
@@ -2383,14 +2791,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 		console.log('[neela] anthropic ok', {
 			replyLen: reply.length,
-			inputTokens: response.usage?.input_tokens,
-			outputTokens: response.usage?.output_tokens,
-			cacheRead: response.usage?.cache_read_input_tokens,
-			cacheCreation: response.usage?.cache_creation_input_tokens
+			rounds: loopGuard,
+			customToolCalls: totalCustomToolCalls,
+			hadWebSearch,
+			inputTokens: aggregatedInputTokens,
+			outputTokens: aggregatedOutputTokens,
+			cacheRead: lastCacheRead,
+			cacheCreation: lastCacheCreation
 		});
 
 		const rawReply = reply || FALLBACK_MSG;
-		const finalReply = scrubPersonalEmails(rawReply, 'neela-reply');
+		const reputationScrub = scrubNegativeReviewContent(rawReply, hadWebSearch, 'neela-reply');
+		const finalReply = scrubPersonalEmails(reputationScrub.text, 'neela-reply');
 		const lastUserMessage = userMessages[userMessages.length - 1];
 		const sessionId = (typeof body.sessionId === 'string' ? body.sessionId : '').slice(0, 200) || 'unknown';
 
@@ -2406,9 +2818,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 				ipHash: hashIp(ip),
 				userMessage: (lastUserMessage?.content ?? '').slice(0, 4000),
 				neelaReply: finalReply.slice(0, 4000),
-				inputTokens: response.usage?.input_tokens ?? null,
-				outputTokens: response.usage?.output_tokens ?? null,
-				cacheReadTokens: response.usage?.cache_read_input_tokens ?? null,
+				inputTokens: aggregatedInputTokens || null,
+				outputTokens: aggregatedOutputTokens || null,
+				cacheReadTokens: lastCacheRead,
 				messageIndex: userMessages.length,
 				conversationLength: cleanedMessages.length
 			}),
@@ -2419,7 +2831,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 			reply: finalReply,
 			remaining: rate.remaining,
 			voiceQuality: process.env.ELEVENLABS_API_KEY ? 'premium' : 'browser',
-			flagged: !!flag
+			flagged: !!flag,
+			toolCalls: totalCustomToolCalls,
+			usedTools,
+			webSearchUsed: hadWebSearch,
+			reputationScrubbed: reputationScrub.scrubbed
 		});
 	} catch (err: unknown) {
 		const isAbort =
