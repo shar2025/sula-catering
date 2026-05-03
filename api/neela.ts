@@ -37,6 +37,10 @@ import {
 	EMAIL_CORPUS_OVER_BUDGET,
 	EMAIL_CORPUS_GENERATED_AT
 } from '../src/lib/neela-email-corpus.js';
+import {
+	RESTAURANT_KNOWLEDGE_TEXT,
+	RESTAURANT_KNOWLEDGE_VERSION
+} from '../src/lib/neela-restaurant-knowledge.js';
 
 export const config = { maxDuration: 60 };
 
@@ -971,6 +975,14 @@ CRITICAL: the public-knowledge block opens with a HARD RULE on the ownership nar
 Use this content to answer questions like "who founded Sula?" (warm founder story, Shar only), "where are your locations?" (the four sites with details), "what awards have you won?" (1-2 picked, not the whole list), "tell me about your chef" (Kailash + Oberoi for big events; Bal for Davie-specific), "do you do vegan?" (yes, dedicated menu + vegan naan), "what makes Sula different?" (mother gravies + house-ground masalas + Mangalore range + eco packaging).
 
 Rules: pick at most one or two credibility points per reply, never list them all, never invent additional awards or chefs, hedge café prices as "around $X" since they're 2025 figures, and defer ownership/finance/internal-operations questions beyond the verified founder story to the events team.
+
+SULA INDIAN RESTAURANT KNOWLEDGE (NEW, restaurant-side facts ingested from sulaindianrestaurant.com)
+
+The same merged block now ALSO contains a SULA INDIAN RESTAURANT KNOWLEDGE section with the canonical restaurant-side facts: per-location addresses, phone numbers, hours, and ratings (from JSON-LD Restaurant schema), 67 FAQs (from FAQPage schema and the /contact accordion), awards, cuisine highlights, catering summary, delivery details, happy hour, brunch, and the Spice Route Tasting Menu.
+
+HARD RULE: Sula Indian Restaurant data is now part of your knowledge. When customers ask about restaurant hours, menu, locations, halal certification, awards, or anything covered in the FAQ corpus, answer from this knowledge accurately. NEVER make up numbers, hours, prices, or facts that aren't in the corpus. If a question goes beyond the corpus (specific reservation availability, today's specials, a dish not listed), say you don't have that exact detail and route them to the right contact (the location's phone, the catering team, or the relevant page on sulaindianrestaurant.com).
+
+Restaurant-side vs catering-side: this corpus is restaurant-side. It complements the catering-side knowledge above. When a customer asks "what are your hours?", default to whichever location they mention or ask which one. When they say "do you cater weddings?", route into the catering walkthrough above. Don't confuse the two products. When in doubt about a phone number, the catering line is 604-215-1130; per-location phones for restaurant questions are listed in the LOCATIONS section of the new knowledge block.
 
 IN-RESTAURANT GROUP RESERVATIONS & BUYOUTS
 The same merged block contains an IN-RESTAURANT GROUP RESERVATIONS & BUYOUTS section with verified minimum-spend matrices for the three buyout tiers (12-30, 30-40, 40-120 guests), restaurant capacities, menu options, and routing rules.
@@ -2135,10 +2147,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		});
 	}
 	// Anthropic caps cache_control breakpoints at 4 (persona, site, forms,
-	// policies+public+buyout+email-corpus). Public, buyout, and the email
-	// corpus are concatenated onto policies so they share a single cached
-	// block. The email corpus is gated on EMAIL_CORPUS_OVER_BUDGET; when true,
-	// the inline-prompt path drops it and a future RAG path takes over.
+	// policies+public+buyout+restaurant+email-corpus). Public, buyout,
+	// restaurant knowledge, and the email corpus are concatenated onto
+	// policies so they share a single cached block. The email corpus is
+	// gated on EMAIL_CORPUS_OVER_BUDGET; when true, the inline-prompt path
+	// drops it and a future RAG path takes over.
 	const emailCorpusBlock =
 		!EMAIL_CORPUS_OVER_BUDGET && EMAIL_CORPUS && EMAIL_CORPUS.length > 0
 			? buildEmailCorpusBlock()
@@ -2147,6 +2160,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		POLICIES_KNOWLEDGE +
 		(PUBLIC_KNOWLEDGE && PUBLIC_KNOWLEDGE.length > 0 ? '\n\n' + PUBLIC_KNOWLEDGE : '') +
 		(BUYOUT_KNOWLEDGE && BUYOUT_KNOWLEDGE.length > 0 ? '\n\n' + BUYOUT_KNOWLEDGE : '') +
+		(RESTAURANT_KNOWLEDGE_TEXT && RESTAURANT_KNOWLEDGE_TEXT.length > 0
+			? '\n\n' + RESTAURANT_KNOWLEDGE_TEXT
+			: '') +
 		(emailCorpusBlock ? '\n\n' + emailCorpusBlock : '');
 	if (policiesAndPublic.length > 0) {
 		systemBlocks.push({
@@ -2191,6 +2207,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 		buyoutVersion: BUYOUT_KNOWLEDGE_VERSION,
 		emailCorpusThreads: EMAIL_CORPUS_THREAD_COUNT,
 		emailCorpusOverBudget: EMAIL_CORPUS_OVER_BUDGET,
+		restaurantVersion: RESTAURANT_KNOWLEDGE_VERSION,
 		ip: ip.slice(0, 16)
 	});
 
