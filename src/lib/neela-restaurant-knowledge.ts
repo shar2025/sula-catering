@@ -19,7 +19,7 @@
 // RESTAURANT_KNOWLEDGE_VERSION, redeploy. First request after deploy rebuilds
 // the merged-block cache.
 
-export const RESTAURANT_KNOWLEDGE_VERSION = '2026-05-02-1';
+export const RESTAURANT_KNOWLEDGE_VERSION = '2026-05-03-1';
 
 export interface RestaurantLocation {
 	name: string;
@@ -104,12 +104,12 @@ export const RESTAURANT_KNOWLEDGE = {
 		{
 			name: 'Sula Cafe',
 			slug: 'cafe',
-			address: '260 East 5th Avenue, Vancouver',
-			postalCode: '',
-			phone: '',
-			hours: 'Mon to Fri 8:00 AM to 4:00 PM, Sat to Sun 9:00 AM to 4:00 PM',
+			address: '260 East 5th Avenue, Vancouver, BC V5T 1H3',
+			postalCode: 'V5T 1H3',
+			phone: '778-386-1130',
+			hours: 'Mon to Fri 8:00 AM to 5:30 PM, Sat to Sun 9:00 AM to 5:30 PM',
 			hoursDetail:
-				'Takeout-focused cafe. Hours from existing public knowledge file; not republished as Restaurant schema on the WordPress site.',
+				'Takeout-focused cafe. Address, phone, and hours verified 2026-05-03 from sulacafe.com JSON-LD CafeOrCoffeeShop schema and visible footer. Not republished on the sulaindianrestaurant.com WordPress site.',
 			rating: { value: '', reviewCount: '' },
 			menuUrl: '',
 			notes:

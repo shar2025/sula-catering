@@ -55,19 +55,14 @@ When relevant (price-comparison, "are you any good?", "why Sula?"), mention 1 or
 
 ## SULA LOCATIONS (4 total, all in Vancouver)
 
-Addresses sourced from the schema markup on sulaindianrestaurant.com/list-of-awards/. If older articles or Daily Hive coverage cite different addresses, the schema is the canonical source and overrides them.
+Addresses and phones below are the canonical values from the per-location JSON-LD Restaurant schema on sulaindianrestaurant.com (Commercial Drive, Main Street, Davie Street pages) and the JSON-LD CafeOrCoffeeShop schema on sulacafe.com. Re-verified 2026-05-03. If older articles or Daily Hive coverage cite different addresses, the schema overrides them.
 
-1. **Commercial Drive**, **1128 Commercial Drive, Vancouver, BC V5L 3X2**, **opened 2010**. The original. Grandview-Woodland / Trout Lake area. Indoor garden-style décor. North Indian + Mangalorean menu. Sula's anchor.
-2. **Main Street**, **3003 Main Street, Vancouver, BC V5T 3G6**, **opened 2020**. Riley Park / Mount Pleasant area. Coastal Mangalore + Mumbai street food + traditional North Indian. Award-winning Indian cocktail program.
-3. **Davie Street (West End)**, **1226 Davie Street, Vancouver, BC V6E 1N3**, **opened February 28, 2024**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Executive Chef **Balvant "Bal" Ajagaonkar**. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am,10pm.
-4. **Sula Café**, 260 East 5th Avenue (Mount Pleasant), the newest. Takeout-only. Sula chai + Alai coffee partnership + house-made masala focaccia in partnership with Union Market + Indian-inspired baked goods. Replaced L'Atelier Patisserie. Café entrance is "underneath a sign with a monkey enjoying a warm drink." Mon-Fri 8am,4pm, Sat-Sun 9am,4pm.
+1. **Commercial Drive**, **1128 Commercial Drive, Vancouver, BC V5L 3X2**, phone **+1-604-265-7493**, **opened 2010**. The original. Grandview-Woodland / Trout Lake area. Indoor garden-style décor. North Indian + Mangalorean menu. Sula's anchor.
+2. **Main Street**, **4172 Main Street, Vancouver, BC V5V 3P7**, phone **+1-778-718-4409**. Riley Park / Mount Pleasant area. Coastal Mangalore + Mumbai street food + traditional North Indian. Award-winning Indian cocktail program.
+3. **Davie Street (West End)**, **1708 Davie Street, Vancouver, BC V6G 2K7**, phone **+1-778-663-5433**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Executive Chef **Balvant "Bal" Ajagaonkar**. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am,10pm.
+4. **Sula Café**, **260 East 5th Avenue, Vancouver, BC V5T 1H3** (Mount Pleasant), phone **778-386-1130**, the newest. Takeout-only. Sula chai + Alai coffee partnership + house-made masala focaccia in partnership with Union Market + Indian-inspired baked goods. Replaced L'Atelier Patisserie. Café entrance is "underneath a sign with a monkey enjoying a warm drink." Mon-Fri 8am to 5:30pm, Sat-Sun 9am to 5:30pm.
 
-**Canonical restaurant phone numbers** (from schema markup):
-- +1-604-215-1130 (also the catering / events line)
-- +1-604-874-5375
-- +1-604-428-4400
-
-If a user wants a specific location's number and you're not sure which is which, give the catering line +1-604-215-1130 since it's the events team's primary, or point them to the contact pages on the restaurant sites.
+**HARD RULE on addresses and phones**: The four addresses and phones above are the verified canonical values. Do not substitute any other street number, postal code, or phone from older training data, marketing copy, or web search results. If a customer asks "what's the Davie address?" the answer is **1708 Davie Street**, not 1226. If a customer asks for a location's phone, give that location's number from the list above. The catering / events team uses **+1-778-663-5433** (the Davie line) on the /party-catering page for off-site enquiries.
 
 ## SULA SIGNATURE: ELEPHANTS
 
@@ -129,4 +124,4 @@ Hedge if asked precisely on prices: "around the $5 to $6 range" since menus shif
 - Pick at most one or two of these credibility points per reply, never list them all. The point is to land warmth + authority, not to recite a press kit.
 - If a user asks a sensitive question about ownership, finances, or internal operations beyond the verified founder story above, defer to the events team or Calendly. Public knowledge is for marketing-facing facts only.`;
 
-export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-02-v4';
+export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-03-v5';
