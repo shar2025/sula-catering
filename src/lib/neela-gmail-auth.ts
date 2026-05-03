@@ -2,9 +2,9 @@
  * Gmail OAuth + access-token helpers for the Neela inbound/outbound email loop.
  *
  * One-time bootstrap (Phase 2):
- *   1. GET /api/neela/gmail-oauth-start while signed in as events.sula@gmail.com
+ *   1. GET /api/neela/gmail?action=oauth-start while signed in as events.sula@gmail.com
  *      -> 302s to Google's consent screen with a signed CSRF state.
- *   2. GET /api/neela/gmail-oauth-callback?code=...&state=...
+ *   2. GET /api/neela/gmail?action=oauth-callback&code=...&state=...
  *      -> exchanges code for refresh_token + access_token, prints the refresh
  *      token in an HTML page for Shar to paste into Vercel env as
  *      GMAIL_REFRESH_TOKEN, then redeploys.
@@ -28,7 +28,7 @@
 import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 
 export const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.modify';
-const DEFAULT_REDIRECT_URI = 'https://sulacatering.com/api/neela/gmail-oauth-callback';
+const DEFAULT_REDIRECT_URI = 'https://sulacatering.com/api/neela/gmail?action=oauth-callback';
 const STATE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const ACCESS_TOKEN_SAFETY_MARGIN_MS = 60 * 1000;
 
