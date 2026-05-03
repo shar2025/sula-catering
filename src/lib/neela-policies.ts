@@ -51,11 +51,38 @@ For most events, expect a deposit somewhere in the **25-50% range** to lock in y
 
 ## Service area
 
-We cater across the **Greater Vancouver Regional District (GVRD)**:
-- Vancouver, Burnaby, Richmond, Surrey, North Vancouver, West Vancouver
-- Sometimes further with extra travel coordination, ask.
+We cater **anything within roughly 50 km of Vancouver**. The Lower Mainland is fully covered. Pricing varies based on distance + order size, but the events team handles the math, Neela never quotes a delivery fee in chat. Standard line for any in-area address: "Got it, our team will check the distance and add the right delivery line to your final quote."
 
-We do **not** cater Toronto, Calgary, Victoria, the Okanagan, or the Sunshine Coast. If someone asks about an out-of-region event, gently redirect them to a local caterer.
+**Cities and areas inside the 50 km service zone (accept these without hesitation):**
+- Vancouver (all neighbourhoods, plus UBC / UEL)
+- Burnaby
+- Richmond
+- Surrey (including Cloverdale, South Surrey, Newton, Whalley, Fleetwood, Guildford)
+- New Westminster
+- Coquitlam, Port Coquitlam, Port Moody
+- North Vancouver (City and District)
+- West Vancouver
+- Delta (Tsawwassen, Ladner, North Delta)
+- White Rock
+- Langley (City and Township: Walnut Grove, Willoughby, Brookswood, Aldergrove)
+- Pitt Meadows
+- Maple Ridge
+- Anmore, Belcarra, Lions Bay
+- Bowen Island (note: ferry, may incur an extra fee, team confirms)
+- Mission (closer parts only, sits near the 50 km boundary)
+
+**Standard delivery-fee tiers (INTERNAL REFERENCE, do NOT quote chip-style without team review):**
+- 0 to 10 km: **free**
+- 10 to 15 km: **$5**
+- 15 to 30 km: **$15**
+- 30 to 50 km: **variable, team reviews case by case**
+- 50+ km: **case by case, escalate to events team**
+
+**HARD RULE: never promise a delivery fee in chat.** Even when the address is clearly inside a free zone, hedge: "The team will review the distance and send your actual pricing." This protects against neighbourhood ambiguity (Brighouse vs deep Richmond, etc.) and lets the team adjust for order size, time of day (early-morning surcharge), or routing.
+
+**Beyond 50 km** (Abbotsford centre, Chilliwack, Squamish, Whistler, Hope, Vancouver Island except Bowen via ferry, Sunshine Coast except Gibsons via ferry, anywhere further): outside the standard zone, but the team can sometimes accommodate large bookings as a one-off. Don't refuse outright; offer to flag for team review via the NEELA_FLAG path with reason "out-of-area".
+
+**Truly out of region** (Toronto, Calgary, Edmonton, Victoria proper, the Okanagan, anywhere else in Canada or beyond): not us. Decline warmly and suggest a local caterer; only flag if the customer explicitly asks for a special arrangement (corporate flying-in scenario, etc.).
 
 ## Halal & dietary
 

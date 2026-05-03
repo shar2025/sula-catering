@@ -180,6 +180,20 @@ export function renderPage1(
 	rawRows.push({ label: 'Event Date', value: eventDateText, bold: true });
 	rawRows.push({ label: 'Delivery Time', value: deliveryTimeText });
 	rawRows.push({ label: 'Event Address', value: addressText });
+	// Delivery distance: if Neela captured a number (geocode lookup, etc.) we
+	// print it; otherwise show "TBD by team" so the customer + team both know
+	// the delivery line will land on the formal quote. Only render when the
+	// service is delivery-flavoured (anything but in-restaurant) and the
+	// customer's address is on file. The team adjusts the actual fee on the
+	// written quote per the persona's HARD RULE: DELIVERY DISTANCE + FEE HEDGING.
+	const isDeliveryFlow = order.serviceType !== 'in-restaurant';
+	if (isDeliveryFlow && addressText) {
+		const km = typeof order.deliveryKm === 'number' && Number.isFinite(order.deliveryKm) ? order.deliveryKm : null;
+		const distanceLabel = km !== null
+			? `${km < 1 ? km.toFixed(1) : Math.round(km)} km from Vancouver`
+			: 'TBD by team (added on the formal quote)';
+		rawRows.push({ label: 'Delivery Distance', value: distanceLabel });
+	}
 	rawRows.push({ label: 'Event Type', value: eventTypeText });
 	if (guestStr) rawRows.push({ label: 'Guests', value: guestStr });
 	for (const r of curryRows) {
