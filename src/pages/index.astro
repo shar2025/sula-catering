@@ -2,6 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 import TrustedBy from '../components/TrustedBy.astro';
 ---
+<style>
+	.hero-pointer{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:17px;color:rgba(245,237,224,0.82);margin:0 auto;max-width:520px;letter-spacing:0.2px;animation:fadeUp 1.2s ease 0.9s both;display:inline-flex;align-items:center;gap:10px;justify-content:center}
+	.hero-pointer-arrow{display:inline-block;font-style:normal;font-size:18px;color:var(--gold-light);animation:hero-pointer-bounce 2s ease-in-out infinite}
+	@keyframes hero-pointer-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+	@media (prefers-reduced-motion:reduce){.hero-pointer-arrow{animation:none}}
+	@media (max-width:600px){.hero-pointer{font-size:15px}}
+</style>
 <Layout
 	title="Indian Catering Vancouver | Wedding & Corporate Catering | Sula Since 2010"
 	description="Award-winning Indian catering Vancouver since 2010. Wedding catering, corporate catering, samosa & finger food catering across Vancouver, Burnaby, Richmond and Surrey."
@@ -13,7 +20,7 @@ import TrustedBy from '../components/TrustedBy.astro';
 		<div class="hero-content">
 			<h1>The Art of <em>Indian Catering</em><br/>in Vancouver</h1>
 			<p class="hero-tagline">From small dinners to big weddings. Real food, beautifully presented, with 15 years behind every plate.</p>
-			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Begin Your Event</a>
+			<p class="hero-pointer">Ask Neela below to start, or use the old form. <span class="hero-pointer-arrow" aria-hidden="true">↓</span></p>
 		</div>
 	</section>
 
@@ -51,7 +58,6 @@ import TrustedBy from '../components/TrustedBy.astro';
 							<span class="service-eyebrow">Most Loved</span>
 							<h3>Wedding <em>Catering</em></h3>
 							<p>Sangeet, ceremony, reception. Custom menus built with our chefs. Halal, vegetarian, vegan, Jain.</p>
-							<span class="service-arrow">Explore Weddings →</span>
 						</div>
 					</div>
 				</a>
@@ -62,7 +68,6 @@ import TrustedBy from '../components/TrustedBy.astro';
 							<span class="service-eyebrow">Trusted by Vancouver's Best</span>
 							<h3>Corporate <em>Catering</em></h3>
 							<p>Boardroom lunches, conferences, client entertaining. Hot delivery, on time, every time.</p>
-							<span class="service-arrow">Explore Corporate →</span>
 						</div>
 					</div>
 				</a>
@@ -73,7 +78,6 @@ import TrustedBy from '../components/TrustedBy.astro';
 							<span class="service-eyebrow">Birthdays & Milestones</span>
 							<h3>Private <em>Parties</em></h3>
 							<p>Birthdays, anniversaries, housewarmings, Diwali. Big feasts, easy delivery.</p>
-							<span class="service-arrow">Explore Private →</span>
 						</div>
 					</div>
 				</a>
@@ -84,7 +88,6 @@ import TrustedBy from '../components/TrustedBy.astro';
 							<span class="service-eyebrow">From Sula Café</span>
 							<h3>Café & <em>Chai</em></h3>
 							<p>Live masala chai stations, specialty coffee bars, fresh-baked Indian pastries.</p>
-							<span class="service-arrow">Explore Café →</span>
 						</div>
 					</div>
 				</a>
@@ -190,13 +193,5 @@ import TrustedBy from '../components/TrustedBy.astro';
 		</div>
 	</section>
 
-
-	<section class="cta-section">
-		<div class="reveal">
-			<h2>Let's Plan Something <em>Beautiful</em></h2>
-			<p>Tell us about your event. We'll respond within 24 hours with a custom menu and quote.</p>
-			<a href="https://sulaindianrestaurant.com/sula-catering-order/" class="btn btn-gold">Request a Quote</a>
-		</div>
-	</section>
 
 </Layout>
