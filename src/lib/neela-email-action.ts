@@ -38,6 +38,9 @@ import {
 import type { GmailMessage } from './neela-gmail-send.js';
 import { classifyEmail, type IntentResult } from './neela-email-intent.js';
 
+// INTERNAL TEST ROUTING ONLY, do NOT mirror in customer responses. This is
+// the team-side notification recipient when neither NEELA_TEAM_EMAIL nor
+// NEELA_TEST_EMAIL is set; it never appears in customer-visible content.
 const TEAM_EMAIL_FALLBACK = 'mail.sharathvittal@gmail.com';
 const COMPLAINT_FORWARD_TO = 'events@sulaindianrestaurant.com';
 const REFERENCE_RE = /\bSC-\d{4}-[A-Z0-9]{4}\b/i;

@@ -37,7 +37,50 @@ export const config = { maxDuration: 30 };
 //   NEELA_TEST_EMAIL → routes ALL notifications there for testing (subject is
 //                      NOT decorated; the redirect itself is the test signal)
 //   NEELA_FROM_EMAIL → override sender; defaults to neela@sulacatering.com (verified)
+// INTERNAL TEST ROUTING ONLY, do NOT mirror in customer responses. This is
+// the recipient address for the team-side notification email; it never
+// renders into customer-visible content.
 const EMAIL_TO_PROD = 'mail.sharathvittal@gmail.com';
+
+// PRIVACY GUARDRAIL: scrub personal-email patterns from any free-text the
+// model captured into the order JSON before it gets persisted, rendered into
+// the customer PDF, or echoed back in an email body. Mirrors the scrub in
+// /api/neela so a model slip during the chat doesn't ride downstream.
+const PUBLIC_CATERING_INBOX = 'events.sula@gmail.com';
+const PERSONAL_EMAIL_PATTERNS: RegExp[] = [
+	/mail\.sharathvittal@gmail\.com/gi,
+	/mail\.shar963@gmail\.com/gi,
+	/sharathvittal@[a-z0-9.-]+/gi,
+	/shar963@[a-z0-9.-]+/gi
+];
+function scrubText(value: unknown): unknown {
+	if (typeof value !== 'string') return value;
+	let out = value;
+	let hits = 0;
+	for (const pattern of PERSONAL_EMAIL_PATTERNS) {
+		out = out.replace(pattern, () => {
+			hits += 1;
+			return PUBLIC_CATERING_INBOX;
+		});
+	}
+	return hits > 0 ? out : value;
+}
+function scrubPersonalEmailsFromOrder(order: Order, context: string): void {
+	const before = JSON.stringify(order);
+	if (order.notes !== undefined) order.notes = scrubText(order.notes) as string;
+	if (order.customMenuDetails !== undefined) order.customMenuDetails = scrubText(order.customMenuDetails) as string;
+	if (order.additionalMenuItems !== undefined) order.additionalMenuItems = scrubText(order.additionalMenuItems) as string;
+	if (order.dietary && typeof order.dietary === 'object' && order.dietary.notes !== undefined) {
+		order.dietary.notes = scrubText(order.dietary.notes) as string;
+	}
+	if (order.contact && typeof order.contact === 'object' && order.contact.name) {
+		order.contact.name = scrubText(order.contact.name) as string;
+	}
+	const after = JSON.stringify(order);
+	if (before !== after) {
+		console.warn('[neela-order] scrubbed personal email from order JSON', { context });
+	}
+}
 const FROM_TEAM = 'Neela <neela@sulacatering.com>';
 const FROM_CUSTOMER = 'Sula Catering <neela@sulacatering.com>';
 function recipient(): string {
@@ -1073,6 +1116,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 	if (!v.ok) {
 		return res.status(400).json({ error: v.error });
 	}
+
+	scrubPersonalEmailsFromOrder(v.order, 'submit-order');
 
 	const ip = getClientIp(req);
 	const ipHash = hashIp(ip);
