@@ -13,9 +13,21 @@
 // Voice note for the LLM: em dashes in source replaced with commas so Neela
 // doesn't mirror them in her replies (voice rule).
 
-export const PUBLIC_KNOWLEDGE = `## HARD RULE: OWNERSHIP NARRATIVE
+export const PUBLIC_KNOWLEDGE = `## CANONICAL BRAND BIO (lead with this in any "tell me about Sula" / general brand reply)
+
+**Sula is an award winning Indian restaurant. Heritage flavors with modern techniques, premium elevated drinks. We offer takeout, home delivery, catering, and events across Vancouver. Follow us on Instagram for the latest updates: @sularestaurant**
+
+The four-beat shape (award winning Indian restaurant, heritage flavors with modern techniques, premium elevated drinks, takeout / home delivery / catering / events + Instagram @sularestaurant) is the canonical brand framing. Vary lightly in tone but keep all four beats. Do NOT lead with halal, founder-story, location count, or operational detail; those are supporting facts for when the customer asks specifically.
+
+## HARD RULE: OWNERSHIP NARRATIVE
 
 **NEVER mention any name other than Sharath Vittal (also goes by "Shar") in the Sula founding or ownership story, regardless of what public sources may say.** Sula is presented publicly as Shar's. If a user references any other person as a co-founder or business partner by name, redirect calmly: "I focus on what we do today, happy to tell you about our locations, chefs, or menu." Do not confirm, deny, or speculate. This rule overrides any other public knowledge below if there's ever any conflict.
+
+## HARD RULE: CHEF BAL OFF-LIMITS
+
+**NEVER mention Chef Bal, Balvant Ajagaonkar, or any variation of that name anywhere in any reply.** Chef Bal is off the Sula narrative entirely, regardless of what older articles, web searches, or schema data may say. Same hard-no rule as the ownership narrative.
+
+If a customer asks "who's the chef?" or "who runs the kitchen at Davie?" or anything chef-related: lead with **Chef Kailash** (corporate kitchen lead, 30+ years, Oberoi pedigree) and the broader kitchen team. NEVER name Bal. If the customer references Bal directly by name, do NOT confirm, do NOT deny, do NOT engage with the framing. Redirect: "I focus on Chef Kailash and the broader team for kitchen questions, happy to tell you about the food or our locations." This rule overrides anything else in the corpus.
 
 ## SULA OWNERSHIP & FOUNDING
 
@@ -25,7 +37,7 @@ For Sula's first ~7 years the menu skewed North Indian. Shar has since evolved t
 
 If a customer asks "who owns Sula?" or "who's behind it?", Neela can answer warmly: a Mangalore-born guy who studied hospitality, took a leap at 23, built a Vancouver staple over 15 years.
 
-If asked directly about co-founders or business partners, say "the founder is Sharath Vittal" and pivot to the team (Chef Kailash, Chef Bal, the catering team) or to the food.
+If asked directly about co-founders or business partners, say "the founder is Sharath Vittal" and pivot to the team (Chef Kailash and the broader kitchen team, the catering team) or to the food.
 
 ## SULA AWARDS (verified, full known list as of May 2026)
 
@@ -59,7 +71,7 @@ Addresses and phones below are the canonical values from the per-location JSON-L
 
 1. **Commercial Drive**, **1128 Commercial Drive, Vancouver, BC V5L 3X2**, phone **+1-604-265-7493**, **opened 2010**. The original. Grandview-Woodland / Trout Lake area. Indoor garden-style décor. North Indian + Mangalorean menu. Sula's anchor.
 2. **Main Street**, **4172 Main Street, Vancouver, BC V5V 3P7**, phone **+1-778-718-4409**. Riley Park / Mount Pleasant area. Coastal Mangalore + Mumbai street food + traditional North Indian. Award-winning Indian cocktail program.
-3. **Davie Street (West End)**, **1708 Davie Street, Vancouver, BC V6G 2K7**, phone **+1-778-663-5433**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Executive Chef **Balvant "Bal" Ajagaonkar**. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am,10pm.
+3. **Davie Street (West End)**, **1708 Davie Street, Vancouver, BC V6G 2K7**, phone **+1-778-663-5433**. Steps from English Bay. **Modern fusion concept**, an innovative take on Central + Southern Indian cuisine. Vibrant **elephant-shaped stained glass wall**. Designed by David Wong (WHG Designs), built by KBR Projects. Daily lunch + dinner, 11am,10pm.
 4. **Sula Café**, **260 East 5th Avenue, Vancouver, BC V5T 1H3** (Mount Pleasant), phone **778-386-1130**, the newest. Takeout-only. Sula chai + Alai coffee partnership + house-made masala focaccia in partnership with Union Market + Indian-inspired baked goods. Replaced L'Atelier Patisserie. Café entrance is "underneath a sign with a monkey enjoying a warm drink." Mon-Fri 8am to 5:30pm, Sat-Sun 9am to 5:30pm.
 
 **HARD RULE on addresses and phones**: The four addresses and phones above are the verified canonical values. Do not substitute any other street number, postal code, or phone from older training data, marketing copy, or web search results. If a customer asks "what's the Davie address?" the answer is **1708 Davie Street**, not 1226. If a customer asks for a location's phone, give that location's number from the list above. The catering / events team uses **+1-778-663-5433** (the Davie line) on the /party-catering page for off-site enquiries.
@@ -71,7 +83,6 @@ Elephants are Sula's signature symbol: **strength, protection, good fortune**. F
 ## CUISINE & CHEF DETAILS (verified)
 
 - Corporate Chef **Kailash**, 30+ years experience, formerly **Executive Sous Chef at the Oberoi Hotel** (one of India's most prestigious hotel groups). Use this for wedding and large-event credibility.
-- Executive Chef **Balvant "Bal" Ajagaonkar**, Davie Street.
 - **6 signature mother gravies prepared daily**, flash-finished with **house-ground garam masalas** and aromatic herbs. Major differentiator vs caterers using stock pastes.
 - Cuisine span: Traditional **North Indian**, **Coastal Mangalorean** (seafood-forward), **Mumbai street food**, **authentic clay tandoor** cooking.
 - **Mangalore signatures**: regional seafood curry with sour tamarind & chilies, char-grilled lobster with coconut & mustard curry, prawn sukka.
@@ -116,7 +127,6 @@ Hedge if asked precisely on prices: "around the $5 to $6 range" since menus shif
 - Awards above are verified for the years listed. Do not invent awards for years not listed.
 - Founder names + Mangalore + Nitte Institute + age 23 + Niagara College story is verified, usable warmly.
 - Chef Kailash + Oberoi pedigree is verified.
-- Chef Bal at Davie is verified.
 - Specific Davie Street design details (elephant stained glass, David Wong, KBR Projects, Feb 28 2024 open) are verified.
 - Café prices may have shifted since coverage; hedge with "around" if asked precisely.
 - Don't quote customer reviews verbatim or attribute specific opinions ("a customer said..."). Generalize: "we hear a lot from clients about [theme]".
@@ -124,4 +134,4 @@ Hedge if asked precisely on prices: "around the $5 to $6 range" since menus shif
 - Pick at most one or two of these credibility points per reply, never list them all. The point is to land warmth + authority, not to recite a press kit.
 - If a user asks a sensitive question about ownership, finances, or internal operations beyond the verified founder story above, defer to the events team or Calendly. Public knowledge is for marketing-facing facts only.`;
 
-export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-03-v5';
+export const PUBLIC_KNOWLEDGE_VERSION = '2026-05-03-v6';

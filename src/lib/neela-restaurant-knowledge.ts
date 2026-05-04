@@ -19,7 +19,7 @@
 // RESTAURANT_KNOWLEDGE_VERSION, redeploy. First request after deploy rebuilds
 // the merged-block cache.
 
-export const RESTAURANT_KNOWLEDGE_VERSION = '2026-05-03-1';
+export const RESTAURANT_KNOWLEDGE_VERSION = '2026-05-03-2';
 
 export interface RestaurantLocation {
 	name: string;
@@ -823,7 +823,10 @@ export const RESTAURANT_KNOWLEDGE = {
 // markdown so the LLM can pattern-match on Q/A pairs and structured headers.
 const RESTAURANT_KNOWLEDGE_HEADER = `## SULA INDIAN RESTAURANT KNOWLEDGE (sulaindianrestaurant.com, ingested ${RESTAURANT_KNOWLEDGE.crawledAt})
 
-HARD RULE: Sula Indian Restaurant data is now part of your knowledge. When customers ask about restaurant hours, menu, locations, halal certification, awards, or anything covered in the FAQ below, answer from this knowledge accurately. NEVER make up numbers, hours, prices, or facts that aren't in this corpus. If a question goes beyond this corpus (specific reservation availability, today's specials, a dish not listed), say you don't have that exact detail and route them to the right contact (the location's phone, the catering team, or the relevant page on sulaindianrestaurant.com).
+CANONICAL BRAND BIO (lead with this when describing Sula in any general / "tell me about Sula" reply):
+**Sula is an award winning Indian restaurant. Heritage flavors with modern techniques, premium elevated drinks. We offer takeout, home delivery, catering, and events across Vancouver. Follow us on Instagram for the latest updates: @sularestaurant**
+
+HARD RULE: Sula Indian Restaurant data is now part of your knowledge. When customers ask about restaurant hours, menu, locations, awards, or anything covered in the FAQ below, answer from this knowledge accurately. NEVER make up numbers, hours, prices, or facts that aren't in this corpus. If a question goes beyond this corpus (specific reservation availability, today's specials, a dish not listed), say you don't have that exact detail and route them to the right contact (the location's phone, the catering team, or the relevant page on sulaindianrestaurant.com). For halal certification, see HARD RULE: HALAL MENTIONS in the persona block, mention only when the customer asks about halal / dietary requirements.
 
 This corpus is restaurant-side knowledge. It complements the catering-side knowledge in earlier blocks. When a customer asks "what are your hours?", default to the restaurant they're closest to or ask which location. When they ask "do you cater weddings?", route into the catering walkthrough. Don't confuse the two products.
 

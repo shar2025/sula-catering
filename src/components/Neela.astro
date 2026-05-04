@@ -7,7 +7,9 @@
 //   POST /api/neela-voice , TTS (ElevenLabs)
 //   POST /api/neela-lead  , lead capture
 // Until those endpoints exist, sends gracefully fail to the hard-error
-// fallback (email + phone + Calendly).
+// fallback (email + phone). The Calendly link is not wired up yet (Shar will
+// provide it), so the consultation card surfaces email + phone directly instead
+// of a broken [CALENDLY_URL] placeholder.
 ---
 
 <button class="neela-fab" id="neela-fab" type="button" aria-label="Ask Neela, Sula's event planning helper">
@@ -404,7 +406,7 @@
 
 	const SESSION_KEY = 'neela-conv-v1';
 	const SESSION_ID_KEY = 'neela-session-id';
-	const FALLBACK_MSG = "I'm taking a quick break right now. Email events.sula@gmail.com, call 604-215-1130, or book a quick call at calendly.com/sula-catering/30min and we'll handle whatever you need.";
+	const FALLBACK_MSG = "I'm taking a quick break right now. Email events.sula@gmail.com or call 604-215-1130 and the team will handle whatever you need, they usually reply within 24 hours.";
 	const MAX_USER_MESSAGES = 25;
 
 	let conversation = [];
@@ -971,6 +973,11 @@
 	}
 
 	function renderConsultationCard(order) {
+		// @TODO replace email + phone fallback with the real Calendly link when Shar
+		// provides it (see https://github.com/shar2025/sula-catering/issues). Until
+		// then, the consultation card surfaces events.sula@gmail.com + 604-215-1130
+		// instead of a broken [CALENDLY_URL] placeholder so customers can actually
+		// reach the team.
 		const card = document.createElement('div');
 		card.className = 'neela-order-card neela-order-card-consultation';
 		const name = order && order.contact && order.contact.name ? String(order.contact.name) : '';
@@ -978,9 +985,12 @@
 			? '<p class="neela-order-noted">Your details are noted for the events team' + (name ? ' (' + escapeHtml(name) + ')' : '') + '.</p>'
 			: '';
 		card.innerHTML =
-			'<p class="neela-order-card-title">Easiest path: a 30-min call.</p>' +
-			'<p class="neela-order-card-sub">Pick any time that works.</p>' +
-			'<a class="neela-order-calendly" href="https://calendly.com/sula-catering/30min" target="_blank" rel="noopener noreferrer">Book a call →</a>' +
+			'<p class="neela-order-card-title">Easiest path: reach the events team.</p>' +
+			'<p class="neela-order-card-sub">They usually reply within 24 hours.</p>' +
+			'<div style="display:flex;flex-direction:column;align-items:center;gap:10px">' +
+			'<a class="neela-order-calendly" href="mailto:events.sula@gmail.com" rel="noopener noreferrer">Email events.sula@gmail.com</a>' +
+			'<a class="neela-order-calendly" href="tel:+16042151130" rel="noopener noreferrer">Call 604-215-1130</a>' +
+			'</div>' +
 			noted;
 		// Best-effort persistence of the consultation context (name + email + notes).
 		// Fire-and-forget; success/failure doesn't change what the user sees.
@@ -1858,7 +1868,7 @@
 		disableActiveQuickReplies();
 		const userMessageCount = conversation.filter(m => m.role === 'user').length;
 		if (userMessageCount >= MAX_USER_MESSAGES) {
-			renderMessage('bot', "We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/ or book a call at calendly.com/sula-catering/30min.");
+			renderMessage('bot', "We've covered a lot in this conversation. Easiest next step is to drop your details in our quote form at sulaindianrestaurant.com/sula-catering-order/, or reach the events team at events.sula@gmail.com or 604-215-1130.");
 			return;
 		}
 
@@ -1884,7 +1894,7 @@
 			if (resp.status === 429) {
 				const data = await resp.json().catch(() => ({}));
 				showTyping(false);
-				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at events.sula@gmail.com or book a quick call: calendly.com/sula-catering/30min");
+				renderMessage('bot', data.reply || "Looks like we've chatted plenty today. To keep going, drop us a line at events.sula@gmail.com or call 604-215-1130, the team usually replies within 24 hours.");
 				return;
 			}
 			if (!resp.ok && resp.status !== 504 && resp.status !== 502 && resp.status !== 503) {
