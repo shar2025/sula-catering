@@ -6,10 +6,10 @@
 //   POST /api/neela       , chat completion (Anthropic Claude Sonnet)
 //   POST /api/neela-voice , TTS (ElevenLabs)
 //   POST /api/neela-lead  , lead capture
-// Until those endpoints exist, sends gracefully fail to the hard-error
-// fallback (email + phone). The Calendly link is not wired up yet (Shar will
-// provide it), so the consultation card surfaces email + phone directly instead
-// of a broken [CALENDLY_URL] placeholder.
+// Hard-error fallback points users at the Calendly URL plus email + phone.
+// The "Book a 30-min call" intent renders Calendly's booking widget inline
+// inside the chat panel via the NEELA_CALENDLY_EMBED marker; the consultation
+// card stays as a fallback for callback captures without an embed.
 ---
 
 <button class="neela-fab" id="neela-fab" type="button" aria-label="Ask Neela, Sula's event planning helper">
@@ -269,6 +269,20 @@
 	.neela-order-calendly:hover{transform:translateY(-1px);background-position:100% 0;box-shadow:0 10px 24px rgba(184,149,106,0.5)}
 	.neela-order-noted{margin:14px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13px;color:rgba(245,237,224,0.65);letter-spacing:0.2px}
 
+	/* CALENDLY INLINE EMBED, gold-bordered card containing Calendly's iframe widget.
+	   Renders inside the chat panel when Neela emits NEELA_CALENDLY_EMBED so the
+	   customer can pick a date + time + email without leaving the conversation.
+	   widget.js is lazy-loaded the first time an embed renders. */
+	.neela-calendly-embed{align-self:stretch;margin:6px 4px 10px;padding:14px 14px 12px;background:linear-gradient(135deg,rgba(20,36,66,0.7),rgba(37,4,45,0.45));border:1px solid var(--gold);border-radius:14px;box-shadow:0 0 0 1px rgba(232,201,135,0.1),0 6px 18px rgba(10,22,40,0.32);animation:neela-fade-up 0.45s cubic-bezier(0.4,0,0.2,1) both}
+	.neela-calendly-embed-title{margin:0 0 10px;font-family:'Libre Baskerville',Georgia,serif;font-size:14px;font-weight:700;color:var(--gold-light);letter-spacing:0.3px;text-align:center}
+	.neela-calendly-embed-frame{position:relative;width:100%;min-width:0;height:500px;border-radius:10px;overflow:hidden;background:rgba(5,11,21,0.6)}
+	.neela-calendly-embed-frame .calendly-inline-widget{width:100%;height:100%;min-width:0}
+	.neela-calendly-embed-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:14px;color:rgba(245,237,224,0.7);letter-spacing:0.2px;pointer-events:none;transition:opacity 0.3s ease}
+	.neela-calendly-embed-frame.loaded .neela-calendly-embed-loading{opacity:0}
+	.neela-calendly-embed-fallback{margin:10px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:12.5px;color:rgba(245,237,224,0.65);letter-spacing:0.2px;text-align:center;line-height:1.5}
+	.neela-calendly-embed-fallback a{color:var(--gold-shimmer);text-decoration:underline;text-decoration-color:rgba(232,201,135,0.4)}
+	@media (min-width:520px){.neela-calendly-embed-frame{height:630px}}
+
 	/* QUOTE SECTION inside the order card, itemized estimate with gold dotted leaders */
 	.neela-quote{margin:0 0 14px;padding:14px 16px;background:linear-gradient(180deg,rgba(10,22,40,0.55),rgba(37,4,45,0.32));border:1px solid rgba(184,149,106,0.32);border-radius:8px}
 	.neela-quote-title{margin:0 0 10px;font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;color:var(--gold);letter-spacing:0.5px;font-weight:500}
@@ -441,21 +455,26 @@
 			.replace(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '<a href="mailto:$1">$1</a>');
 	}
 
-	// Marker parsers. Neela's reply may include any of four structured blocks at
+	// Marker parsers. Neela's reply may include any of these structured blocks at
 	// the tail of her prose:
-	//   <<<NEELA_ORDER_READY>>>   , final order JSON, renders as the order card
-	//   <<<NEELA_OPTIONS>>>       , inline tappable answer buttons
-	//   <<<NEELA_TIERS>>>         , menu-tier cards (curated lead 3)
-	//   <<<NEELA_TIERS_MORE>>>    , additional tiers behind a "View all" expander
-	//   <<<NEELA_FORM>>>          , inline contact form (name / phone / email)
-	//   <<<NEELA_SUGGESTIONS>>>   , lightweight follow-up chips
-	//   <<<NEELA_PRICING_BOX>>>   , approximate pricing breakdown card (line items,
-	//                               subtotal, GST, total, "team will finalize" note)
-	//   <<<NEELA_FLAG>>>          , server-side trigger to email the events team
-	//                               for review (out-of-area, rush, complaint,
-	//                               discount, etc.). Renders a small "flagged
-	//                               for team review" badge under the bubble so
-	//                               the customer sees the system has committed.
+	//   <<<NEELA_ORDER_READY>>>     , final order JSON, renders as the order card
+	//   <<<NEELA_OPTIONS>>>         , inline tappable answer buttons
+	//   <<<NEELA_TIERS>>>           , menu-tier cards (curated lead 3)
+	//   <<<NEELA_TIERS_MORE>>>      , additional tiers behind a "View all" expander
+	//   <<<NEELA_FORM>>>            , inline contact form (name / phone / email)
+	//   <<<NEELA_SUGGESTIONS>>>     , lightweight follow-up chips
+	//   <<<NEELA_PRICING_BOX>>>     , approximate pricing breakdown card (line items,
+	//                                 subtotal, GST, total, "team will finalize" note)
+	//   <<<NEELA_FLAG>>>            , server-side trigger to email the events team
+	//                                 for review (out-of-area, rush, complaint,
+	//                                 discount, etc.). Renders a small "flagged
+	//                                 for team review" badge under the bubble so
+	//                                 the customer sees the system has committed.
+	//   <<<NEELA_CALENDLY_EMBED>>>  , inline Calendly booking widget so the
+	//                                 customer can pick a 30-min slot without
+	//                                 leaving the chat panel. widget.js is
+	//                                 lazy-loaded the first time the embed
+	//                                 renders.
 	// We strip every marker from the displayed text and render the structured
 	// element below the bubble. If a JSON block fails to parse, we still strip
 	// the markers and just show prose (Neela's prose almost always names the
@@ -468,13 +487,14 @@
 	const SUGGESTIONS_MARKER_RE = /<<<NEELA_SUGGESTIONS>>>([\s\S]*?)<<<END_NEELA_SUGGESTIONS>>>/;
 	const PRICING_BOX_MARKER_RE = /<<<NEELA_PRICING_BOX>>>([\s\S]*?)<<<END_NEELA_PRICING_BOX>>>/;
 	const FLAG_MARKER_RE = /<<<NEELA_FLAG>>>([\s\S]*?)<<<END_NEELA_FLAG>>>/;
+	const CALENDLY_EMBED_MARKER_RE = /<<<NEELA_CALENDLY_EMBED>>>([\s\S]*?)<<<END_NEELA_CALENDLY_EMBED>>>/;
 	function tryParseJson(raw, label) {
 		try { return JSON.parse(raw.trim()); }
 		catch (e) { console.warn('[neela] ' + label + ' JSON parse failed', e); return null; }
 	}
 	function extractMarkers(text) {
 		let display = String(text);
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null;
 		const om = display.match(ORDER_MARKER_RE);
 		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
 		const opm = display.match(OPTIONS_MARKER_RE);
@@ -491,7 +511,9 @@
 		if (pbm) { display = display.replace(PRICING_BOX_MARKER_RE, '').trim(); pricingBox = tryParseJson(pbm[1], 'pricing_box'); }
 		const flm = display.match(FLAG_MARKER_RE);
 		if (flm) { display = display.replace(FLAG_MARKER_RE, '').trim(); flag = tryParseJson(flm[1], 'flag'); }
-		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, pricingBox, flag };
+		const cem = display.match(CALENDLY_EMBED_MARKER_RE);
+		if (cem) { display = display.replace(CALENDLY_EMBED_MARKER_RE, '').trim(); calendlyEmbed = tryParseJson(cem[1], 'calendly_embed'); }
+		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, pricingBox, flag, calendlyEmbed };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -506,7 +528,7 @@
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null;
 		let displayText = String(text);
 		if (role !== 'user') {
 			const ex = extractMarkers(displayText);
@@ -519,6 +541,7 @@
 			suggestions = ex.suggestions;
 			pricingBox = ex.pricingBox;
 			flag = ex.flag;
+			calendlyEmbed = ex.calendlyEmbed;
 		}
 
 		const paragraphs = displayText
@@ -537,6 +560,31 @@
 			if (boxEl) messagesEl.appendChild(boxEl);
 		}
 
+		// Calendly inline embed renders ABOVE the order card so the customer sees
+		// the booking widget first. Allowed pairings: standalone (consultation
+		// path, "I'd rather talk to someone"), or paired with NEELA_ORDER_READY
+		// for the wedding flow (embed first, contact card second). When the embed
+		// is paired with a consultation-mode order, we suppress the consultation
+		// card itself (the embed includes the email + phone secondary line, so a
+		// second card with the same info would duplicate the action surface).
+		// The consultation order still posts to /api/neela/submit-order so the
+		// events team gets the heads-up; only the visual card is suppressed.
+		const consultationEmbedPair = !!(calendlyEmbed && calendlyEmbed.url
+			&& order && order.mode === 'consultation');
+		if (calendlyEmbed && typeof calendlyEmbed.url === 'string' && calendlyEmbed.url) {
+			const embedEl = renderCalendlyEmbed(calendlyEmbed);
+			if (embedEl) messagesEl.appendChild(embedEl);
+			if (consultationEmbedPair && order && order.contact && order.contact.name && order.contact.email) {
+				try {
+					fetch('/api/neela/submit-order', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ sessionId, order: { ...order, mode: 'consultation', transcriptSnippet: lastTranscriptSnippet(15) } })
+					}).catch(() => {});
+				} catch (e) {}
+			}
+		}
+
 		// Order marker is mostly exclusive: the card replaces inline quick-replies,
 		// tier cards, options, and forms. The ONE allowed pairing is the post-submit
 		// interactive close, ORDER_READY + SUGGESTIONS, where the close chips render
@@ -544,7 +592,7 @@
 		// customer presses Send and the card flips to .neela-order-card-sent. Then
 		// submitOrder() flips the chips to .neela-suggestions-revealed so they fade
 		// in as the natural pause after a quote is submitted.
-		if (order) {
+		if (order && !consultationEmbedPair) {
 			const card = renderOrderCard(order);
 			if (card) messagesEl.appendChild(card);
 			if (card && suggestions && Array.isArray(suggestions.chips) && suggestions.chips.length) {
@@ -554,7 +602,7 @@
 					messagesEl.appendChild(chipsEl);
 				}
 			}
-		} else if (opts.allowInteractive !== false) {
+		} else if (!order && !calendlyEmbed && opts.allowInteractive !== false) {
 			if (tiers && Array.isArray(tiers.tiers) && tiers.tiers.length) {
 				const tierWrap = renderTierCards(tiers.tiers);
 				if (tierWrap) messagesEl.appendChild(tierWrap);
@@ -972,12 +1020,96 @@
 		return card;
 	}
 
+	// Lazy-load Calendly's widget.js on first render. The script auto-initializes
+	// any .calendly-inline-widget element already in the DOM AND any added later
+	// (it observes DOM mutations). Once loaded, subsequent embeds in the same
+	// session re-use the cached script, no extra network call.
+	let calendlyScriptState = 'unloaded'; // 'unloaded' | 'loading' | 'loaded' | 'error'
+	const calendlyScriptCallbacks = [];
+	function loadCalendlyScript() {
+		if (calendlyScriptState === 'loaded') return Promise.resolve();
+		if (calendlyScriptState === 'error') return Promise.reject(new Error('calendly script failed to load'));
+		return new Promise((resolve, reject) => {
+			calendlyScriptCallbacks.push({ resolve, reject });
+			if (calendlyScriptState === 'loading') return;
+			calendlyScriptState = 'loading';
+			const existing = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+			if (existing && existing.dataset.neelaLoaded === '1') {
+				calendlyScriptState = 'loaded';
+				calendlyScriptCallbacks.splice(0).forEach((cb) => cb.resolve());
+				return;
+			}
+			const script = existing || document.createElement('script');
+			script.src = 'https://assets.calendly.com/assets/external/widget.js';
+			script.async = true;
+			script.addEventListener('load', () => {
+				calendlyScriptState = 'loaded';
+				script.dataset.neelaLoaded = '1';
+				calendlyScriptCallbacks.splice(0).forEach((cb) => cb.resolve());
+			});
+			script.addEventListener('error', () => {
+				calendlyScriptState = 'error';
+				calendlyScriptCallbacks.splice(0).forEach((cb) => cb.reject(new Error('calendly script failed to load')));
+			});
+			if (!existing) document.head.appendChild(script);
+		});
+	}
+
+	function renderCalendlyEmbed(spec) {
+		if (!spec || typeof spec.url !== 'string' || !spec.url) return null;
+		const url = spec.url.trim();
+		if (!/^https:\/\/calendly\.com\//i.test(url)) {
+			console.warn('[neela] calendly embed url failed validation', url);
+			return null;
+		}
+		const wrap = document.createElement('div');
+		wrap.className = 'neela-calendly-embed';
+		wrap.setAttribute('role', 'region');
+		wrap.setAttribute('aria-label', 'Book a 30 minute call');
+
+		const title = document.createElement('p');
+		title.className = 'neela-calendly-embed-title';
+		title.textContent = 'Pick a slot that works for you';
+		wrap.appendChild(title);
+
+		const frame = document.createElement('div');
+		frame.className = 'neela-calendly-embed-frame';
+		const widget = document.createElement('div');
+		widget.className = 'calendly-inline-widget';
+		widget.setAttribute('data-url', url);
+		widget.style.minWidth = '320px';
+		widget.style.height = '100%';
+		const loading = document.createElement('div');
+		loading.className = 'neela-calendly-embed-loading';
+		loading.textContent = 'Loading the calendar…';
+		frame.appendChild(widget);
+		frame.appendChild(loading);
+		wrap.appendChild(frame);
+
+		const fallback = document.createElement('p');
+		fallback.className = 'neela-calendly-embed-fallback';
+		fallback.innerHTML = 'Or reach the team at <a href="mailto:events.sula@gmail.com">events.sula@gmail.com</a> / <a href="tel:+16042151130">604-215-1130</a>.';
+		wrap.appendChild(fallback);
+
+		// Lazy-load the script the first time an embed renders. Calendly's widget
+		// auto-discovers .calendly-inline-widget nodes once loaded.
+		loadCalendlyScript().then(() => {
+			frame.classList.add('loaded');
+		}).catch((err) => {
+			console.warn('[neela] calendly script load failed', err);
+			loading.textContent = 'Calendar didn\'t load. Use the email / phone below to reach the team.';
+		});
+
+		return wrap;
+	}
+
 	function renderConsultationCard(order) {
-		// @TODO replace email + phone fallback with the real Calendly link when Shar
-		// provides it (see https://github.com/shar2025/sula-catering/issues). Until
-		// then, the consultation card surfaces events.sula@gmail.com + 604-215-1130
-		// instead of a broken [CALENDLY_URL] placeholder so customers can actually
-		// reach the team.
+		// Fallback path: a consultation order arrived WITHOUT a paired Calendly
+		// embed (e.g., the customer asked the team to call them back, captured
+		// via NEELA_FORM, no booking widget needed). Surfaces email + phone as
+		// the action surface. When an embed IS paired (the standard wedding /
+		// "book a call" flow), the embed renders above and this card is
+		// suppressed by the consultationEmbedPair branch in renderMessage.
 		const card = document.createElement('div');
 		card.className = 'neela-order-card neela-order-card-consultation';
 		const name = order && order.contact && order.contact.name ? String(order.contact.name) : '';
@@ -1229,13 +1361,9 @@
 	//  - data-neela-prompt → tap submits the value as a typed user message
 	//  - data-neela-href   → tap opens the external URL in a new tab; no chat turn
 	//
-	// SPECIAL CASE: "Book a 30-min call" chip. The persona's CONSULTATION PATH
-	// currently emits a [CALENDLY_URL] placeholder string because Shar hasn't
-	// wired the real Calendly URL yet. Until he does, intercept the chip here
-	// and render an inline Neela bubble pointing the customer at email + phone
-	// instead of routing through the server (which would emit the broken
-	// placeholder verbatim). Drop this block once the real URL lands.
-	// @TODO replace with real Calendly URL when Shar provides it.
+	// "Book a 30-min call" uses data-neela-prompt: the message routes through the
+	// model so Neela's reply emits NEELA_CALENDLY_EMBED, which the marker pipeline
+	// renders as the inline Calendly widget right inside the chat panel.
 	suggestedEl.addEventListener('click', (e) => {
 		const btn = e.target.closest('.neela-chip');
 		if (!btn) return;
@@ -1245,15 +1373,6 @@
 			return;
 		}
 		const prompt = btn.dataset.neelaPrompt || btn.textContent.trim();
-		if (prompt === 'Book a 30-min call') {
-			renderMessage('user', 'Book a 30-min call');
-			conversation.push({ role: 'user', content: 'Book a 30-min call' });
-			renderMessage('bot', "I don't have the team's Calendly link wired up yet, but you can reach them at events.sula@gmail.com or 604-215-1130 to book a call. They usually reply within 24 hours.");
-			conversation.push({ role: 'assistant', content: "I don't have the team's Calendly link wired up yet, but you can reach them at events.sula@gmail.com or 604-215-1130 to book a call. They usually reply within 24 hours." });
-			saveConversation();
-			suggestedEl.classList.add('hidden');
-			return;
-		}
 		inputEl.value = prompt;
 		submitMessage();
 	});
@@ -1409,6 +1528,7 @@
 			.replace(/<<<NEELA_SUGGESTIONS>>>[\s\S]*?<<<END_NEELA_SUGGESTIONS>>>/g, '')
 			.replace(/<<<NEELA_PRICING_BOX>>>[\s\S]*?<<<END_NEELA_PRICING_BOX>>>/g, '')
 			.replace(/<<<NEELA_FLAG>>>[\s\S]*?<<<END_NEELA_FLAG>>>/g, '')
+			.replace(/<<<NEELA_CALENDLY_EMBED>>>[\s\S]*?<<<END_NEELA_CALENDLY_EMBED>>>/g, '')
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
 			.replace(/https?:\/\/\S+/g, '')
