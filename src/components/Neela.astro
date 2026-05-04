@@ -1218,6 +1218,14 @@
 	// Suggested chips. Two shapes:
 	//  - data-neela-prompt → tap submits the value as a typed user message
 	//  - data-neela-href   → tap opens the external URL in a new tab; no chat turn
+	//
+	// SPECIAL CASE: "Book a 30-min call" chip. The persona's CONSULTATION PATH
+	// currently emits a [CALENDLY_URL] placeholder string because Shar hasn't
+	// wired the real Calendly URL yet. Until he does, intercept the chip here
+	// and render an inline Neela bubble pointing the customer at email + phone
+	// instead of routing through the server (which would emit the broken
+	// placeholder verbatim). Drop this block once the real URL lands.
+	// @TODO replace with real Calendly URL when Shar provides it.
 	suggestedEl.addEventListener('click', (e) => {
 		const btn = e.target.closest('.neela-chip');
 		if (!btn) return;
@@ -1227,6 +1235,15 @@
 			return;
 		}
 		const prompt = btn.dataset.neelaPrompt || btn.textContent.trim();
+		if (prompt === 'Book a 30-min call') {
+			renderMessage('user', 'Book a 30-min call');
+			conversation.push({ role: 'user', content: 'Book a 30-min call' });
+			renderMessage('bot', "I don't have the team's Calendly link wired up yet, but you can reach them at events.sula@gmail.com or 604-215-1130 to book a call. They usually reply within 24 hours.");
+			conversation.push({ role: 'assistant', content: "I don't have the team's Calendly link wired up yet, but you can reach them at events.sula@gmail.com or 604-215-1130 to book a call. They usually reply within 24 hours." });
+			saveConversation();
+			suggestedEl.classList.add('hidden');
+			return;
+		}
 		inputEl.value = prompt;
 		submitMessage();
 	});
