@@ -24,6 +24,7 @@ const order = {
 	deliveryTime: '6:00 PM',
 	guestCount: 35,
 	deliveryAddress: '4567 West 10th Avenue, Vancouver, BC',
+	deliveryKm: 6.5,
 	dietary: {
 		hasNutAllergy: true,
 		notes: 'One guest has a tree-nut allergy, kitchen flag for prep surfaces'
@@ -67,3 +68,4 @@ console.log('  - NO "Includes" row (Naan, Rice, Chutney standard list suppressed
 console.log('  - NO "Menu Tier" row (no tier was picked)');
 console.log('  - NO curry rows (no menuItems array)');
 console.log('  - "Allergies / Dietary Notes" row shows the nut allergy capture');
+console.log('  - "Delivery Distance" row shows "6.5 km from Vancouver" (deliveryKm passed through)');

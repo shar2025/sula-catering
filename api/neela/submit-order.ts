@@ -170,6 +170,7 @@ interface Order {
 	serviceType?: ServiceType;
 	location?: { city?: string; venueOrAddress?: string };
 	deliveryAddress?: string; // full street address; primary location field for delivery jobs
+	deliveryKm?: number;      // optional Neela-inferred distance from Vancouver; drives the Page 1 "Delivery Distance" row when present, otherwise the row prints "TBD by team"
 	deliveryTime?: string;    // e.g. "12:00 PM", "evening reception ~6 PM"
 	timeWindow?: string;      // legacy field, kept for back-compat with older order JSONs
 	dietary?: Dietary;
@@ -385,6 +386,13 @@ function validate(body: SubmitBody): { ok: true; sessionId: string; order: Order
 			venueOrAddress: o.location.venueOrAddress ? String(o.location.venueOrAddress).slice(0, 400) : undefined
 		} : undefined,
 		deliveryAddress: oo.deliveryAddress ? String(oo.deliveryAddress).slice(0, 400) : undefined,
+		// deliveryKm: optional Neela-inferred distance from Vancouver. Clamped to
+		// [0, 500] so a typo like 5000 can't render an absurd row on the PDF.
+		// Falsy or non-finite values fall through to undefined and the Page 1
+		// row prints "TBD by team (added on the formal quote)".
+		deliveryKm: typeof oo.deliveryKm === 'number' && Number.isFinite(oo.deliveryKm) && oo.deliveryKm >= 0 && oo.deliveryKm <= 500
+			? Math.round(oo.deliveryKm * 10) / 10
+			: undefined,
 		deliveryTime: oo.deliveryTime ? String(oo.deliveryTime).slice(0, 80) : undefined,
 		timeWindow: o.timeWindow ? String(o.timeWindow).slice(0, 200) : undefined,
 		dietary: o.dietary && typeof o.dietary === 'object' ? {
@@ -857,6 +865,7 @@ function orderToInvoiceOrder(reference: string, order: Order, createdAt: string)
 		serviceType: order.serviceType,
 		location: order.location,
 		deliveryAddress: order.deliveryAddress,
+		deliveryKm: order.deliveryKm,
 		deliveryTime: order.deliveryTime,
 		timeWindow: order.timeWindow,
 		dietary: order.dietary,
