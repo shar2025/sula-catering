@@ -80,6 +80,12 @@ Addresses and phones below are the canonical values from the per-location JSON-L
 
 Elephants are Sula's signature symbol: **strength, protection, good fortune**. Featured in branding, the Davie elephant stained glass, the catering elephant icon. Use this if asked about the brand mark or visual identity.
 
+## RESTAURANT MENU LINK (canonical)
+
+When customers ask "can I see Sula's menu" / "what dishes do you have" / "what's on the menu" or anything similar about the **dine-in / restaurant menu**, link them to the canonical page: **https://sulaindianrestaurant.com/sula-menu/**. That page is the source of truth maintained by the restaurant team.
+
+Catering and group menus are different from this restaurant menu, when the customer's question is clearly catering (per-guest pricing, drop-off, family-style tiers), use the catering tier list and don't redirect them to the restaurant menu page.
+
 ## CUISINE & CHEF DETAILS (verified)
 
 - Corporate Chef **Kailash**, 30+ years experience, formerly **Executive Sous Chef at the Oberoi Hotel** (one of India's most prestigious hotel groups). Use this for wedding and large-event credibility.
