@@ -1438,6 +1438,13 @@
 		// Generic name fallbacks
 		'female', 'woman'
 	];
+	// Locale-allowlist for browser voices. en-US + en-GB are the warm,
+	// neutral, professional defaults. en-IN voices (Microsoft Heera, Microsoft
+	// Ravi) sound robotic + over-accented for Sula's brand voice. We also
+	// reject Heera + Ravi by name in case Edge mis-reports their lang field.
+	const ACCEPTED_VOICE_LANGS = /^en-(US|GB)/i;
+	const ACCEPTABLE_FALLBACK_LANGS = /^en-(AU|CA|IE|NZ)/i;
+	const REJECTED_VOICE_LANGS = /^en-IN/i;
 	let cachedVoice = null;
 	function pickVoice() {
 		if (!speechSynthAvailable) return null;
@@ -1445,27 +1452,35 @@
 		const voices = window.speechSynthesis.getVoices();
 		if (!voices || !voices.length) return null;
 
-		// Exact match in priority order
-		for (const pref of VOICE_PREFERENCE) {
-			const v = voices.find((vv) => vv.name === pref || vv.name.toLowerCase() === pref.toLowerCase());
-			if (v) { cachedVoice = v; return cachedVoice; }
-		}
-		// Fuzzy: any voice whose name CONTAINS a preferred name
-		for (const pref of VOICE_PREFERENCE) {
-			const v = voices.find((vv) => vv.name.toLowerCase().includes(pref.toLowerCase()));
-			if (v) { cachedVoice = v; return cachedVoice; }
-		}
-		// Female-leaning en-* voice
-		const femaleEn = voices.find(
-			(v) => /female|woman|samantha|karen|aria|jenny|sonia/i.test(v.name) && /en/i.test(v.lang || '')
+		const safe = voices.filter(
+			(v) =>
+				!REJECTED_VOICE_LANGS.test(v.lang || '') &&
+				!/Heera|Ravi|Hemant|Kalpana/i.test(v.name)
 		);
-		if (femaleEn) { cachedVoice = femaleEn; return cachedVoice; }
-		// Any en-US/GB/CA/AU
-		const en = voices.find((v) => /en-(US|GB|CA|AU)/i.test(v.lang || ''));
-		if (en) { cachedVoice = en; return cachedVoice; }
+		const usGb = safe.filter((v) => ACCEPTED_VOICE_LANGS.test(v.lang || ''));
+		const fallback = safe.filter((v) => ACCEPTABLE_FALLBACK_LANGS.test(v.lang || ''));
 
-		cachedVoice = voices[0];
-		return cachedVoice;
+		const pickFrom = (pool) => {
+			for (const pref of VOICE_PREFERENCE) {
+				const v = pool.find((vv) => vv.name === pref || vv.name.toLowerCase() === pref.toLowerCase());
+				if (v) return v;
+			}
+			for (const pref of VOICE_PREFERENCE) {
+				const v = pool.find((vv) => vv.name.toLowerCase().includes(pref.toLowerCase()));
+				if (v) return v;
+			}
+			const female = pool.find(
+				(v) => /female|woman|samantha|karen|aria|jenny|sonia/i.test(v.name)
+			);
+			if (female) return female;
+			return pool[0] || null;
+		};
+
+		// First-choice: en-US or en-GB. Second-choice: en-AU/CA/IE/NZ. Never
+		// fall back to en-IN even if it's the only thing on the system.
+		const picked = pickFrom(usGb) || pickFrom(fallback);
+		if (picked) { cachedVoice = picked; return cachedVoice; }
+		return null;
 	}
 	if (speechSynthAvailable) {
 		try {
@@ -1515,9 +1530,11 @@
 		}
 	}
 
-	// Strip the order-marker JSON block + URLs + markdown asterisks before TTS.
-	// Neela's prose above the marker is the human-readable part; the JSON is for
-	// the order card and shouldn't be read aloud.
+	// Strip everything that the chat UI renders visually but should NEVER be
+	// read aloud: marker blocks, markdown link syntax (which made the TTS
+	// recite bracket / paren / URL characters), emoji (browser synth tries
+	// to pronounce them by name), markdown bold/italic, raw URLs, leftover
+	// HTML entities, and bullet glyphs. Keep prose, prices, and event names.
 	function stripForSpeech(text) {
 		return String(text)
 			.replace(/<<<NEELA_ORDER_READY>>>[\s\S]*?<<<END_NEELA_ORDER_READY>>>/g, '')
@@ -1529,9 +1546,23 @@
 			.replace(/<<<NEELA_PRICING_BOX>>>[\s\S]*?<<<END_NEELA_PRICING_BOX>>>/g, '')
 			.replace(/<<<NEELA_FLAG>>>[\s\S]*?<<<END_NEELA_FLAG>>>/g, '')
 			.replace(/<<<NEELA_CALENDLY_EMBED>>>[\s\S]*?<<<END_NEELA_CALENDLY_EMBED>>>/g, '')
+			// Markdown links [label](url) → speak inner label only.
+			.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+			// Bold + italic → speak inner text.
 			.replace(/\*\*([^*\n]+)\*\*/g, '$1')
 			.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
 			.replace(/https?:\/\/\S+/g, '')
+			// HTML entities + bullet glyphs.
+			.replace(/&nbsp;/g, ' ')
+			.replace(/&amp;/g, ' and ')
+			.replace(/&middot;|&bull;|·|•/g, ', ')
+			// Bullet markers + headers at line start.
+			.replace(/^\s*[-*]\s+/gm, '')
+			.replace(/^#{1,6}\s+/gm, '')
+			// Emoji + pictographs (synth would say "mango emoji" / "calendar emoji").
+			.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F1FF}\u{1F200}-\u{1F2FF}]/gu, '')
+			.replace(/[‍️]/g, '')
+			.replace(/[<>]+/g, ' ')
 			.replace(/\s+/g, ' ')
 			.trim();
 	}
