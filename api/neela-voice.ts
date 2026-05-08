@@ -3,9 +3,12 @@
  *
  * Required env (only when speaker toggle is on):
  *   ELEVENLABS_API_KEY   , get from elevenlabs.io
- *   ELEVENLABS_VOICE_ID  , voice ID for Neela. Default: Rachel ('21m00Tcm4TlvDq8ikWAM').
- *                           Browse the ElevenLabs voice library to pick a warmer or more
- *                           refined fit and override via env var.
+ *   ELEVENLABS_VOICE_ID  , voice ID for Neela. Default: Monika Sogam, Indian
+ *                           English female ('qNkzaJoHLLdpvgh5tISm'). Picked to
+ *                           match Neela's name (Sanskrit "blue, sapphire") and
+ *                           Sula's heritage and modern Indian brand. Browse the
+ *                           ElevenLabs voice library to swap and override via
+ *                           env var without redeploying.
  *
  * Returns audio/mpeg bytes. Frontend wraps in Blob URL and plays.
  * If keys are missing, returns 503 and the frontend silently skips audio playback.
@@ -17,7 +20,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export const config = { maxDuration: 60 };
 
-const DEFAULT_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel, warm, refined female voice
+const DEFAULT_VOICE_ID = 'qNkzaJoHLLdpvgh5tISm'; // Monika Sogam, Indian English female, warm conversational tone
 const MAX_TEXT_LENGTH = 1200;
 
 interface VoiceRequest {
