@@ -233,7 +233,7 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 			<div class="footer-bottom">
 				<p>© 2026 Sula Indian Restaurant · All Rights Reserved</p>
 				<p class="footer-dmca">© 2026 Sula Indian Restaurant. All content, photographs, and recipes are property of Sula Indian Restaurant. Unauthorized use, reproduction, or distribution is prohibited.</p>
-				<p class="footer-built-by">Built by <a href="https://dhruvlabs.ai" target="_blank" rel="noopener">Dhruv Labs</a></p>
+				<p class="footer-built-by">Built by <a href="https://dhruvlabs.ai" target="_blank" rel="noopener"><span class="dl-pole-mark" aria-hidden="true"><span class="dl-pole-dot"></span><span class="dl-pole-ring"></span></span>Dhruv Labs</a></p>
 			</div>
 		</footer>
 
@@ -695,6 +695,13 @@ const breadcrumbJsonLd = breadcrumbItems && breadcrumbItems.length > 1 ? {
 			.footer-bottom .footer-built-by{margin-top:18px;color:rgba(245,237,224,0.55);font-family:'Montserrat',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:400}
 			.footer-bottom .footer-built-by a{color:rgba(245,237,224,0.85);text-decoration:none;border-bottom:1px solid rgba(184,149,106,0.4);transition:color 0.25s ease,border-color 0.25s ease}
 			.footer-bottom .footer-built-by a:hover{color:rgba(245,237,224,1);border-color:rgba(184,149,106,0.8)}
+			.footer-bottom .footer-built-by a{display:inline-flex;align-items:center;gap:8px}
+			.footer-bottom .dl-pole-mark{position:relative;display:inline-block;width:14px;height:14px;flex:none;vertical-align:middle}
+			.footer-bottom .dl-pole-dot{position:absolute;top:50%;left:50%;width:4px;height:4px;border-radius:50%;background:#FFFFFF;transform:translate(-50%,-50%);box-shadow:0 0 4px rgba(255,255,255,0.85),0 0 10px rgba(255,255,255,0.45),0 0 20px rgba(124,143,255,0.22);animation:dl-pole-pulse 4s ease-in-out infinite}
+			.footer-bottom .dl-pole-ring{position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);transform:translate(-50%,-50%) scale(0.45);animation:dl-pole-ring 3.6s ease-out infinite;pointer-events:none}
+			.footer-bottom .dl-pole-mark::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.18);transform:translate(-50%,-50%) scale(0.45);animation:dl-pole-ring 3.6s ease-out infinite;animation-delay:1.8s;pointer-events:none}
+			@keyframes dl-pole-pulse{0%,100%{box-shadow:0 0 4px rgba(255,255,255,0.7),0 0 10px rgba(255,255,255,0.35),0 0 20px rgba(124,143,255,0.18);transform:translate(-50%,-50%) scale(1)}50%{box-shadow:0 0 6px rgba(255,255,255,0.95),0 0 16px rgba(255,255,255,0.5),0 0 28px rgba(124,143,255,0.25);transform:translate(-50%,-50%) scale(1.15)}}
+			@keyframes dl-pole-ring{0%{transform:translate(-50%,-50%) scale(0.45);opacity:0.85;border-color:rgba(255,255,255,0.85)}25%{border-color:rgba(124,143,255,0.65);opacity:0.65}50%{border-color:rgba(180,230,255,0.5);opacity:0.45}75%{border-color:rgba(200,160,255,0.35);opacity:0.25}100%{transform:translate(-50%,-50%) scale(1.7);border-color:rgba(255,255,255,0);opacity:0}}
 
 			/* FOOTER MOBILE - tighter letter-spacing on labels to avoid crop, center align */
 			@media (max-width:600px){
