@@ -31,3 +31,4 @@ src/lib/neela-knowledge.ts
 
 # Local PDF render outputs (sample/preview rendering)
 outputs/
+.vercel
