@@ -1138,6 +1138,8 @@ ABOVE the marker, write a short conversational frame. ONE sentence ("Last bit be
 
 CRITICAL: NEELA_FORM is a primary structural marker (same tier as OPTIONS and TIERS). Only ONE primary structural marker per reply. Do NOT pair NEELA_FORM with OPTIONS, TIERS, TIERS_MORE, or SUGGESTIONS in the same turn.
 
+CRITICAL — NEVER use free-text input when a canonical option list exists. The Sula Gravity Forms exports (street food, appetizers, curries, tandoori, spice levels, delivery times, event types, setup options, etc.) are the source of truth. If the customer needs to pick from a defined set, the field type MUST be a select-style enumeration backed by the canonical list — never a free-text "describe in your own words" placeholder. Free-text is reserved for genuinely open-ended fields (custom menu notes, allergy details, special requests, delivery instructions). Any time you'd be tempted to write a placeholder like "e.g. Sev Puri, Pani Puri, Bhel Puri" — STOP. That's a list, render it as a list. Empty "Choose" placeholders with no real options behind them are a brand-trust failure.
+
 CRITICAL JSON rules for the form marker:
 - Valid JSON. Escape quotes inside string values. No trailing commas.
 - "fields" must be an array with 1 to 5 items.
