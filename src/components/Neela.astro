@@ -384,6 +384,10 @@
 	.neela-inline-form-submit:disabled{cursor:default;transform:none;box-shadow:none;opacity:0.7}
 	.neela-inline-form-confirm{margin:6px 0 0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:13.5px;color:var(--gold-light);letter-spacing:0.3px;text-align:center}
 	.neela-inline-form-sent{opacity:0.85}
+	/* Inline date + time picker. Reuses the inline-form styling; these rules
+	   just tame the native date / time controls so they read in dark mode. */
+	.neela-datetime-picker input[type="date"],.neela-datetime-picker input[type="time"]{color-scheme:dark;cursor:pointer;min-height:44px}
+	.neela-datetime-picker input[type="date"]::-webkit-calendar-picker-indicator,.neela-datetime-picker input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(78%) sepia(18%) saturate(540%) hue-rotate(2deg) brightness(95%);cursor:pointer;opacity:0.9}
 
 	/* DISABLED: any quick-reply container the user has already answered past */
 	.neela-quick-disabled{opacity:0.45;pointer-events:none;filter:saturate(0.7)}
@@ -475,6 +479,11 @@
 	//                                 leaving the chat panel. widget.js is
 	//                                 lazy-loaded the first time the embed
 	//                                 renders.
+	//   <<<NEELA_DATETIME>>>        , inline native date + time picker. Emitted
+	//                                 right after Neela asks the catering
+	//                                 date / delivery-time question. On submit
+	//                                 it posts the chosen date + time back as
+	//                                 the customer's reply.
 	// We strip every marker from the displayed text and render the structured
 	// element below the bubble. If a JSON block fails to parse, we still strip
 	// the markers and just show prose (Neela's prose almost always names the
@@ -488,13 +497,16 @@
 	const PRICING_BOX_MARKER_RE = /<<<NEELA_PRICING_BOX>>>([\s\S]*?)<<<END_NEELA_PRICING_BOX>>>/;
 	const FLAG_MARKER_RE = /<<<NEELA_FLAG>>>([\s\S]*?)<<<END_NEELA_FLAG>>>/;
 	const CALENDLY_EMBED_MARKER_RE = /<<<NEELA_CALENDLY_EMBED>>>([\s\S]*?)<<<END_NEELA_CALENDLY_EMBED>>>/;
+	// NEELA_DATETIME has no JSON payload, it's a bare marker. Optional trailing
+	// END tag is tolerated so the persona can emit it either way.
+	const DATETIME_MARKER_RE = /<<<NEELA_DATETIME>>>(?:[\s\S]*?<<<END_NEELA_DATETIME>>>)?/;
 	function tryParseJson(raw, label) {
 		try { return JSON.parse(raw.trim()); }
 		catch (e) { console.warn('[neela] ' + label + ' JSON parse failed', e); return null; }
 	}
 	function extractMarkers(text) {
 		let display = String(text);
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null, datetime = false;
 		const om = display.match(ORDER_MARKER_RE);
 		if (om) { display = display.replace(ORDER_MARKER_RE, '').trim(); order = tryParseJson(om[1], 'order'); }
 		const opm = display.match(OPTIONS_MARKER_RE);
@@ -513,7 +525,9 @@
 		if (flm) { display = display.replace(FLAG_MARKER_RE, '').trim(); flag = tryParseJson(flm[1], 'flag'); }
 		const cem = display.match(CALENDLY_EMBED_MARKER_RE);
 		if (cem) { display = display.replace(CALENDLY_EMBED_MARKER_RE, '').trim(); calendlyEmbed = tryParseJson(cem[1], 'calendly_embed'); }
-		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, pricingBox, flag, calendlyEmbed };
+		const dtm = display.match(DATETIME_MARKER_RE);
+		if (dtm) { display = display.replace(DATETIME_MARKER_RE, '').trim(); datetime = true; }
+		return { displayText: display, order, options, tiers, tiersMore, form, suggestions, pricingBox, flag, calendlyEmbed, datetime };
 	}
 
 	function lastTranscriptSnippet(n) {
@@ -528,7 +542,7 @@
 		const div = document.createElement('div');
 		div.className = 'neela-msg neela-msg-' + (role === 'user' ? 'user' : 'bot');
 
-		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null;
+		let order = null, options = null, tiers = null, tiersMore = null, form = null, suggestions = null, pricingBox = null, flag = null, calendlyEmbed = null, datetime = false;
 		let displayText = String(text);
 		if (role !== 'user') {
 			const ex = extractMarkers(displayText);
@@ -542,6 +556,7 @@
 			pricingBox = ex.pricingBox;
 			flag = ex.flag;
 			calendlyEmbed = ex.calendlyEmbed;
+			datetime = ex.datetime;
 		}
 
 		const paragraphs = displayText
@@ -614,6 +629,10 @@
 			}
 			if (form && Array.isArray(form.fields) && form.fields.length) {
 				const el = renderInlineForm(form);
+				if (el) messagesEl.appendChild(el);
+			}
+			if (datetime) {
+				const el = renderDateTimePicker();
 				if (el) messagesEl.appendChild(el);
 			}
 			if (options && Array.isArray(options.options) && options.options.length) {
@@ -990,6 +1009,128 @@
 			confirm.textContent = 'Got your details, sending the quote now.';
 			wrap.appendChild(confirm);
 
+			quickReplyTap(composed);
+		});
+
+		return wrap;
+	}
+
+	// Inline date + time picker. Rendered when Neela emits <<<NEELA_DATETIME>>>
+	// right after the catering date / delivery-time question. Native HTML date
+	// + time inputs, brand-styled to match the inline contact form. On submit
+	// it fires ONE user message ("Date: 2026-05-20, Time: 12:00 PM") via
+	// quickReplyTap so it shares the typed-message path, exactly like the
+	// inline form does.
+	function renderDateTimePicker() {
+		const wrap = document.createElement('form');
+		wrap.className = 'neela-inline-form neela-datetime-picker neela-quick-active';
+		wrap.noValidate = true;
+
+		const dateRow = document.createElement('label');
+		dateRow.className = 'neela-inline-form-row';
+		const dateLabel = document.createElement('span');
+		dateLabel.className = 'neela-inline-form-label';
+		dateLabel.textContent = 'Date *';
+		dateRow.appendChild(dateLabel);
+		const dateInput = document.createElement('input');
+		dateInput.type = 'date';
+		dateInput.className = 'neela-inline-form-input';
+		dateInput.name = 'date';
+		dateInput.required = true;
+		// Don't allow a date in the past.
+		try { dateInput.min = new Date().toISOString().slice(0, 10); } catch (e) {}
+		dateRow.appendChild(dateInput);
+		const dateErr = document.createElement('span');
+		dateErr.className = 'neela-inline-form-err';
+		dateErr.hidden = true;
+		dateRow.appendChild(dateErr);
+		wrap.appendChild(dateRow);
+
+		const timeRow = document.createElement('label');
+		timeRow.className = 'neela-inline-form-row';
+		const timeLabel = document.createElement('span');
+		timeLabel.className = 'neela-inline-form-label';
+		timeLabel.textContent = 'Delivery time *';
+		timeRow.appendChild(timeLabel);
+		const timeInput = document.createElement('input');
+		timeInput.type = 'time';
+		timeInput.className = 'neela-inline-form-input';
+		timeInput.name = 'time';
+		timeInput.required = true;
+		timeRow.appendChild(timeInput);
+		const timeErr = document.createElement('span');
+		timeErr.className = 'neela-inline-form-err';
+		timeErr.hidden = true;
+		timeRow.appendChild(timeErr);
+		wrap.appendChild(timeRow);
+
+		const submitBtn = document.createElement('button');
+		submitBtn.type = 'submit';
+		submitBtn.className = 'neela-inline-form-submit';
+		submitBtn.textContent = 'Use this date and time';
+		wrap.appendChild(submitBtn);
+
+		// Format a 24h "HH:MM" value into a friendly "12:00 PM" string.
+		function prettyTime(value) {
+			const m = /^(\d{1,2}):(\d{2})$/.exec(value || '');
+			if (!m) return value;
+			let h = parseInt(m[1], 10);
+			const min = m[2];
+			const ampm = h >= 12 ? 'PM' : 'AM';
+			h = h % 12;
+			if (h === 0) h = 12;
+			return h + ':' + min + ' ' + ampm;
+		}
+		// Format an ISO "YYYY-MM-DD" value into a friendly "May 20, 2026" string.
+		function prettyDate(value) {
+			const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+			if (!m) return value;
+			const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+			const mi = parseInt(m[2], 10) - 1;
+			if (mi < 0 || mi > 11) return value;
+			return months[mi] + ' ' + parseInt(m[3], 10) + ', ' + m[1];
+		}
+
+		wrap.addEventListener('submit', (e) => {
+			e.preventDefault();
+			if (submitBtn.disabled) return;
+
+			let firstBad = null;
+			const dateVal = (dateInput.value || '').trim();
+			const timeVal = (timeInput.value || '').trim();
+			if (!dateVal) {
+				dateErr.textContent = 'Pick a date';
+				dateErr.hidden = false;
+				dateInput.classList.add('neela-inline-form-input-bad');
+				if (!firstBad) firstBad = dateInput;
+			} else {
+				dateErr.hidden = true;
+				dateInput.classList.remove('neela-inline-form-input-bad');
+			}
+			if (!timeVal) {
+				timeErr.textContent = 'Pick a time';
+				timeErr.hidden = false;
+				timeInput.classList.add('neela-inline-form-input-bad');
+				if (!firstBad) firstBad = timeInput;
+			} else {
+				timeErr.hidden = true;
+				timeInput.classList.remove('neela-inline-form-input-bad');
+			}
+			if (firstBad) { try { firstBad.focus(); } catch (_) {} return; }
+
+			dateInput.disabled = true;
+			timeInput.disabled = true;
+			submitBtn.disabled = true;
+			wrap.classList.add('neela-inline-form-sent');
+
+			const confirm = document.createElement('p');
+			confirm.className = 'neela-inline-form-confirm';
+			confirm.textContent = 'Got it.';
+			wrap.appendChild(confirm);
+
+			// Fire as a single user message so the model parses it on its next
+			// turn. Friendly formatting keeps the chat transcript readable.
+			const composed = 'Date: ' + prettyDate(dateVal) + ', Time: ' + prettyTime(timeVal);
 			quickReplyTap(composed);
 		});
 
@@ -1546,6 +1687,7 @@
 			.replace(/<<<NEELA_PRICING_BOX>>>[\s\S]*?<<<END_NEELA_PRICING_BOX>>>/g, '')
 			.replace(/<<<NEELA_FLAG>>>[\s\S]*?<<<END_NEELA_FLAG>>>/g, '')
 			.replace(/<<<NEELA_CALENDLY_EMBED>>>[\s\S]*?<<<END_NEELA_CALENDLY_EMBED>>>/g, '')
+			.replace(/<<<NEELA_DATETIME>>>(?:[\s\S]*?<<<END_NEELA_DATETIME>>>)?/g, '')
 			// Markdown links [label](url) → speak inner label only.
 			.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
 			// Bold + italic → speak inner text.
